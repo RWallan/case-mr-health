@@ -37,6 +37,10 @@ ORDEM_SIMPLICIDADE = (
     'ets_holt_winters_aditivo',
     'sarima',
 )
+# Desvio do pré-registro, aprovado pelo usuário depois de ver os resultados
+# e antes do OOT (`fase2/12.md`): em série diária intermitente, o naive repete
+# o último dia por todo o horizonte. No item B, isso daria zero por 14 dias.
+FORA_POS_HOC = (('diaria', 'naive'),)
 TOLERANCIA_EMPATE = 1e-9
 LIMITE_VIES_RELATIVO = 0.20
 NIVEL_IC_GANHO = 0.80
@@ -135,6 +139,12 @@ def elegiveis(runs: list[Avaliado]) -> tuple[list[Avaliado], tuple[str, ...]]:
         r.algoritmo for r in runs if r.intervalo_metodo == INDISPONIVEL
     )
     return aceitos, fora
+
+
+def sem_pos_hoc(granularidade: str, runs: list[Avaliado]) -> list[Avaliado]:
+    return [
+        r for r in runs if (granularidade, r.algoritmo) not in FORA_POS_HOC
+    ]
 
 
 def selecionar(sku: str, granularidade: str, runs: list[Avaliado]) -> Selecao:
@@ -257,7 +267,7 @@ def publicar_selecao(
     if not series:
         raise ValueError(f'Rodada sem runs: {rodada}')
     selecoes = [
-        selecionar(sku, gran, series[sku, gran])
+        selecionar(sku, gran, sem_pos_hoc(gran, series[sku, gran]))
         for sku in SKUS
         for gran in GRANULARIDADES
         if (sku, gran) in series

@@ -26,6 +26,7 @@ from case_mr_health.selecao import (
     publicar_selecao,
     resumo_markdown,
     selecionar,
+    sem_pos_hoc,
 )
 from case_mr_health.treino import (
     ARTEFATO_BACKTEST,
@@ -213,6 +214,11 @@ def test_resumo_traz_o_baseline_vencedor_como_resultado():
     assert 'item A semanal' in texto
 
 
+def test_naive_sai_so_das_series_diarias():
+    assert sem_pos_hoc('diaria', [BASE, MEDIA]) == [MEDIA]
+    assert sem_pos_hoc('semanal', [BASE, MEDIA]) == [BASE, MEDIA]
+
+
 def test_grafico_so_recebe_o_desenvolvimento():
     indice = pd.date_range('2021-06-07', periods=20, freq='D')
     particao = type(
@@ -246,6 +252,35 @@ def test_grafico_so_recebe_o_desenvolvimento():
 
     observado = figura.axes[0].lines[0]
     assert len(observado.get_ydata()) == len(indice)
+
+
+def test_grafico_mostra_o_intervalo_de_fold_com_um_ponto():
+    indice = pd.date_range('2021-06-07', periods=8, freq='W-MON')
+    particao = type(
+        'P',
+        (),
+        {
+            'granularidade': 'semanal',
+            'oot_inicio': indice[-1] + pd.Timedelta(days=7),
+            'oot_fim': indice[-1] + pd.Timedelta(days=20),
+        },
+    )()
+    fold = {
+        'teste_inicio': indice[-1].isoformat(),
+        'previsto': [10.0],
+        'inferior_80': [8.0],
+        'superior_80': [12.0],
+        'inferior_95': [6.0],
+        'superior_95': [14.0],
+    }
+    futuro = pd.DataFrame({'previsao': [10.0, 10.0]})
+
+    figura = desenhar(
+        pd.Series(np.arange(8.0), index=indice), particao, [fold], futuro, 't'
+    )
+
+    rotulos = figura.axes[0].get_legend_handles_labels()[1]
+    assert 'Intervalo de 80%' in rotulos
 
 
 @pytest.fixture

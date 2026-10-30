@@ -39,6 +39,17 @@ def _banda(eixo, x, dados, previsto, rotulos=(None, None)) -> None:
         superior = dados.get(f'superior_{nivel}')
         if inferior is None or None in inferior:
             continue
+        if len(x) == 1:  # fold semanal: um ponto não forma área
+            eixo.vlines(
+                x,
+                inferior,
+                superior,
+                color=COR_PREVISAO,
+                alpha=alfa + 0.2,
+                linewidth=6,
+                label=rotulo,
+            )
+            continue
         eixo.fill_between(
             x,
             inferior,
