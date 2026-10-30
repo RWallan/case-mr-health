@@ -1,0 +1,257 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.2857142857142857
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 42,
+            "lag": 8
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 4.2263614204023686e-05,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 6,
+            "kruskal_p": 0.008687629885622696
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.3469387755102041
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 49,
+            "lag": 9
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 9.097246274789895e-07,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 7,
+            "kruskal_p": 0.003652168383049326
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.35714285714285715
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.00044644943355942455
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 3.721113068588211e-07,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 8,
+            "kruskal_p": 0.0036559284339868843
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.36507936507936506
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.005041585871992748
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 8.309224451309892e-11,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 9,
+            "kruskal_p": 0.0019054540336690194
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 76,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.3684210526315789
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 76,
+            "lag": 14,
+            "ljung_box_p": 0.001719741657108682
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "d": 0,
+            "adf_p": 3.5720656192382187e-09,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 10,
+            "kruskal_p": 0.006135620946894812
+          }
+        }
+      ]
+    }
+  ]
+}

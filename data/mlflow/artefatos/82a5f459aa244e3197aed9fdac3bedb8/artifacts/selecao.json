@@ -1,0 +1,94 @@
+{
+  "baseline_referencia": "naive_sazonal",
+  "sinais": [
+    "menor RMSE: sarima",
+    "vi\u00e9s relativo +25.2%"
+  ],
+  "excluidos": [],
+  "comparacoes": [
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.3\"}",
+      "media": 0.207926638737381,
+      "erro_padrao": 0.2243455307967393,
+      "supera": false
+    },
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.2\"}",
+      "media": 0.1667501286847018,
+      "erro_padrao": 0.0888643994971742,
+      "supera": true
+    },
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.1\"}",
+      "media": 0.12336909257958767,
+      "erro_padrao": 0.0210173445300196,
+      "supera": true
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.3\"}",
+      "media": 0.11025150916531651,
+      "erro_padrao": 0.19322887598987534,
+      "supera": false
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.2\"}",
+      "media": 0.03567983937604258,
+      "erro_padrao": 0.17133647653293982,
+      "supera": false
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.1\"}",
+      "media": -0.018115870142411616,
+      "erro_padrao": 0.10014348913055733,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.3\"}",
+      "media": -0.09718309846097212,
+      "erro_padrao": 0.27792171931363174,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.2\"}",
+      "media": -0.11442558718041163,
+      "erro_padrao": 0.21308711658447974,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.1\"}",
+      "media": -0.09425730691682455,
+      "erro_padrao": 0.10885268748263292,
+      "supera": false
+    },
+    {
+      "algoritmo": "sarima",
+      "hiperparametros": "{\"ordem\": \"(0, 0, 0)\", \"ordem_sazonal\": \"(1, 0, 0, 7)\"}",
+      "media": 0.09030610707558212,
+      "erro_padrao": 0.0808679750930605,
+      "supera": true
+    },
+    {
+      "algoritmo": "ets_holt_winters_aditivo",
+      "hiperparametros": "{\"periodo\": \"7\", \"tendencia\": \"nenhuma\"}",
+      "media": 0.10545906670593586,
+      "erro_padrao": 0.25377650601049523,
+      "supera": false
+    },
+    {
+      "algoritmo": "ets_ses",
+      "hiperparametros": "{\"alfa\": \"estimado\"}",
+      "media": -0.0019716831327525886,
+      "erro_padrao": 0.09466243981702682,
+      "supera": false
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+artifact_path: file:///home/rwallan/git/case-mr-health/data/mlflow/artefatos/models/m-73950419981a40e39f40df88a7ef94a7/artifacts
+flavors:
+  python_function:
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.14.0
+    streamable: false
+mlflow_version: 3.17.2
+model_id: m-73950419981a40e39f40df88a7ef94a7
+model_size_bytes: 535
+model_uuid: m-73950419981a40e39f40df88a7ef94a7
+prompts: null
+run_id: 56f19a3a28a540368c3764c55642bf0a
+utc_time_created: '2026-10-30 10:19:30.736663'

@@ -1,0 +1,308 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.5
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 42,
+            "lag": 8
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 0.2413730925430061,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 6,
+            "kruskal_p": 0.14096021370280853
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.46938775510204084
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 49,
+            "lag": 9
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 0.044604329782993675,
+            "kpss_p": 0.04254516583868117
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 7,
+            "kruskal_p": 0.13306781504239606
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.42857142857142855
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.00046222634698869504
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 0.4542156760456496,
+            "kpss_p": 0.01
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 8,
+            "kruskal_p": 0.06215723620774829
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.4444444444444444
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.000768373434589085
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 2.771965559661522e-09,
+            "kpss_p": 0.017497550997984276
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 9,
+            "kruskal_p": 0.03383697893408891
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_5",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 70,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 70,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.44285714285714284
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 70,
+            "lag": 14,
+            "ljung_box_p": 0.004143178574161103
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 70,
+            "d": 0,
+            "adf_p": 4.712987949248413e-10,
+            "kpss_p": 0.02376065022775854
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 10,
+            "kruskal_p": 0.01268761764369883
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "ets_holt_winters_aditivo",
+      "n_treino": 79,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "parametros": 11
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.45569620253164556
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 79,
+            "lag": 14,
+            "ljung_box_p": 0.009378912713847788
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "d": 0,
+            "adf_p": 2.2720394467299358e-11,
+            "kpss_p": 0.0781161000400818
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 11,
+            "kruskal_p": 0.017061820086612677
+          }
+        }
+      ]
+    }
+  ]
+}

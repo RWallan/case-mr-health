@@ -1,0 +1,94 @@
+{
+  "baseline_referencia": "media_historica",
+  "sinais": [
+    "menor RMSE: sarima",
+    "vi\u00e9s relativo -25.5%"
+  ],
+  "excluidos": [],
+  "comparacoes": [
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.3\"}",
+      "media": 0.01069920072194792,
+      "erro_padrao": 0.30770473331756276,
+      "supera": false
+    },
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.2\"}",
+      "media": -0.03436246564411283,
+      "erro_padrao": 0.2791904184588836,
+      "supera": false
+    },
+    {
+      "algoritmo": "tsb",
+      "hiperparametros": "{\"alfa_beta\": \"0.1\"}",
+      "media": -0.04589657263538109,
+      "erro_padrao": 0.19682727408767955,
+      "supera": false
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.3\"}",
+      "media": -0.08454926487879551,
+      "erro_padrao": 0.2773022532778811,
+      "supera": false
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.2\"}",
+      "media": -0.09183975978653622,
+      "erro_padrao": 0.24034754032026498,
+      "supera": false
+    },
+    {
+      "algoritmo": "sba",
+      "hiperparametros": "{\"alfa\": \"0.1\"}",
+      "media": -0.0746598572758252,
+      "erro_padrao": 0.1516260067542464,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.3\"}",
+      "media": -0.16014024270097785,
+      "erro_padrao": 0.40553435982186126,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.2\"}",
+      "media": -0.12572142621784455,
+      "erro_padrao": 0.3248892340630111,
+      "supera": false
+    },
+    {
+      "algoritmo": "croston",
+      "hiperparametros": "{\"alfa\": \"0.1\"}",
+      "media": -0.08980486229535475,
+      "erro_padrao": 0.1874265287835395,
+      "supera": false
+    },
+    {
+      "algoritmo": "sarima",
+      "hiperparametros": "{\"ordem\": \"(0, 0, 0)\", \"ordem_sazonal\": \"(1, 0, 0, 7)\"}",
+      "media": 0.08740304715320782,
+      "erro_padrao": 0.16245025753430406,
+      "supera": false
+    },
+    {
+      "algoritmo": "ets_holt_winters_aditivo",
+      "hiperparametros": "{\"periodo\": \"7\", \"tendencia\": \"nenhuma\"}",
+      "media": 0.1153427658458452,
+      "erro_padrao": 0.24957895516980919,
+      "supera": false
+    },
+    {
+      "algoritmo": "ets_ses",
+      "hiperparametros": "{\"alfa\": \"estimado\"}",
+      "media": -0.15103532226713118,
+      "erro_padrao": 0.1646417236220637,
+      "supera": false
+    }
+  ]
+}

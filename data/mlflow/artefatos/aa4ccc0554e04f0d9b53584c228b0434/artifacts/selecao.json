@@ -1,0 +1,16 @@
+{
+  "baseline_referencia": "media_historica",
+  "sinais": [
+    "menor RMSE: ets_ses"
+  ],
+  "excluidos": [],
+  "comparacoes": [
+    {
+      "algoritmo": "ets_ses",
+      "hiperparametros": "{\"alfa\": \"estimado\"}",
+      "media": 3.190764678429048e-05,
+      "erro_padrao": 6.842017800312943e-05,
+      "supera": false
+    }
+  ]
+}

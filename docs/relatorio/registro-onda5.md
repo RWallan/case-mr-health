@@ -50,3 +50,9 @@ lentos excluídos (187 s). Nenhum treino rodou.
 - Sugestão (CLAUDE.md): fechar o marco com `uv version` e `towncrier build`.
   Fragmentos pendentes incluem `adicionado`, portanto MINOR (0.5.0), a
   confirmar com o usuário.
+
+## Pós-onda: MLflow versionado e retreino por humanos (2026-10-30)
+
+Pergunta do usuário: o clone traz os artefatos do MLflow e o modelo selecionado? Resposta verificada: não, `data/mlflow/`, `data/processed/` e `*.duckdb` estão no `.gitignore`; sem `champion`, a API responde 503. O `.ds-workflow/` **é** versionado, e `avaliar-final`/`promover` o leem (fase, protocolo congelado, decisões aprovadas, marcador de tentativa única já `concluida`), então o CLI não refaz a avaliação final no clone.
+
+Decisão do usuário: opção 1, versionar o `data/mlflow/` (repositório de demonstração; issue #32, resolvida). Achado: o `mlflow.db` tem caminhos absolutos; sem reescrevê-los, o clone em outro diretório recebe 503 (hash vazio), e com a reescrita a predição devolve a mesma versão e o mesmo hash (teste em cópia, fora do repositório). Issues abertas a pedido do usuário para simplificar o retreino total por humanos: #33 (relocar o MLflow), #34 (avaliação final e promoção sem o agente; exige decisão), #35 (comando `retreinar`), #36 (guia e README). Nada disso foi implementado nesta etapa.

@@ -1,0 +1,21 @@
+{
+  "raw_dir": "data/raw",
+  "db_path": "data/processed/base.duckdb",
+  "relatorio_path": "data/processed/relatorio_qualidade.md",
+  "desenvolvimento_db_path": "data/processed/desenvolvimento.duckdb",
+  "oot_db_path": "data/processed/oot.duckdb",
+  "arquivo_pedido": "PEDIDO-_1_.xlsx",
+  "arquivo_item_pedido": "ITEM_PEDIDO-_2_.xlsx",
+  "arquivo_sku": "ITENS-_3_.xlsx",
+  "log_level": "INFO",
+  "oot_diaria_dias": 14,
+  "oot_semanal_semanas": 2,
+  "fold_diaria_dias": 7,
+  "fold_semanal_semanas": 1,
+  "treino_minimo_diaria_dias": 42,
+  "treino_minimo_semanal_semanas": 6,
+  "seed": null,
+  "fuso_horario": "America/Sao_Paulo",
+  "mlflow_tracking_uri": "sqlite:///data/mlflow/mlflow.db",
+  "mlflow_artifact_dir": "data/mlflow/artefatos"
+}
