@@ -1,3 +1,19 @@
+# case-mr-health 0.3.0 (2026-10-30)
+
+## Adicionado
+
+- Comando `case-mr-health treinar --sku --granularidade [--seed]`: backtest de origem móvel na visão de desenvolvimento, baselines (naive, média histórica e naive sazonal), MAE, MSE, RMSE, WAPE e MASE por fold e na média, previsões truncadas em zero, sensibilidade do item C semanal (sem a semana 07-19 e sem os folds 1 e 2) e registro no MLflow (um experimento por granularidade, tags `sku`, `granularidade` e `algoritmo`, modelo `demanda-<sku>-<granularidade>` com hash do artefato). Interface `Previsor` e `registrar` para plugar candidatos novos sem mudar o fluxo. ([#7](issues/7.md))
+- Intervalos de previsão de 80% e 95% para todo modelo treinado (`intervalos.py`): mecanismo empírico por origem móvel dentro do treino, que serve a qualquer `Previsor`, e intervalo nativo opcional usado só se calibrado. Limites não negativos, aninhados e contendo a previsão, com piso zero no limite inferior quando a fração de zeros do treino é de ao menos `(1 - nível)/2` (D-009). Cobertura do backtest, método e motivo registrados no MLflow; o modelo registrado expõe os limites com a coluna `intervalos` no `predict`. Níveis em `Settings.niveis_intervalo`. ([#8](issues/8.md))
+- Confiança de cada versão do modelo, calculada no backtest a partir do MASE, com faixas configuráveis (Ótima, Boa, Média e Ruim) e o status Insuficiente para MASE indefinido, folds de menos ou MASE instável. Os valores vão como tags da versão e do run no MLflow. Notebook `04_validacao_confianca.ipynb` com a validação das faixas nas 8 séries. ([#9](issues/9.md))
+- Croston, SBA e TSB como candidatos do comando `treinar` nas séries diárias, com implementação própria, sem `numba` nem `statsforecast`, previsão constante e não negativa, e cada combinação de suavização registrada no MLflow. ([#10](issues/10.md))
+- Candidatos ETS (SES, Holt-Winters aditivo e Holt amortecido), ARIMA, SARIMA e Prophet (só sazonalidade semanal) no comando `treinar`, com intervalos nativos, premissas verificadas no treino de cada fold (`diagnosticos.json` e tags no MLflow) e falhas de convergência registradas como runs `FAILED`, sem interromper o treino. O modelo registrado declara as dependências do previsor com as versões instaladas. ([#11](issues/11.md))
+
+## Alterado
+
+- Corta da tabela ARIMA diário e semanal, Holt amortecido semanal e Prophet, e reduz o SARIMA diário a uma combinação, por decisão do usuário (D-007). ([#11](issues/11.md))
+- Simplifica o escopo do frontend: página única em Svelte com Vite, sem testes de componentes nem Playwright, e com link para a UI do MLflow.
+
+
 # case-mr-health 0.2.0 (2026-10-30)
 
 ## Adicionado
