@@ -24,6 +24,13 @@ class ItemPrevisaoHistorica(BaseModel):
     limite_superior_95: float | None
     experimento_id: str
     run_id: str
+    recomendacao: str | None = Field(
+        default=None,
+        description=(
+            'Resultado da regra de recomendação (#19), só nas linhas '
+            'geradas por `GET /recomendacoes/{sku}`; `null` nas demais.'
+        ),
+    )
 
 
 class RespostaHistorico(BaseModel):

@@ -46,9 +46,10 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
 
 ## Decisões e limitações
 
-- A exportação ainda não tem coluna de recomendação: o #19 existe, mas o
-  histórico não guarda o resultado da regra; incluir a coluna exige decisão
-  (guardar no histórico ou recalcular na exportação).
+- A exportação tem a coluna `Recomendação`, preenchida só nas linhas geradas
+  por `GET /recomendacoes/{sku}` (decisão do usuário em 2026-10-30; o resultado
+  é gravado no histórico, não recalculado). Previsões de `POST /predicoes`
+  ficam com a célula vazia.
 - A interface é um primeiro caminho funcional, sem roteador, biblioteca de
   estado ou testes de navegador, em linha com o escopo simplificado aprovado
   para #22.
@@ -69,7 +70,7 @@ cd frontend && npm run build
 ## Pendências para concluir a onda
 
 1. Usuário decidir a divergência de `quantidade` em #15.
-2. Usuário confirmar a interpretação do #19: SKU válido sem modelo semanal responde 503 (a spec diz 404; ver `issues/19.md`).
+2. (Resolvida em 2026-10-30) 503 para SKU válido sem modelo semanal foi confirmado.
 3. Usuário aprovar formalmente D-019, D-020 e D-021 e avançar a fase para
    `final_evaluation`; só então executar #13 uma vez.
 4. Registrar a decisão de publicação por série antes de atribuir `champion`.

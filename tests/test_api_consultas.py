@@ -126,6 +126,7 @@ def test_exportacao_xlsx_contem_colunas_e_previsoes(cliente, app):
         'Limite superior 80%',
         'Limite inferior 95%',
         'Limite superior 95%',
+        'Recomendação',
         'Versão do modelo',
         'Hash do artefato',
         'Data de geração',
@@ -135,6 +136,48 @@ def test_exportacao_xlsx_contem_colunas_e_previsoes(cliente, app):
     assert dados[0] == linha.sku
     assert dados[2] == datetime.combine(linha.data_alvo, datetime.min.time())
     assert dados[3] == linha.quantidade_prevista
+
+
+def test_exportacao_traz_a_recomendacao_so_onde_ela_existe(cliente, app):
+    com = replace(_linha(3), recomendacao='aumento_significativo')
+    sem = replace(_linha(4), recomendacao=None)
+    app.state.historico.registrar([com, sem])
+
+    resposta = cliente.get('/previsoes/exportacao.xlsx')
+
+    aba = load_workbook(BytesIO(resposta.content), read_only=True)['Previsões']
+    cabecalho, *linhas = list(aba.iter_rows(values_only=True))
+    indice = cabecalho.index('Recomendação')
+    por_sku_data = {(r[0], r[2].date()): r[indice] for r in linhas}
+    assert por_sku_data[com.sku, com.data_alvo] == 'aumento_significativo'
+    assert por_sku_data[sem.sku, sem.data_alvo] is None
+
+
+def test_historico_antigo_ganha_a_coluna_de_recomendacao(tmp_path):
+    caminho = tmp_path / 'antigo.duckdb'
+    with duckdb.connect(str(caminho)) as con:
+        con.execute(
+            'CREATE TABLE previsoes (id_requisicao VARCHAR NOT NULL, '
+            'sku VARCHAR NOT NULL, granularidade VARCHAR NOT NULL, '
+            'data_geracao TIMESTAMP NOT NULL, data_referencia DATE NOT NULL, '
+            'data_alvo DATE NOT NULL, versao_modelo VARCHAR NOT NULL, '
+            'hash_artefato VARCHAR NOT NULL, '
+            'quantidade_prevista DOUBLE NOT NULL, '
+            'valor_unitario DOUBLE NOT NULL, valor_previsto DOUBLE NOT NULL, '
+            'limite_inferior_80 DOUBLE, limite_superior_80 DOUBLE, '
+            'limite_inferior_95 DOUBLE, limite_superior_95 DOUBLE, '
+            'experimento_id VARCHAR NOT NULL, run_id VARCHAR NOT NULL, '
+            'PRIMARY KEY (id_requisicao, data_alvo))'
+        )
+    historico = Historico(caminho)
+    try:
+        historico.registrar([replace(_linha(5), recomendacao='estavel')])
+        linhas, total = historico.consultar(None, None)
+    finally:
+        historico.fechar()
+
+    assert total == 1
+    assert linhas[0].recomendacao == 'estavel'
 
 
 def test_exportacao_respeita_filtros(cliente, app):

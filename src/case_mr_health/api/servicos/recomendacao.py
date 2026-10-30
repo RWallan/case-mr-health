@@ -102,10 +102,15 @@ def recomendar_sku(
         if ponto.data <= ultima_semana
     ]
     previsto = modelo.prever(SEMANAS_PREVISTAS)
-    registrada = predicao.registrar_previsao(
-        modelo, ultima_semana, previsto, historico, cfg
-    )
     regra = recomendar(vendas, previsto['previsao'].tolist())
+    registrada = predicao.registrar_previsao(
+        modelo,
+        ultima_semana,
+        previsto,
+        historico,
+        cfg,
+        recomendacao=regra.resultado,
+    )
     return RespostaRecomendacao(
         id_requisicao=registrada.id_requisicao,
         sku=sku,
