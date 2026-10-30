@@ -11,7 +11,7 @@ rastreio e registro de modelos no MLflow e um dashboard em Svelte.
 
 ```bash
 uv sync
-(cd frontend && npm install)
+(cd frontend && npm ci)
 ```
 
 ## Clonar o repositório (demonstração)
@@ -119,8 +119,8 @@ As planilhas brutas ficam em `data/raw/` (`PEDIDO-_1_.xlsx`,
    da API só aceita o dashboard em `127.0.0.1:5173` e `localhost:5173`; para
    servir o build por outra porta, inclua-a em `src/case_mr_health/api/app.py`.
 
-7. **Documentação** (MkDocs Material, porta 8001; instale o grupo com
-   `uv sync --group docs`).
+7. **Documentação** (MkDocs Material, porta 8001; o grupo `docs` já vem no
+   `uv sync`).
 
    ```bash
    uv run poe docs         # servidor local em http://127.0.0.1:8001
