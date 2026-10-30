@@ -104,14 +104,19 @@ def prever(
     return registrar_previsao(modelo, referencia, previsto, historico, cfg)
 
 
-def registrar_previsao(
+def registrar_previsao(  # noqa: PLR0913
     modelo: ModeloServido,
     referencia: date,
     previsto: pd.DataFrame,
     historico: Historico,
     cfg: Settings,
+    *,
+    recomendacao: str | None = None,
 ) -> RespostaPredicao:
-    """Monta a resposta e a grava no histórico antes de devolvê-la."""
+    """Monta a resposta e a grava no histórico antes de devolvê-la.
+
+    `recomendacao` é o resultado da regra, quando a chamada vem dela.
+    """
     resposta = _responder(
         modelo,
         referencia,
@@ -119,7 +124,7 @@ def registrar_previsao(
         cfg.valores_unitarios[modelo.sku],
         datetime.now(ZoneInfo(cfg.fuso_horario)),
     )
-    historico.registrar(_linhas(resposta))
+    historico.registrar(_linhas(resposta, recomendacao))
     return resposta
 
 
@@ -163,7 +168,9 @@ def _responder(
     )
 
 
-def _linhas(resposta: RespostaPredicao) -> list[LinhaHistorico]:
+def _linhas(
+    resposta: RespostaPredicao, recomendacao: str | None
+) -> list[LinhaHistorico]:
     geracao_utc = resposta.data_geracao.astimezone(UTC).replace(tzinfo=None)
     return [
         LinhaHistorico(
@@ -184,6 +191,7 @@ def _linhas(resposta: RespostaPredicao) -> list[LinhaHistorico]:
             limite_superior_95=periodo.limite_superior_95,
             experimento_id=resposta.experimento_id,
             run_id=resposta.run_id,
+            recomendacao=recomendacao,
         )
         for periodo in resposta.periodos
     ]

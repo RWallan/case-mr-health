@@ -34,6 +34,7 @@ _COLUNAS_XLSX = (
     ('limite_superior_80', 'Limite superior 80%'),
     ('limite_inferior_95', 'Limite inferior 95%'),
     ('limite_superior_95', 'Limite superior 95%'),
+    ('recomendacao', 'Recomendação'),
     ('versao_modelo', 'Versão do modelo'),
     ('hash_artefato', 'Hash do artefato'),
     ('data_geracao', 'Data de geração'),

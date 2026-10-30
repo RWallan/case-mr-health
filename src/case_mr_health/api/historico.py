@@ -34,9 +34,12 @@ CREATE TABLE IF NOT EXISTS previsoes (
     limite_superior_95 DOUBLE,
     experimento_id VARCHAR NOT NULL,
     run_id VARCHAR NOT NULL,
+    recomendacao VARCHAR,
     PRIMARY KEY (id_requisicao, data_alvo)
 )
 """
+# Bancos criados antes do #19 não têm a coluna; ela é sempre a última.
+_MIGRAR = 'ALTER TABLE previsoes ADD COLUMN IF NOT EXISTS recomendacao VARCHAR'
 
 
 @dataclass(frozen=True)
@@ -60,6 +63,7 @@ class LinhaHistorico:
     limite_superior_95: float | None
     experimento_id: str
     run_id: str
+    recomendacao: str | None = None
 
 
 _COLUNAS = ', '.join(f.name for f in fields(LinhaHistorico))
@@ -71,6 +75,7 @@ class Historico:
         caminho.parent.mkdir(parents=True, exist_ok=True)
         self._con = duckdb.connect(str(caminho))
         self._con.execute(_CRIAR)
+        self._con.execute(_MIGRAR)
         self._trava = Lock()
 
     def registrar(self, linhas: Sequence[LinhaHistorico]) -> None:

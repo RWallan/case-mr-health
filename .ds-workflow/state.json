@@ -1,5 +1,5 @@
 {
-  "phase": "modeling",
+  "phase": "final_evaluation",
   "history": [
     {
       "at": "2026-10-30T05:26:45+00:00",
@@ -45,6 +45,14 @@
       "decision": "D-004",
       "note": null,
       "decision_events": 8
+    },
+    {
+      "at": "2026-10-30T12:13:50+00:00",
+      "from": "modeling",
+      "phase": "final_evaluation",
+      "decision": "D-021",
+      "note": null,
+      "decision_events": 42
     }
   ],
   "frozen": {
@@ -52,6 +60,11 @@
       "path": "/home/rwallan/git/case-mr-health/docs/analysis/plano-candidatos.md",
       "sha256": "ac9df33babb91091673129f61d65e6b02de00f069c4d45a20a04c79d5e467d5e",
       "at": "2026-10-30T07:02:48+00:00"
+    },
+    "evaluation_protocol": {
+      "path": "/home/rwallan/git/case-mr-health/docs/analysis/protocolo-avaliacao-final.md",
+      "sha256": "88defe79d130afdcd81c43a386163a9fbd86922957a97f19175432c32c11e360",
+      "at": "2026-10-30T11:07:38+00:00"
     }
   }
 }

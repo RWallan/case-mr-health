@@ -263,6 +263,7 @@ def test_chamada_e_gravada_no_historico(servir):
         corpo['id_requisicao']
     }
     assert sorted(linha.quantidade_prevista for linha in linhas) == [24, 26]
+    assert {linha.recomendacao for linha in linhas} == {corpo['resultado']}
     assert {linha.versao_modelo for linha in linhas} == {
         corpo['versao_modelo']
     }
