@@ -1,6 +1,7 @@
 <script>
   import EntradaPrevisoes from './EntradaPrevisoes.svelte';
   import ComparacaoSkus from './ComparacaoSkus.svelte';
+  import GraficoPrevisao from './GraficoPrevisao.svelte';
   import LinksApi from './LinksApi.svelte';
   import Recomendacoes from './Recomendacoes.svelte';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -120,31 +121,6 @@
     granularidade;
     carregarSerie();
   });
-
-  let valoresGrafico = $derived([
-    ...historico.map((ponto) => ponto.quantidade),
-    ...(previsao?.periodos ?? []).map((ponto) => ponto.quantidade_prevista),
-    ...(previsao?.periodos ?? []).flatMap((ponto) => [
-      ponto.limite_inferior_95 ?? 0,
-      ponto.limite_superior_95 ?? ponto.quantidade_prevista,
-    ]),
-  ]);
-  let teto = $derived(Math.max(1, ...valoresGrafico) * 1.18);
-  let pontos = $derived([...historico, ...(previsao?.periodos ?? [])]);
-  let linhaHistorico = $derived(
-    historico.map((ponto, indice) => `${x(indice, pontos.length)},${y(ponto.quantidade)}`).join(' '),
-  );
-  let linhaPrevisao = $derived(
-    (previsao?.periodos ?? []).map((ponto, indice) => `${x(historico.length + indice, pontos.length)},${y(ponto.quantidade_prevista)}`).join(' '),
-  );
-
-  function x(indice, total) {
-    return total <= 1 ? 40 : 40 + (indice * 820) / (total - 1);
-  }
-
-  function y(valor) {
-    return 245 - (valor / teto) * 205;
-  }
 </script>
 
 <svelte:head>
@@ -208,38 +184,9 @@
             <span class="step">02</span>
             <div><h2>Demanda ao longo do tempo</h2><p>{sku} · {granularidade === 'diaria' ? 'Diária' : 'Semanal'} · quantidade na rede</p></div>
           </div>
-          <div class="legend"><span class="legend-history"></span> Histórico <span class="legend-forecast"></span> Previsão <span class="legend-interval"></span> Intervalo 80% / 95%</div>
         </div>
 
-        {#if erro}<div class="alerta alerta-erro" role="alert">{erro}</div>{/if}
-        {#if historico.length}
-          <div class="chart-wrap">
-            <svg viewBox="0 0 900 290" role="img" aria-label="Gráfico do histórico e da previsão de vendas">
-              <line x1="40" y1="245" x2="860" y2="245" class="axis" />
-              <line x1="40" y1="40" x2="40" y2="245" class="axis" />
-              <line x1="40" y1="143" x2="860" y2="143" class="gridline" />
-              <text x="30" y="48" class="tick" text-anchor="end">{fmt.format(teto / 1.18)}</text>
-              <text x="30" y="250" class="tick" text-anchor="end">0</text>
-              {#if historico.length > 1}<polyline points={linhaHistorico} class="history-line" />{/if}
-              {#if previsao?.periodos?.length}
-                {#if historico.length}<line x1={x(historico.length - 1, pontos.length)} y1="40" x2={x(historico.length - 1, pontos.length)} y2="245" class="split-line" />{/if}
-                <polyline points={linhaPrevisao} class="forecast-line" />
-                {#each previsao.periodos as periodo, indice}
-                    <line x1={x(historico.length + indice, pontos.length)} y1={y(periodo.limite_superior_95 ?? periodo.quantidade_prevista)} x2={x(historico.length + indice, pontos.length)} y2={y(periodo.limite_inferior_95 ?? 0)} class="interval-95" />
-                    <line x1={x(historico.length + indice, pontos.length)} y1={y(periodo.limite_superior_80 ?? periodo.quantidade_prevista)} x2={x(historico.length + indice, pontos.length)} y2={y(periodo.limite_inferior_80 ?? 0)} class="interval-80" />
-                  <circle cx={x(historico.length + indice, pontos.length)} cy={y(periodo.quantidade_prevista)} r="5" class="forecast-point" />
-                {/each}
-              {/if}
-              {#if historico.length}
-                <text x="40" y="274" class="tick">{fmtData(historico[0].data)}</text>
-                <text x="860" y="274" class="tick" text-anchor="end">{fmtData(pontos.at(-1).data)}</text>
-              {/if}
-            </svg>
-          </div>
-          <div class="chart-footnote"><span>—</span> Faixa externa mostra o intervalo de 95%. A previsão começa após a linha pontilhada.</div>
-        {:else}
-          <div class="empty-state"><div class="empty-icon">⌁</div><h3>Seu histórico aparecerá aqui</h3><p>O gráfico mostra as vendas até o último período disponível e a previsão gerada.</p></div>
-        {/if}
+        <GraficoPrevisao {historico} {previsao} {granularidade} {carregando} {erro} />
 
         {#if previsao}
           <div class="forecast-summary">

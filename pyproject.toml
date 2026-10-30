@@ -76,6 +76,7 @@ frontend = { cmd = "npm run dev", cwd = "frontend" }
 frontend-build = { cmd = "npm run build", cwd = "frontend" }
 app = { parallel = ["backend", "mlflow", "frontend"] }
 test-rapido = { cmd = "pytest -x -m 'not lento'", env = { CASE_MR_HEALTH_INTERVALO_MAX_ORIGENS = "5" } }
+test-frontend = "node --test 'frontend/src/*.test.js'"
 
 [tool.towncrier]
 directory = "changelogs"
