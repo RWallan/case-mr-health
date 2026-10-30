@@ -6,17 +6,26 @@ A chamada é gravada no histórico como as predições. Só lê o banco de
 desenvolvimento; o OOT não é aberto.
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
+from math import isnan
+
+import pandas as pd
 
 from case_mr_health.api.erros import SkuInexistente
 from case_mr_health.api.historico import Historico
 from case_mr_health.api.modelos import CatalogoModelos
 from case_mr_health.api.schemas.recomendacao import (
     AVISO,
+    ExplicacaoResposta,
     RespostaRecomendacao,
 )
 from case_mr_health.api.servicos import consultas, predicao
 from case_mr_health.config import Settings
+from case_mr_health.explicacao import (
+    EntradaExplicacao,
+    GeradorLLM,
+    explicar,
+)
 from case_mr_health.particoes import DIAS_POR_PERIODO
 from case_mr_health.recomendacao import (
     SEMANAS_BASE,
@@ -82,11 +91,46 @@ def montar_texto(r: Recomendacao) -> str:
     )
 
 
+def _entrada_explicacao(
+    sku: str,
+    ultima_semana: date,
+    vendas: list[float],
+    previsto: pd.DataFrame,
+    regra: Recomendacao,
+) -> EntradaExplicacao:
+    """Contrato do LLM: só o que a regra e o modelo já produziram."""
+    limites = list(
+        zip(
+            previsto['inferior_80'].tolist(),
+            previsto['superior_80'].tolist(),
+            strict=True,
+        )
+    )
+    sem_intervalo = any(isnan(x) for par in limites for x in par)
+    return EntradaExplicacao(
+        sku=sku,
+        primeira_semana_prevista=ultima_semana
+        + timedelta(days=DIAS_POR_PERIODO['semanal']),
+        vendas_4s=vendas[-SEMANAS_BASE:],
+        previsao_2s=previsto['previsao'].tolist(),
+        limites_80=[] if sem_intervalo else limites,
+        media_vendida_4s=regra.media_vendida_4s,
+        media_prevista_2s=regra.media_prevista_2s,
+        variacao=regra.variacao,
+        limite_aplicado=regra.limite_aplicado,
+        n_variacoes_positivas=regra.n_variacoes_positivas,
+        n_variacoes_negativas=regra.n_variacoes_negativas,
+        resultado=regra.resultado,
+        motivo=regra.motivo,
+    )
+
+
 def recomendar_sku(
     sku: str,
     modelos: CatalogoModelos,
     historico: Historico,
     cfg: Settings,
+    gerador_llm: GeradorLLM | None = None,
 ) -> RespostaRecomendacao:
     try:
         sku = normalizar_sku(sku)
@@ -111,6 +155,10 @@ def recomendar_sku(
         cfg,
         recomendacao=regra.resultado,
     )
+    explicacao = explicar(
+        _entrada_explicacao(sku, ultima_semana, vendas, previsto, regra),
+        gerador_llm,
+    )
     return RespostaRecomendacao(
         id_requisicao=registrada.id_requisicao,
         sku=sku,
@@ -123,6 +171,7 @@ def recomendar_sku(
         n_variacoes_positivas=regra.n_variacoes_positivas,
         n_variacoes_negativas=regra.n_variacoes_negativas,
         texto=montar_texto(regra),
+        explicacao=ExplicacaoResposta(**explicacao.model_dump()),
         aviso=AVISO,
         versao_modelo=modelo.versao,
         hash_artefato=modelo.hash_artefato,
