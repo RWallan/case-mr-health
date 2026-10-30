@@ -1,2 +1,5 @@
+from case_mr_health.cli import app
+
+
 def main() -> None:
-    print("Hello from case-mr-health!")
+    app()
