@@ -100,7 +100,11 @@ def exportar_previsoes(
     sku: str | None = None,
     granularidade: Literal['diaria', 'semanal'] | None = None,
 ) -> StreamingResponse:
-    """Exporta todos os períodos filtrados; não inclui confiança removida."""
+    """Exporta todos os períodos filtrados, com a aba `Escopo`.
+
+    A aba e o cabeçalho `X-Escopo` dizem se o arquivo cobre o conjunto
+    completo ou um filtro. Não inclui a confiança removida.
+    """
     if sku is not None:
         try:
             sku = normalizar_sku(sku)
@@ -109,12 +113,15 @@ def exportar_previsoes(
     itens, _ = request.app.state.historico.consultar(
         sku, granularidade, limite=None
     )
-    corpo = consultas.gerar_xlsx(itens)
+    corpo = consultas.gerar_xlsx(itens, sku, granularidade)
     nome = f'previsoes-{datetime.now(UTC):%Y%m%dT%H%M%SZ}.xlsx'
     return StreamingResponse(
         BytesIO(corpo),
         media_type=_MIME_XLSX,
-        headers={'Content-Disposition': f'attachment; filename="{nome}"'},
+        headers={
+            'Content-Disposition': f'attachment; filename="{nome}"',
+            'X-Escopo': consultas.rotulo_escopo(sku, granularidade).lower(),
+        },
     )
 
 
