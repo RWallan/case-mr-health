@@ -772,6 +772,25 @@ def test_previsao_servida_e_gravada_por_periodo_alvo(base, registro, tmp_path):
         assert primeira[campo] == pytest.approx(periodo[campo])
 
 
+def test_previsao_servida_aparece_na_consulta_da_api(base, registro, tmp_path):
+    with _app_com(base, tmp_path) as c:
+        prevista = _pedir(c, 'item B', 'diaria', horizonte=2).json()
+        resposta = c.get(
+            '/previsoes',
+            params={'sku': 'B', 'granularidade': 'diaria'},
+        )
+
+    assert resposta.status_code == HTTP_OK
+    corpo = resposta.json()
+    assert corpo['total'] == len(prevista['periodos'])
+    assert {item['id_requisicao'] for item in corpo['itens']} == {
+        prevista['id_requisicao']
+    }
+    assert {item['data_alvo'] for item in corpo['itens']} == {
+        periodo['data_alvo'] for periodo in prevista['periodos']
+    }
+
+
 def test_limites_indisponiveis_vao_nulos_ao_historico(
     base, registro, tmp_path
 ):

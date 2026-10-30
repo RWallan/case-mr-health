@@ -101,11 +101,22 @@ def prever(
         )
 
     previsto = modelo.prever(passo + horizonte).iloc[passo:]
+    return registrar_previsao(modelo, referencia, previsto, historico, cfg)
+
+
+def registrar_previsao(
+    modelo: ModeloServido,
+    referencia: date,
+    previsto: pd.DataFrame,
+    historico: Historico,
+    cfg: Settings,
+) -> RespostaPredicao:
+    """Monta a resposta e a grava no histórico antes de devolvê-la."""
     resposta = _responder(
         modelo,
         referencia,
         previsto,
-        cfg.valores_unitarios[sku],
+        cfg.valores_unitarios[modelo.sku],
         datetime.now(ZoneInfo(cfg.fuso_horario)),
     )
     historico.registrar(_linhas(resposta))
