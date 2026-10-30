@@ -76,6 +76,10 @@ _Evitar_: granularidade, prazo
 Trecho final de uma série reservado para avaliar o modelo depois de escolhido, sem participar do treino nem da seleção.
 _Evitar_: validação, holdout
 
+**Reavaliação de demonstração**:
+Nova abertura do período OOT por quem retreina o projeto, depois que a avaliação final já foi consumida. Não é cega e não estima desempenho independente; vem sempre rotulada (ADR 0012).
+_Evitar_: avaliação final, teste cego
+
 **Confiança**:
 Classificação de um modelo (Ótima, Boa, Média ou Ruim) a partir do erro histórico relativo ao seu baseline. Não é garantia de acerto.
 _Evitar_: acurácia, certeza
