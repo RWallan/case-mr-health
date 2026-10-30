@@ -88,7 +88,8 @@ cd frontend && npm run build
 - Entregue: `atualizacao.py` (#28), `reajuste.py` (#29), rotas `POST /dados/pedidos` e `GET /dados/atualizacoes/{id}`, gerente em segundo plano e recarga do catálogo (#30), comando `reajustar`. Testes: `test_atualizacao.py` (14), `test_reajuste.py` (11), `test_api_atualizacao.py` (16). Suíte rápida: 541 passaram, 48 lentos fora (evidência `.ds-workflow/test-evidence/test-run-20261030T094959-1151433.json`).
 - Desvios e achados: (1) o `GET /series` e a recomendação passaram a ler `db_path` (base completa), não a visão de desenvolvimento, porque o antigo OOT virou histórico; (2) o `GET /modelos` do #16 não mostrava o `champion` com o MLflow real (a busca de versões não devolve aliases), corrigido; (3) a refatoração tornou públicos `preparar_mlflow` e `config_intervalos` em `treino.py`.
 - Hipótese não verificada: o reajuste de SARIMA e Prophet em dados reais pode levar minutos; só foi medido com séries sintéticas.
-- Pendente: #31 (dashboard) e #24 (entrada manual e XLSX no dashboard).
+- #31 (dashboard) implementado: envio, erros, acompanhamento e gráfico atualizado; só `npm run build` verificado (sem fumaça com API real, para não gravar uma atualização na base real).
+- Pendente: #24 (entrada manual e XLSX de predição no dashboard), #20 a #23, #25 e #26.
 
 ## Registro do #13
 
