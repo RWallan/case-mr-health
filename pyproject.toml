@@ -44,6 +44,9 @@ dev = [
 
 [tool.ruff]
 line-length = 79
+# O registro MLflow versionado tem pyproject.toml dentro dos artefatos: sem
+# a exclusão o ruff cria .ruff_cache neles e o hash do artefato diverge.
+extend-exclude = ["data"]
 
 [tool.ruff.lint]
 preview = true
