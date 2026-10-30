@@ -1,3 +1,14 @@
+# case-mr-health 0.7.0 (2026-10-30)
+
+## Adicionado
+
+- Tarefa poe parar, que libera de imediato as portas do app (8000, 5000, 5173 e 8001), executada também antes do poe app. ([#54](issues/54.md))
+
+## Correções
+
+- O uv sync passa a instalar o grupo docs (MkDocs) e o frontend/node_modules sai do Git, com npm ci no README, pois os dist/ dos pacotes nunca foram versionados. ([#53](issues/53.md))
+
+
 # case-mr-health 0.6.1 (2026-10-30)
 
 ## Alterado
