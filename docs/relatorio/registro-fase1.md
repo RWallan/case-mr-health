@@ -70,7 +70,7 @@ As branches são empilhadas (cada uma parte da anterior); nada foi mesclado em `
 - Primeira venda: A e C em 2021-06-01; B e D em 2021-06-04. Última venda: A, C e D em 2021-09-01; B em 2021-08-29.
 - A primeira linha de ITENS é um resquício (índice 0), não um dado.
 
-**Hipótese não verificável:** os pares repetidos com quantidades idênticas podem ser lançamentos duplicados ou compras legítimas. Os dados não permitem distinguir. Seguiu-se a spec (somar).
+**Hipótese resolvida pelo usuário:** os pares repetidos com quantidades idênticas poderiam ser lançamentos duplicados; o usuário informou que **não são duplicidade** (decisão 23). Segue-se a spec (somar).
 
 ### 3.2 Ticket #3 — séries diária e semanal
 
@@ -135,6 +135,29 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 - Razão ~2,4x: **confirmada** na rede (2,40).
 - Zeros "32% a 43%" (Fase 0 e ADR 0003): na visão de desenvolvimento são **33% a 46%**; o item C (45,6%) **ultrapassa o limite de 43%** citado no ADR. No histórico completo com o calendário do SKU (glossário), são 30% a 43%; o "32%" do ADR corresponde ao item D contado sobre 93 dias (hipótese aritmética, não confirmada). Não muda a decisão do ADR (métodos intermitentes seguem justificados), mas o trecho está impreciso. **Decisão do usuário: corrigir o ADR 0003** (feito: o texto agora cita 33% a 46% na visão de desenvolvimento e 30% a 43% no histórico completo com o calendário do SKU). A spec `issues/1.md` ainda cita "32% a 43%" como fato da Fase 0 e não foi alterada.
 
+### 3.5 Item C, semana de 07-19: avaliação preliminar do impacto (decisão: alternativa 1)
+
+O usuário pediu (2026-10-30) pesquisar alternativas ou avaliar o impacto caso só esse registro seja o outlier. Abaixo, a avaliação preliminar do agente, feita por consulta direta à visão de desenvolvimento, **sem alterar dados**. Ela ainda não está numa célula de notebook; deve ser incluída se o usuário aprovar.
+
+**Fatos observados**
+- A semana de 07-19 do item C tem 40 unidades; as outras 9 semanas valem 4 a 19 (mediana 16,5; média 16,7 com a semana, 14,1 sem ela).
+- **Não é um registro isolado anômalo.** Os sete dias da semana têm vendas comuns (5, 8, 5, 3, 9, 5 e 5): nenhum dia fora do intervalo diário habitual (máximo diário 9) e nenhum dia sem venda. Na série diária do item C não há outlier. O 40 semanal nasce de uma semana **sem nenhum dia zerado** (as demais semanas têm vários), isto é, é um efeito de agregação.
+- Na rede, a semana de 07-19 soma 98 unidades (a maior; mediana 70, MAD 12), puxada também pelo item D (30). Os itens A e B ficaram abaixo da média. Para a rede, o z robusto fica em cerca de 1,6 (não é outlier pela regra usada).
+- O CV² semanal do item C cai de 0,30 para 0,13 sem essa semana; a classificação continua "suave" nos dois casos.
+- **Impacto no backtest semanal:** a semana 07-19 é o **teste do fold 1** (treino de 06-07 a 07-18). O erro absoluto do naive (previsão = semana anterior) é 22 nessa semana e 23 na seguinte (a previsão da semana seguinte parte do 40). O MAE do naive nas 4 semanas de teste é 14,25 com elas e 6,0 sem as duas. A escala do MASE (erro do naive no treino de 6 semanas) é 4,2, e o MASE do naive no fold 1 é 5,24. Ou seja, uma única semana domina a métrica do item C na semana; modelos que suavizam o nível (média, ETS) são menos afetados do que o naive.
+
+**Alternativas de tratamento (para decisão do usuário)**
+1. **Manter e relatar a sensibilidade:** calcular as métricas do item C com e sem a semana (e com e sem os folds 1 e 2) e mostrar a diferença. Não altera dados; custo baixo.
+2. **Limitar (winsorizar) o valor semanal** a uma cerca (por exemplo, 3 IQR além do centro dos 50%). Altera a série semanal, que deixa de bater com a soma da diária (teste do ticket #3 exige igualdade), e é um tratamento que exige aprovação.
+3. **Substituir por estimativa consistente com o restante** (mediana ou interpolação). Mesma ressalva do item 2.
+4. **Variável de intervenção** (indicadora da semana) nos candidatos que a aceitam (ARIMA/SARIMA com regressor, Prophet), sem tocar na série; não se aplica a naive, média e ETS simples.
+5. **Métricas e perdas robustas** (por exemplo, mediana dos erros) como complemento, sem alterar a série.
+6. **Investigar a origem** (consultar a operação) — o usuário informou que não há explicação.
+
+**Referência consultada:** Hyndman e Athanasopoulos, *Forecasting: Principles and Practice*, 3ª ed., seção 13.9, "Dealing with outliers and missing values": substituir outliers por valores faltantes ou por uma estimativa mais consistente é razoável se forem erros ou não se repetirem; "simplesmente substituir outliers sem pensar em por que ocorreram é uma prática perigosa" (tradução livre), pois eles podem trazer informação sobre o processo; o texto sugere STL robusto e sinalização por 3 IQR sobre o resto (https://otexts.com/fpp3/missing-outliers.html; sem número de página).
+
+**Decisão do usuário (2026-10-30): alternativa 1.** A recomendação do agente era: alternativa 1 (manter e mostrar sensibilidade), com as alternativas 4 e 5 como complemento para os candidatos que as aceitam. Evitar 2 e 3 enquanto não houver razão para crer que o registro é erro, porque o dado diário é consistente e as alternativas 2 e 3 quebrariam a igualdade entre as séries diária e semanal.
+
 ## 4. Decisões consolidadas
 
 | # | Decisão | Quem | Justificativa | Onde está registrado |
@@ -157,6 +180,12 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 | 16 | Corrigir o ADR 0003 (faixa de zeros) | Usuário | Divergência do item C (45,6%) | `docs/adr/0003-candidatos-de-algoritmo.md` |
 | 17 | Citar as referências normalmente no notebook, sem marcá-las como não verificadas | Usuário | Preferência de apresentação | Notebook 02 |
 | 18 | O #6 será conduzido por outro agente, com a skill de ciência de dados, a partir de `docs/relatorio/continuacao-6.md` | Usuário | Continuidade com contexto novo | Esse arquivo |
+| 19 | **Não corrigir a spec** (`issues/1.md`) quanto aos "32% a 43%"; acrescentar uma observação de que o dado de treino (visão de desenvolvimento) deu resultado diferente (33% a 46%) | Usuário | Preservar o texto da Fase 0 e documentar a divergência | `issues/1.md` (blockquote em "Dados") |
+| 20 | Manter a suposição de que a planilha de SKUs é o preço por unidade | Usuário | Sem confirmação externa; afeta só valores financeiros | `GLOSSARY.md`, notebooks 01 e 02 |
+| 21 | Sem explicação operacional para os 3 dias seguidos sem pedido (08-02 a 08-04) nem para as 40 unidades do item C na semana de 07-19. **Os 3 dias zerados não precisam de tratamento** (permanecem zeros imputados). **Item C:** pesquisar alternativas de tratamento ou avaliar o impacto caso só esse registro seja o outlier (ver seção 3.5); depois escolhida a alternativa 1 (decisão 24) | Usuário (versão revisada em 2026-10-30; a anterior os tratava ambos como outliers) | Ausência de explicação | Notebooks 01 e 02, seção 3.5 |
+| 24 | **Item C, semana de 07-19: alternativa 1** — manter o valor (40) e relatar a sensibilidade das métricas, sem alterar a série. Calcular as métricas do item C semanal com e sem essa semana (e com e sem os folds 1 e 2). Alternativas 4 (variável de intervenção) e 5 (métricas robustas) ficam como complemento opcional para os candidatos que as aceitam; as alternativas 2 e 3 (limitar ou substituir) estão descartadas por ora | Usuário | Dado diário consistente; não alterar a série preserva a igualdade entre a diária e a semanal | Seção 3.5, `issues/7.md` (comentário) |
+| 23 | Os pares de itens repetidos (inclusive os 4 com quantidades idênticas) **não são duplicidade**; as quantidades seguem somadas | Usuário | Resposta à dúvida do ticket #2 | Notebook 01, seção 3.1 |
+| 22 | Não executar operações de git até nova ordem (as alterações de documentação desta rodada ficam sem commit) | Usuário | Controle do histórico pelo usuário | Este arquivo |
 
 Decisões **ainda não tomadas**: ver seção 8.
 
@@ -175,7 +204,7 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
    | C | 20 | 216 | 9 | 0 | 0 | 0 |
    | D | 25 | 251 | 10 | 0 | 0 | 0 |
 
-   Maior quantidade por pedido: 8, 7, 9 e 6 (A a D). A venda acumulada ultrapassa o valor em 06-09 (A), 06-06 (B), 06-18 (C) e 06-14 (D) sem reposição visível. Conclusão: a hipótese "o valor é uma quantidade vendida" não se sustenta; "é estoque" **não é refutável** com estes dados (estoque pontual não precisa coincidir com vendas). Indícios para preço: progressão regular 10-15-20-25 e a existência da coluna `VALOR_TOTAL` em PEDIDO (indireto). **O PDF do case não diz o que é a planilha 3** (informado pelo usuário; o agente não conseguiu ler o PDF no ambiente por falta de leitor de PDF). Decisão: manter "valor unitário" como suposição de trabalho; afeta só valores financeiros, não as quantidades, as séries nem as recomendações. Pergunta aberta para quem conhece o case: a planilha 3 é o preço por unidade? Status: respondida; pergunta externa em aberto.
+   Maior quantidade por pedido: 8, 7, 9 e 6 (A a D). A venda acumulada ultrapassa o valor em 06-09 (A), 06-06 (B), 06-18 (C) e 06-14 (D) sem reposição visível. Conclusão: a hipótese "o valor é uma quantidade vendida" não se sustenta; "é estoque" **não é refutável** com estes dados (estoque pontual não precisa coincidir com vendas). Indícios para preço: progressão regular 10-15-20-25 e a existência da coluna `VALOR_TOTAL` em PEDIDO (indireto). **O PDF do case não diz o que é a planilha 3** (informado pelo usuário; o agente não conseguiu ler o PDF no ambiente por falta de leitor de PDF). Decisão: manter "valor unitário" como suposição de trabalho; afeta só valores financeiros, não as quantidades, as séries nem as recomendações. Em 2026-10-30 o usuário decidiu manter a suposição de que é o preço por unidade (decisão 20). Status: respondida e decidida.
 4. **"Explique as conclusões sem abreviações e diga se o modelo semanal parece viável."** Resposta (julgamento do agente, não resultado de teste): viável como baseline sólido, fraco para afirmar precisão. A favor: toda semana tem venda; o efeito de dia da semana some ao somar a semana; métodos simples funcionam bem. Contra: apenas 10 semanas completas (4 testes por produto com treino mínimo de 6 semanas); estabilidade e autocorrelação não testáveis; palpite (não testado) de que métodos simples terão desempenho parecido com os complexos; a regra do ADR 0004 (4 vs 2 semanas, cerca de 7 variações históricas) tem base estatística muito frágil. Um resultado "Insuficiente" em vários produtos seria honesto. Status: respondida; a confirmação depende do backtest (#7 em diante).
 5. **"Dá para eliminar o OOT para ter mais dados de treino e teste? Isso daria mais testes ao modelo semanal?"** Resposta: tecnicamente sim, mas não recomendado. Ganho: semanal 10→12 semanas (4→6 testes), diária 76–79→90–93 dias (A, C: 5→7 testes; B, D: 4→6). Custo: perde a única avaliação independente (risco de erro otimista com vários candidatos em 4–6 pontos) e a validação do horizonte de 2 semanas (os folds têm 1 semana). Mitigações: retreinar o modelo escolhido com todos os dados depois da avaliação (**não definido no ADR 0002; sugerido para a Fase 4**); reduzir o treino mínimo semanal de 6 para 5 semanas (5 testes); comparar métodos somando o erro dos 4 produtos (24 pontos, não independentes). Qualquer mudança contradiz o ADR 0002 e a D-001 e exigiria nova decisão (`resplit`). Recomendação do agente: manter o OOT. **O usuário não pediu mudança; o protocolo atual segue vigente.** Status: respondida; sem alteração.
 6. **"Muitos zeros tornam o modelo diário fraco ou instável?"** Resposta: mais difícil de avaliar e de prever, não inutilizável. Dificuldades: métricas percentuais não funcionam com zero; o erro fica dominado pelos dias com venda; ARIMA/ETS supõem valores contínuos e simétricos; intervalos limitados em zero; métodos intermitentes ignoram o dia da semana. Atenuante: os zeros não são aleatórios (dependem do dia da semana). Hipótese do agente: confiança baixa ou "Insuficiente" em vários produtos na diária. Status: respondida.
@@ -212,9 +241,9 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 1. ~~Aprovação das conclusões da EDA (#5)~~ — **feita**; ~~correção do ADR 0003~~ — **feita**; referências: citadas sem página, conforme decisão 17.
 2. Plano de análise do #5 seguido sem aprovação explícita item a item (seção 3.4); as conclusões resultantes foram aprovadas.
 3. Retreino do modelo escolhido com todos os dados após a avaliação final: não está no ADR 0002 (sugestão para a Fase 4, #13/#14).
-4. **Perguntas externas (a quem conhece o case):** a planilha de SKUs é o preço por unidade? Há explicação operacional para os três dias seguidos sem pedido (08-02 a 08-04) e para a venda de 40 unidades do item C na semana de 07-19? Pares de itens repetidos com quantidades idênticas são duplicidade?
+4. **Perguntas respondidas pelo usuário em 2026-10-30:** a planilha de SKUs segue como preço por unidade (suposição mantida); os pares repetidos não são duplicidade; não há explicação para os três dias sem pedido (sem tratamento) nem para as 40 unidades do item C (decisões 20, 21 e 23). O tratamento do item C na semana de 07-19 foi decidido (alternativa 1, decisão 24): a análise de sensibilidade será feita no backtest (#7 em diante).
 5. **Ticket #6 (tabela de candidatos por série) não iniciado.** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
-6. A spec (`issues/1.md`) e as histórias de usuário ainda citam "32% a 43%"; o ADR 0003 já foi corrigido. Decidir se a spec deve ser atualizada.
+6. ~~Spec com "32% a 43%"~~ — resolvido pela decisão 19: texto mantido, observação acrescentada.
 7. Os tickets seguintes (#7 a #26) estão em `issues/`. Com a decisão de manter a diária, os candidatos diários (Croston, SBA, TSB e baselines) seguem no ticket #10 (`issues/10.md`).
 
 ## 9. Reprodução e verificação
