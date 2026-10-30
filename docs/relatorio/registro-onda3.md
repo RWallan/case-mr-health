@@ -26,7 +26,7 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
 | Ticket | Status nesta entrega | Registro |
 | --- | --- | --- |
 | #13 | Preparado, execução pendente | Protocolo congelado e D-021 proposta; D-019, D-020 e D-021 precisam ser aprovadas pelo usuário e a fase precisa avançar para `final_evaluation`. Sem execução do OOT. |
-| #15 | Aguardando decisão | A regra de quantidade zero conflita com o contrato de #14, que não tem campo `quantidade`; pergunta de escopo segue pendente. |
+| #15 | Escopo fechado, não implementado | Decisão do usuário (2026-10-30): sem campo `quantidade`; contrato do #14 inalterado; critério de zero × ausente descartado. Resta batch e XLSX com template, sem o campo. |
 | #16 | Implementado | `GET /previsoes`, `GET /previsoes/exportacao.xlsx`, `GET /modelos`; histórico paginado, XLSX sem truncamento e metadados do Registry. |
 | #19 | Implementado | #18 foi aprovada (commit e66357d). `GET /recomendacoes/{sku}`, regra pura em `recomendacao.py`, 5 casos do #18 e bordas testados. Detalhes em `docs/relatorio/fase5/19.md`. |
 | #22 | Implementado | Dashboard Svelte/Vite e rota `GET /series/{sku}/{granularidade}` usando só o banco de desenvolvimento. |
@@ -69,7 +69,7 @@ cd frontend && npm run build
 
 ## Pendências para concluir a onda
 
-1. Usuário decidir a divergência de `quantidade` em #15.
+1. (Resolvida em 2026-10-30) Sem campo `quantidade` no #15. Pendente: implementar batch e XLSX; avaliar o mock de bucket de retreino no frontend (sem ticket).
 2. (Resolvida em 2026-10-30) 503 para SKU válido sem modelo semanal foi confirmado.
 3. Usuário aprovar formalmente D-019, D-020 e D-021 e avançar a fase para
    `final_evaluation`; só então executar #13 uma vez.
