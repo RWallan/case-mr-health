@@ -1,0 +1,61 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Visão geral
+
+Projeto de **ciência de dados**: modelo preditivo para prever demanda futura. Pacote Python em layout `src/` (`src/case_mr_health/`), gerenciado com `uv`, Python >= 3.14.
+
+Stack principal (ver `pyproject.toml`): pandas, duckdb, scikit-learn, feature-engine, mlflow (rastreio de experimentos), FastAPI (servir o modelo), cyclopts (CLI), pydantic-settings (configuração), loguru (logging), openpyxl (leitura de Excel). Em dev: notebook, faker (dados sintéticos para testes), pytest.
+
+O entrypoint de CLI é `case-mr-health` → `case_mr_health:main`.
+
+## Comandos
+
+Tarefas definidas em `[tool.poe.tasks]` e executadas via poethepoet:
+
+```bash
+uv sync                     # instala dependências (incluindo grupo dev)
+uv run poe lint             # ruff check
+uv run poe format           # ruff check --fix + ruff format
+uv run poe test             # lint + pytest com cobertura + relatório HTML
+uv run pytest tests/caminho/test_x.py::test_nome   # um único teste
+uv run case-mr-health       # roda a CLI
+```
+
+## Convenções do projeto
+
+Respeite sempre as convenções já estabelecidas no projeto; ao adicionar código, siga o estilo do código ao redor.
+
+- Ruff: `line-length = 79`, aspas **simples** (`quote-style = 'single'`), regras `I, F, E, W, PL, PT, FAST` com `preview = true`. Rode `uv run poe format` e `uv run poe lint` antes de concluir uma alteração.
+- Testes com pytest (`pythonpath = "."`); use estilo pytest (regras `PT`) e fixtures, e `faker` para gerar dados sintéticos.
+- Configuração via `pydantic-settings`, logs via `loguru` (não use `print`/`logging`), CLI via `cyclopts`.
+- Projeto e textos de changelog em português.
+
+## Issues locais
+
+As issues são rastreadas localmente no repositório, em `issues/<ID>.md` (ID numérico sequencial; o arquivo começa com `# <título>`). O `issue_format` do towncrier gera links para esses arquivos no `CHANGELOG.md`.
+
+- Ao escrever specs/planos, **quebre o trabalho em issues** em `issues/`, cada uma pequena o suficiente para ser uma entrega rastreável no changelog. Use o próximo ID livre.
+- Trabalhe cada issue em sua própria branch. Se ainda não existir branch para a issue, crie-a no padrão `<ID_ISSUE>-<titulo_breve>` (ex.: `12-pipeline_features`).
+
+## Changelog (towncrier) — obrigatório
+
+**Toda alteração deve incluir um fragmento de changelog** com towncrier. Fragmentos ficam em `changelogs/` com nome `<ID_ISSUE>.<tipo>.md` (use `+<nome>.<tipo>.md` apenas para mudanças sem issue) e são compilados em `CHANGELOG.md`.
+
+Tipos válidos: `adicionado`, `correcoes`, `alterado`, `removido`, `atualizacoes`, `interno`.
+
+```bash
+uv run towncrier create -c "Descrição da mudança." 12.correcoes.md        # vinculado à issue #12
+uv run towncrier create -c "Descrição da mudança." +nome-curto.interno.md # sem issue
+uv run towncrier build --draft                                            # pré-visualizar o CHANGELOG
+```
+
+### Versões
+
+As versões seguem **Semantic Versioning** (`MAJOR.MINOR.PATCH`). Ao concluir um marco/entregável do projeto, **sugira** ao usuário fazer o build do changelog para uma nova versão, propondo o número com base nos fragmentos pendentes (quebra de compatibilidade → MAJOR; `adicionado` → MINOR; apenas correções/internos → PATCH). Após aprovação:
+
+```bash
+uv version <nova_versao>                          # atualiza pyproject.toml
+uv run towncrier build --yes --version <nova_versao>
+```

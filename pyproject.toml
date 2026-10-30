@@ -1,0 +1,98 @@
+[project]
+name = "case-mr-health"
+version = "0.1.0"
+description = "Modelo preditivo para prever demanda futura."
+readme = "README.md"
+authors = [
+    { name = "RWallan", email = "3am.richardwallan@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "cyclopts>=5.3.2",
+    "duckdb>=2.0.0",
+    "fastapi[standard]>=0.162.0",
+    "feature-engine>=1.9.4",
+    "loguru>=0.7.3",
+    "mlflow>=3.17.2",
+    "openpyxl>=3.1.5",
+    "pandas>=3.1.0",
+    "pydantic-settings>=2.16.2",
+    "scikit-learn>=1.9.1",
+]
+
+[project.scripts]
+case-mr-health = "case_mr_health:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "faker>=40.44.0",
+    "notebook>=7.6.3",
+    "poethepoet>=0.49.0",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.3",
+    "towncrier>=26.9.0",
+]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+preview = true
+select = ["I", "F", "E", "W", "PL", "PT", "FAST"]
+
+[tool.ruff.format]
+preview = true
+quote-style = "single"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-p no:warnings"
+
+[tool.poe.tasks]
+lint = "ruff check"
+_pre_format = "ruff check --fix"
+_format = "ruff format"
+_test = "pytest -s -x -vv --cov=src"
+_post_test = "coverage html"
+format = ["_pre_format", "_format"]
+test = ["lint", "_test", "_post_test"]
+
+[tool.towncrier]
+directory = "changelogs"
+filename = "CHANGELOG.md"
+issue_format = '[#{issue}](issues/{issue}.md)'
+
+[[tool.towncrier.type]]
+directory = "adicionado"
+name = "Adicionado"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "correcoes"
+name = "Correções"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "alterado"
+name = "Alterado"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removido"
+name = "Removido"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "atualizacoes"
+name = "Atualizações"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "interno"
+name = "Interno"
+showcontent = true
