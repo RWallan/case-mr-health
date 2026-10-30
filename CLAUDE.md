@@ -59,3 +59,17 @@ As versões seguem **Semantic Versioning** (`MAJOR.MINOR.PATCH`). Ao concluir um
 uv version <nova_versao>                          # atualiza pyproject.toml
 uv run towncrier build --yes --version <nova_versao>
 ```
+
+## Agent skills
+
+### Issue tracker
+
+Issues locais em markdown, em `issues/<ID>.md` (ID numérico sequencial). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Os cinco papéis canônicos com os nomes padrão, registrados na linha `Status:` de cada issue. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` + `docs/adr/` na raiz. See `docs/agents/domain.md`.
