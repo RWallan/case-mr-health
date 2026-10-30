@@ -32,6 +32,14 @@ Respeite sempre as convenções já estabelecidas no projeto; ao adicionar códi
 - Configuração via `pydantic-settings`, logs via `loguru` (não use `print`/`logging`), CLI via `cyclopts`.
 - Projeto e textos de changelog em português.
 - Commits sem coautoria do Claude
+- **Registro para o documento geral do projeto (todas as fases).** O usuário vai escrever (ou pedir) um documento geral com decisões, metodologia, resultados e limitações; portanto cada fase e cada ticket deixam registro suficiente para um agente ou pessoa **sem o contexto da conversa** reconstruir o que foi feito e por quê. Mantenha atualizado a cada ticket:
+  - `docs/relatorio/registro-fase<N>.md` (um por fase; parta de `docs/relatorio/_modelo-registro.md`, com `registro-fase1.md` como exemplo): linha do tempo por ticket (o que foi entregue, arquivos, commits, testes), fatos verificados com números e onde conferir, decisões (quem decidiu, quando, justificativa, alternativas), perguntas do usuário com as respostas dadas, hipóteses separadas de evidência, limitações, referências (com localizador; diga o que não foi consultado), pendências e passos de reprodução;
+  - **ADRs** em `docs/adr/` para decisões de arquitetura ou de metodologia relevantes, e sinalização explícita quando um resultado contradisser um ADR ou a spec (sem sobrescrever o original em silêncio);
+  - seção `## Answer` em cada issue resolvida, com a decisão, os números e as limitações;
+  - notebooks com Observação e Interpretação aprovadas, e fragmentos de changelog;
+  - decisões formais da política de dados em `.ds-workflow/` quando a skill de ciência de dados estiver em uso.
+
+  Registre também desvios do plano, achados inesperados e o que foi descartado e por quê. Não registre hipótese como fato nem conclusão não aprovada como decidida.
 
 ## Issues locais
 

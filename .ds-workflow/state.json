@@ -1,10 +1,34 @@
 {
-  "phase": "setup",
+  "phase": "awaiting_user_direction",
   "history": [
     {
       "at": "2026-10-30T05:26:45+00:00",
       "phase": "setup",
       "note": "init"
+    },
+    {
+      "at": "2026-10-30T05:37:33+00:00",
+      "from": "setup",
+      "phase": "eda",
+      "decision": null,
+      "note": null,
+      "decision_events": 4
+    },
+    {
+      "at": "2026-10-30T06:20:08+00:00",
+      "from": "eda",
+      "phase": "eda_review",
+      "decision": null,
+      "note": null,
+      "decision_events": 4
+    },
+    {
+      "at": "2026-10-30T06:20:08+00:00",
+      "from": "eda_review",
+      "phase": "awaiting_user_direction",
+      "decision": null,
+      "note": null,
+      "decision_events": 4
     }
   ],
   "frozen": {}
