@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import Annotated
 
+import uvicorn
 from cyclopts import App, Parameter
 from loguru import logger
 
+from case_mr_health.api.app import criar_app
 from case_mr_health.config import Settings
 from case_mr_health.dados import DadosInvalidosError, preparar_dados
 from case_mr_health.logs import configurar_logs
@@ -145,4 +147,29 @@ def selecionar(
     except ValueError as erro:
         logger.error('{}', erro)
         return 1
+    return 0
+
+
+@app.command(name='servir')
+def servir(
+    host: Annotated[str | None, Parameter(name='--host')] = None,
+    porta: Annotated[int | None, Parameter(name='--porta')] = None,
+) -> int:
+    """Sobe a API com um único worker (ADR 0005).
+
+    Parameters
+    ----------
+    host
+        Endereço de escuta (padrão: configuração).
+    porta
+        Porta de escuta (padrão: configuração).
+    """
+    cfg = Settings()
+    configurar_logs(cfg.log_level)
+    uvicorn.run(
+        criar_app(cfg),
+        host=host or cfg.api_host,
+        port=porta or cfg.api_port,
+        workers=1,
+    )
     return 0

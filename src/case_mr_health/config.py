@@ -55,3 +55,19 @@ class Settings(BaseSettings):
     # Intervalos de previsão (#8, docs/analysis/plano-intervalos.md).
     niveis_intervalo: tuple[float, ...] = (0.80, 0.95)
     intervalo_max_origens: int = 70
+
+    # API (#14, ADR 0005). `modelos_fixados`: nome do modelo → versão; o que
+    # não estiver aqui serve o alias `champion`. O valor unitário vem daqui
+    # porque a tabela `sku` só existe no `base.duckdb`, selado (spec, Dados).
+    modelos_fixados: dict[str, str] = Field(default_factory=dict)
+    valores_unitarios: dict[str, float] = Field(
+        default_factory=lambda: {
+            'item A': 10,
+            'item B': 15,
+            'item C': 20,
+            'item D': 25,
+        }
+    )
+    historico_db_path: Path = Path('data/servico/historico.duckdb')
+    api_host: str = '127.0.0.1'
+    api_port: int = 8000
