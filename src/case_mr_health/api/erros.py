@@ -14,6 +14,8 @@ _MENSAGENS_VALIDACAO = {
     'string_type': 'deve ser um texto',
     'string_too_short': 'não pode ser vazio',
     'greater_than_equal': 'deve ser maior ou igual a 1',
+    'too_short': 'o lote precisa de ao menos um item',
+    'too_long': 'o lote passa do limite de itens',
     'json_invalid': 'o corpo não é um JSON válido',
     'model_attributes_type': 'o corpo deve ser um objeto JSON',
 }
@@ -66,6 +68,11 @@ class DataReferenciaInvalida(ErroApi):
 class DadosInvalidos(ErroApi):
     status = 422
     codigo = 'dados_invalidos'
+
+
+class LoteInvalido(ErroApi):
+    status = 422
+    codigo = 'lote_invalido'
 
 
 class AtualizacaoRecusada(ErroApi):

@@ -18,6 +18,7 @@ from case_mr_health.api.rotas import (
     atualizacao,
     changelog,
     consultas,
+    lote,
     predicao,
     recomendacoes,
 )
@@ -30,6 +31,7 @@ ROTEADORES = (
     consultas.router,
     recomendacoes.router,
     atualizacao.router,
+    lote.router,
 )
 
 

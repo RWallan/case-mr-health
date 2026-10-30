@@ -7,6 +7,7 @@ referência é o último período conhecido pelo solicitante, e os alvos são os
 `passo_inicial + horizonte` períodos, e só os últimos são servidos.
 """
 
+from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from math import isnan
 from uuid import uuid4
@@ -60,13 +61,20 @@ def passo_inicial(
     return (referencia - ultimo_periodo).days // dias
 
 
-def prever(
-    pedido: PedidoPredicao,
-    modelos: CatalogoModelos,
-    historico: Historico,
-    cfg: Settings,
-) -> RespostaPredicao:
-    """Valida, prevê, grava no histórico e só então responde."""
+@dataclass(frozen=True)
+class Plano:
+    """Pedido já validado: o modelo certo e os passos a servir."""
+
+    modelo: ModeloServido
+    referencia: date
+    passo: int
+    horizonte: int
+
+
+def planejar(
+    pedido: PedidoPredicao, modelos: CatalogoModelos, cfg: Settings
+) -> Plano:
+    """Todas as validações da predição, sem prever nem gravar nada."""
     granularidade, horizonte = pedido.granularidade, pedido.horizonte
     try:
         sku = normalizar_sku(pedido.sku)
@@ -99,9 +107,29 @@ def prever(
             f'{_justificativa(limite, granularidade)}.',
             campo='horizonte',
         )
+    return Plano(modelo, referencia, passo, horizonte)
 
-    previsto = modelo.prever(passo + horizonte).iloc[passo:]
-    return registrar_previsao(modelo, referencia, previsto, historico, cfg)
+
+def executar(
+    plano: Plano, historico: Historico, cfg: Settings
+) -> RespostaPredicao:
+    """Prevê, grava no histórico e só então responde."""
+    previsto = plano.modelo.prever(plano.passo + plano.horizonte).iloc[
+        plano.passo :
+    ]
+    return registrar_previsao(
+        plano.modelo, plano.referencia, previsto, historico, cfg
+    )
+
+
+def prever(
+    pedido: PedidoPredicao,
+    modelos: CatalogoModelos,
+    historico: Historico,
+    cfg: Settings,
+) -> RespostaPredicao:
+    """Valida, prevê, grava no histórico e só então responde."""
+    return executar(planejar(pedido, modelos, cfg), historico, cfg)
 
 
 def registrar_previsao(  # noqa: PLR0913

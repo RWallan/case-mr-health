@@ -47,6 +47,10 @@ line-length = 79
 preview = true
 select = ["I", "F", "E", "W", "PL", "PT", "FAST"]
 
+[tool.ruff.lint.per-file-ignores]
+# Fixtures importadas de outro módulo de teste (os parâmetros "redefinem").
+"tests/test_api_lote.py" = ["F811"]
+
 [tool.ruff.format]
 preview = true
 quote-style = "single"
