@@ -92,7 +92,7 @@ Executada em paralelo por agentes, em worktrees a partir da `main` com o #7 inte
 | 8 | Frontend simplificado, sem testes de componentes nem Playwright, com link para a UI do MLflow | Usuário (a retirada dos testes de componentes foi escolha do agente) | 2026-10-30 | Prazo | `issues/1.md`, "Alterações de escopo", e `issues/22.md` a `issues/26.md` |
 | 9 | Treino real uma única vez, no #12; depois, só testes rápidos | Usuário | 2026-10-30 | Prazo | `plano-paralelizacao.md`, seção 5 |
 | 10 | Integrar sempre por PR | Usuário | 2026-10-30 | Padrão do projeto | Histórico da `main` |
-| 11 | Remover a confiança se ela se mostrar inútil | Usuário (condicional) | 2026-10-30 | 15 de 20 runs Insuficiente | `issues/12.md` |
+| 11 | Remover a confiança após a validação repetida mostrar baixa utilidade | Usuário | 2026-10-30 | 2 de 8 modelos selecionados fora de Insuficiente; alternativa pareada 2/12 | D-020, `issues/27.md`, ADR 0008 |
 
 ## 5. Questionamentos do usuário e respostas
 
@@ -123,5 +123,5 @@ Conclusões **APROVADAS** (D-006, `human_cli`, 2026-10-30): (a) o comando `trein
 
 ## 9. Pendências e passos de reprodução
 
-- Onda 2 (#12, #14, #17) e o #18 aguardam início. No #12, antes de qualquer resultado de candidato: fixar o critério de seleção, o critério de confiança "inútil" e testar a comparação pareada nos baselines; ajustar a chave do notebook 04 para incluir hiperparâmetros.
+- Onda 2 (#12, #14, #17) executada; validação rápida pendente após a integração. O #18 continua pendente e bloqueia #19. O treino real das oito séries ocorreu uma vez no #12 e não deve ser repetido.
 - Reprodução: `uv sync`; `uv run case-mr-health preparar-dados`; `uv run case-mr-health treinar --sku A --granularidade diaria --seed 20261030`; `uv run poe test`.

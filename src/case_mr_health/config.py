@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         'data/processed/desenvolvimento.duckdb'
     )
     oot_db_path: Path = Path('data/processed/oot.duckdb')
+    changelog_path: Path = Path('CHANGELOG.md')
     arquivo_pedido: str = 'PEDIDO-_1_.xlsx'
     arquivo_item_pedido: str = 'ITEM_PEDIDO-_2_.xlsx'
     arquivo_sku: str = 'ITENS-_3_.xlsx'
@@ -36,22 +37,22 @@ class Settings(BaseSettings):
     fuso_horario: str = 'America/Sao_Paulo'
     mlflow_tracking_uri: str = 'sqlite:///data/mlflow/mlflow.db'
     mlflow_artifact_dir: Path = Path('data/mlflow/artefatos')
-    # Confiança (ADR 0008): limites superiores inclusivos de MASE para Ótima,
-    # Boa e Média; acima do último, Ruim. MASE instável: o IC atravessa mais
-    # fronteiras do que `confianca_max_fronteiras_ic`.
-    confianca_limites: tuple[float, float, float] = (0.50, 0.75, 1.00)
-    confianca_nivel_ic: float = Field(default=0.80, gt=0, lt=1)
-    confianca_max_fronteiras_ic: int = Field(default=1, ge=0)
-
-    @field_validator('confianca_limites')
-    @classmethod
-    def _limites_crescentes(cls, limites: tuple[float, ...]):
-        if limites[0] <= 0 or sorted(set(limites)) != list(limites):
-            raise ValueError(
-                'confianca_limites deve ser positivo e estritamente crescente'
-            )
-        return limites
-
     # Intervalos de previsão (#8, docs/analysis/plano-intervalos.md).
     niveis_intervalo: tuple[float, ...] = (0.80, 0.95)
     intervalo_max_origens: int = 70
+
+    # API (#14, ADR 0005). `modelos_fixados`: nome do modelo → versão; o que
+    # não estiver aqui serve o alias `champion`. O valor unitário vem daqui
+    # porque a tabela `sku` só existe no `base.duckdb`, selado (spec, Dados).
+    modelos_fixados: dict[str, str] = Field(default_factory=dict)
+    valores_unitarios: dict[str, float] = Field(
+        default_factory=lambda: {
+            'item A': 10,
+            'item B': 15,
+            'item C': 20,
+            'item D': 25,
+        }
+    )
+    historico_db_path: Path = Path('data/servico/historico.duckdb')
+    api_host: str = '127.0.0.1'
+    api_port: int = 8000

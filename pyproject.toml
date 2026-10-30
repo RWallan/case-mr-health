@@ -54,6 +54,7 @@ quote-style = "single"
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = "-p no:warnings"
+markers = ["lento: treina modelos; não roda depois do #12"]
 
 [tool.poe.tasks]
 lint = "ruff check"
@@ -63,6 +64,7 @@ _test = { cmd = "pytest -s -x -vv --cov=src", env = { CASE_MR_HEALTH_INTERVALO_M
 _post_test = "coverage html"
 format = ["_pre_format", "_format"]
 test = ["lint", "_test", "_post_test"]
+test-rapido = { cmd = "pytest -x -m 'not lento'", env = { CASE_MR_HEALTH_INTERVALO_MAX_ORIGENS = "5" } }
 
 [tool.towncrier]
 directory = "changelogs"
