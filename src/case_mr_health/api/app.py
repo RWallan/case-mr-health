@@ -15,6 +15,7 @@ from case_mr_health.api.erros import registrar_tratadores
 from case_mr_health.api.historico import Historico
 from case_mr_health.api.modelos import carregar_modelos
 from case_mr_health.api.rotas import (
+    alertas,
     atualizacao,
     changelog,
     consultas,
@@ -33,6 +34,7 @@ ROTEADORES = (
     recomendacoes.router,
     atualizacao.router,
     lote.router,
+    alertas.router,
 )
 
 
