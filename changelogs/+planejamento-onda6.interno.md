@@ -1,0 +1,1 @@
+Planejada a onda 6 (interface, gráfico de previsão, documentação em MkDocs): ADR 0013 (referência automática da previsão), termos no glossário, issues #38 a #51 e registro em `docs/relatorio/registro-onda6.md`.
