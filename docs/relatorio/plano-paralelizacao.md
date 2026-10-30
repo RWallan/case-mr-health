@@ -30,6 +30,8 @@ Mais precisamente: #12 depende de #8, #9, #10 e #11; #14 de #8 e #9; #13 de #12;
 
 Possível antecipação, com custo de retrabalho: começar o #22 (Svelte) na onda 1 contra um contrato OpenAPI fixado antes, já que os testes do frontend (Seam 4) usam API mockada. Só vale se o contrato da resposta de predição (`issues/14.md`) for congelado primeiro.
 
+Atualização de 2026-10-30, decisão do usuário: o frontend foi simplificado e os testes Seam 4 e Playwright saíram (`issues/22.md` a `issues/26.md`; ver "Alterações de escopo" em `issues/1.md`). Por isso, o #26 deixa de ser uma onda pesada.
+
 ## 3. O que NÃO paraleliza (gargalo real)
 
 A trilha de modelagem #7 → #12 → #13 passa por portões do usuário que não se resolvem com mais agentes: aprovação do critério de seleção do #12 antes de olhar os resultados; a abertura única do OOT no #13; a decisão de publicação por série. A trilha da API e do frontend (#14 a #26) é a que mais ganha com paralelismo. Os pedidos de aprovação de `D-xxx` devem ser agrupados para o usuário aprovar em lote.
@@ -40,13 +42,14 @@ A trilha de modelagem #7 → #12 → #13 passa por portões do usuário que não
 - `treino.py` e `backtest.py`: #8 (intervalos) e #9 (confiança) alteram `_treinar_candidato`. Cada um deve concentrar a lógica em módulo próprio (`intervalos.py`, `confianca.py`) e tocar `treino.py` só no ponto de chamada. Merge sequencial: #8, depois #9.
 - `docs/relatorio/registro-fase<N>.md`: arquivo único editado por todos. Cada agente escreve o seu bloco em `docs/relatorio/fase<N>/<ID>.md`; quem integra consolida no registro.
 - `CHANGELOG`: sem conflito (um fragmento por ticket).
-- `pyproject.toml` e `uv.lock` (FastAPI já está; Svelte e Playwright entram nos #22 e #26): dependências novas só no ticket que as usa; `uv.lock` regenerado ao integrar.
+- `pyproject.toml` e `uv.lock` (FastAPI já está; Svelte entra no #22; Playwright saiu do projeto em 2026-10-30): dependências novas só no ticket que as usa; `uv.lock` regenerado ao integrar.
 - Política de dados: os agentes herdam o hook; o OOT segue selado. Nenhum agente roda `ds_policy.py approve`.
 
 ## 5. Mecânica proposta
 
 - Uma branch e um worktree por ticket (`<ID>-<titulo_breve>`, conforme `CLAUDE.md`), a partir de uma base de integração que contenha o #7. Cada agente de ticket entrega: código, testes, fragmento de changelog, `## Answer` no ticket, bloco de registro e `uv run poe test` verde.
 - Integração sequencial na ordem do grafo, com `uv run poe test` na base de integração após cada merge.
+- Decisão do usuário (2026-10-30): depois que a suíte lenta (treino com intervalos e candidatos) rodar e o modelo vencedor for escolhido no #12, ela não roda mais. Nas ondas seguintes, valem só os testes rápidos, e isso substitui a linha anterior a partir desse ponto. A separação entre testes lentos e rápidos entra na integração da onda 1. Reforço do usuário no mesmo dia: o treino não roda em nenhuma outra issue, de backend, modelagem ou frontend. O treino real das 8 séries acontece uma vez, no #12, e dele sai o campeão; depois disso, os tickets usam os modelos já registrados. A suíte de pytest não substitui esse treino, pois usa séries sintéticas e MLflow temporário.
 - Cada agente propõe, e o usuário aprova, as decisões do seu ticket (`ds_policy.py propose`); as aprovações são feitas em lote.
 - Commits e merges só quando o usuário pedir, sem coautoria do Claude.
 
