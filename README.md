@@ -130,7 +130,9 @@ As planilhas brutas ficam em `data/raw/` (`PEDIDO-_1_.xlsx`,
    A publicação (GitHub Pages ou outra) ainda não está definida.
 
 Para subir tudo de uma vez (API, UI do MLflow, dashboard e documentação),
-use `uv run poe app`; Ctrl+C encerra todos.
+use `uv run poe app`; ele libera antes as portas 8000, 5000, 5173 e 8001.
+Se algum processo ficar órfão depois do Ctrl+C, `uv run poe parar` encerra
+quem escuta nessas portas, na hora (usa `fuser`, só Linux).
 
 A API nunca treina: serve o `champion` de cada série. Se a base mudar, o
 envio de pedidos novos pelo dashboard (`POST /dados/pedidos`) reajusta os

@@ -12,7 +12,8 @@ As tarefas são do `poethepoet` (`uv run poe <tarefa>`).
 | `frontend-build` | `npm run build`, gera `frontend/dist/` | | Não verificado no worktree (ver registro) |
 | `docs` | `mkdocs serve` | `http://127.0.0.1:8001` | Não verificado |
 | `docs-build` | `mkdocs build --strict` | `site/` | Verificado |
-| `app` | `backend`, `mlflow`, `frontend` e `docs` em paralelo; Ctrl+C encerra todos | | Não verificado |
+| `parar` | `scripts/parar_app.py`: encerra (SIGKILL) quem escuta nas portas 8000, 5000, 5173 e 8001 | | Verificado na porta 8000 |
+| `app` | `parar` e depois `backend`, `mlflow`, `frontend` e `docs` em paralelo; Ctrl+C encerra todos | | Não verificado |
 
 ```bash
 uv run poe app
