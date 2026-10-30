@@ -62,8 +62,18 @@ def _banda(eixo, x, dados, previsto, rotulos=(None, None)) -> None:
     eixo.plot(x, previsto, color=COR_PREVISAO, linewidth=2, marker='o', ms=3)
 
 
-def desenhar(serie: pd.Series, particao, folds: list[dict], futuro, titulo):
-    """Figura da série; `futuro` é o `DataFrame` da previsão pós-treino."""
+def desenhar(  # noqa: PLR0913, PLR0917
+    serie: pd.Series,
+    particao,
+    folds: list[dict],
+    futuro,
+    titulo,
+    oot_observado: pd.Series | None = None,
+):
+    """Figura da série; `futuro` é o `DataFrame` da previsão pós-treino.
+
+    Com `oot_observado` (#13), o OOT aberto é desenhado sobre a previsão.
+    """
     figura, eixo = plt.subplots(figsize=(LARGURA, ALTURA), facecolor=COR_FUNDO)
     eixo.set_facecolor(COR_FUNDO)
     eixo.plot(
@@ -89,11 +99,25 @@ def desenhar(serie: pd.Series, particao, folds: list[dict], futuro, titulo):
         fim,
         color=COR_RESERVADO,
         zorder=0,
-        label='Período OOT reservado (valores não abertos)',
+        label=(
+            'Período OOT reservado (valores não abertos)'
+            if oot_observado is None
+            else 'Período OOT'
+        ),
     )
     x = pd.date_range(inicio, periods=len(futuro), freq=_freq(particao))
     _banda(eixo, x, futuro.to_dict('list'), futuro['previsao'])
     eixo.plot([], [], color=COR_PREVISAO, linewidth=2, label='Previsão')
+    if oot_observado is not None:
+        eixo.plot(
+            oot_observado.index,
+            oot_observado.to_numpy(),
+            color=COR_OBSERVADO,
+            linewidth=1.2,
+            marker='o',
+            ms=4,
+            label='Venda observada (OOT)',
+        )
     eixo.set_title(titulo, loc='left', fontsize=12)
     eixo.set_xlabel('Data')
     eixo.set_ylabel('Quantidade vendida')

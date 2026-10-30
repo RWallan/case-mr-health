@@ -10,12 +10,11 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
 - A skill `evidence-based-data-science-workflow` foi lida em
   `/home/rwallan/.claude/skills/evidence-based-data-science-workflow/SKILL.md`.
 - `.ds-workflow/state.json` permanece na fase `modeling`.
-- O OOT está selado. D-019 (seleção final) e D-020 (remoção da confiança)
-  constam como propostas sem eventos `approved` no ledger.
+- **Atualização 2026-10-30:** D-019, D-020 e D-021 foram aprovadas e o OOT foi aberto uma única vez pelo #13. Texto anterior: o OOT estava selado e as decisões constavam como propostas.
 - O protocolo `docs/analysis/protocolo-avaliacao-final.md` foi congelado
   (SHA-256 `88defe79d130afdcd81c43a386163a9fbd86922957a97f19175432c32c11e360`)
   e a decisão D-021 foi proposta; ainda requer aprovação humana.
-- Nenhum comando de avaliação final abriu o banco OOT e nenhuma aprovação foi
+- (Superado em 2026-10-30, ver abaixo.) Nenhum comando de avaliação final abriu o banco OOT e nenhuma aprovação foi
   registrada pelo agente.
 - A confiança foi removida dos escopos das issues #13, #16 e #22, conforme a
   decisão conversacional do usuário; a formalização D-020 segue pendente no
@@ -25,7 +24,7 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
 
 | Ticket | Status nesta entrega | Registro |
 | --- | --- | --- |
-| #13 | Preparado, execução pendente | Protocolo congelado e D-021 proposta; D-019, D-020 e D-021 precisam ser aprovadas pelo usuário e a fase precisa avançar para `final_evaluation`. Sem execução do OOT. |
+| #13 | Avaliação executada; publicação pendente (D-022) | D-019, D-020 e D-021 aprovadas pelo usuário às 12:13 UTC de 2026-10-30; fase `final_evaluation`; `avaliar-final` rodou uma vez (12:18 UTC). Resultados em `docs/relatorio/fase4/13-avaliacao-final.md` e `issues/13.md`. Publicação por série proposta como D-022. |
 | #15 | Escopo fechado, não implementado | Decisão do usuário (2026-10-30): sem campo `quantidade`; contrato do #14 inalterado; critério de zero × ausente descartado. Resta batch e XLSX com template, sem o campo. |
 | #16 | Implementado | `GET /previsoes`, `GET /previsoes/exportacao.xlsx`, `GET /modelos`; histórico paginado, XLSX sem truncamento e metadados do Registry. |
 | #19 | Implementado | #18 foi aprovada (commit e66357d). `GET /recomendacoes/{sku}`, regra pura em `recomendacao.py`, 5 casos do #18 e bordas testados. Detalhes em `docs/relatorio/fase5/19.md`. |
@@ -57,7 +56,7 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
   2 semanas após o treino). A interface apresenta esse limite; não há retreino
   nem previsão para a data atual enquanto o modelo publicado não cobrir essa
   data.
-- Nenhuma conclusão sobre desempenho OOT foi produzida.
+- (Superado: o #13 produziu a avaliação descritiva no OOT; ver `issues/13.md`.)
 
 ## Reprodução
 
@@ -74,3 +73,10 @@ cd frontend && npm run build
 3. Usuário aprovar formalmente D-019, D-020 e D-021 e avançar a fase para
    `final_evaluation`; só então executar #13 uma vez.
 4. Registrar a decisão de publicação por série antes de atribuir `champion`.
+
+## Registro do #13
+
+- Fatos: ver `docs/relatorio/fase4/13-avaliacao-final.md` (8 séries, MAE, RMSE, WAPE, MASE e cobertura 80/95%).
+- Implementação: `src/case_mr_health/avaliacao_final.py`, comandos `avaliar-final` e `promover`, `tests/test_avaliacao_final.py` (26 testes).
+- Integridade: a marca de tentativa fica em `.ds-workflow/final-evaluation-attempt.json` e não é apagada; uma nova execução recusa-se a abrir o OOT.
+- Desvio do plano: o protocolo previa só o procedimento; os comandos foram escritos nesta sessão, com testes sobre OOT sintético, antes da execução real.
