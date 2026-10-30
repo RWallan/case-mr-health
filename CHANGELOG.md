@@ -1,3 +1,18 @@
+# case-mr-health 0.5.0 (2026-10-30)
+
+## Adicionado
+
+- Explicação em linguagem simples na recomendação (`GET /recomendacoes/{sku}`): campo `explicacao` com `origem` (`llm` ou `template`). Um LLM de qualquer provedor (litellm), com modelo e chave informados pelo usuário nos cabeçalhos `X-LLM-Modelo` e `X-LLM-Chave` ou, na falta deles, pela configuração do servidor, recebe só um contrato estruturado, tem a saída validada por schema e só pode citar números da entrada; sem chave, com falha ou com saída inválida, vale um template determinístico. A decisão continua só da regra. ([#20](issues/20.md))
+- Rota `POST /alertas/email` que valida o e-mail do gestor e devolve o conteúdo completo do alerta de um SKU (previsão de 2 semanas, valores, intervalos, recomendação e indicadores) com `envio_simulado: true`; nenhum e-mail é enviado. ([#21](issues/21.md))
+- Lista de recomendações por SKU no dashboard, com distinção entre aumento, redução, estável e insuficiente, variação, Q3, aviso, explicação (LLM ou template) e visualização do e-mail de alerta com aviso de envio simulado. ([#23](issues/23.md))
+- Dashboard: entrada de previsões por formulário com validação nativa do HTML, upload de XLSX, link do template e tabela de erros do backend com campo e linha. ([#24](issues/24.md))
+- Sumário XLSX com aba `Escopo` (completo ou filtrado) e cabeçalho `X-Escopo`, comparação da demanda entre SKUs em um gráfico de linhas e links de Swagger e changelog no cabeçalho do dashboard. ([#25](issues/25.md))
+
+## Interno
+
+- README com instruções de execução do zero ao dashboard, configuração (MLflow remoto, endereços do dashboard) e limitações conhecidas; passada de fumaça do sistema integrado registrada. ([#26](issues/26.md))
+
+
 # case-mr-health 0.4.0 (2026-10-30)
 
 ## Adicionado
