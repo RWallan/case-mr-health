@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS previsoes (
     limite_superior_80 DOUBLE,
     limite_inferior_95 DOUBLE,
     limite_superior_95 DOUBLE,
-    confianca VARCHAR,
     experimento_id VARCHAR NOT NULL,
     run_id VARCHAR NOT NULL,
     PRIMARY KEY (id_requisicao, data_alvo)
@@ -59,7 +58,6 @@ class LinhaHistorico:
     limite_superior_80: float | None
     limite_inferior_95: float | None
     limite_superior_95: float | None
-    confianca: str | None
     experimento_id: str
     run_id: str
 

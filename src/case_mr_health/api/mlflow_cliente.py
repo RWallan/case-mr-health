@@ -82,8 +82,3 @@ def carregar_conferido(versao: ModelVersion):
 
 def obter_run(cliente: MlflowClient, versao: ModelVersion) -> Run:
     return cliente.get_run(versao.run_id or versao.tags['run_id'])
-
-
-def ler_confianca(versao: ModelVersion) -> str | None:
-    """Único ponto que conhece a confiança; pode sair da solução (#12)."""
-    return versao.tags.get('confianca')

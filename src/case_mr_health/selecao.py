@@ -15,9 +15,8 @@ import mlflow
 import numpy as np
 from loguru import logger
 from mlflow import MlflowClient
-from scipy import stats
 
-from case_mr_health import confianca, graficos
+from case_mr_health import graficos
 from case_mr_health.candidatos import SKUS
 from case_mr_health.config import Settings
 from case_mr_health.intervalos import INDISPONIVEL
@@ -43,13 +42,6 @@ ORDEM_SIMPLICIDADE = (
 FORA_POS_HOC = (('diaria', 'naive'),)
 TOLERANCIA_EMPATE = 1e-9
 LIMITE_VIES_RELATIVO = 0.20
-NIVEL_IC_GANHO = 0.80
-MIN_SELECIONADOS_CLASSIFICADOS = 4
-MIN_FAIXAS = 2
-SUPERA = 'Supera'
-PIOR = 'Pior'
-INDISTINGUIVEL = 'Indistinguível'
-E_O_BASELINE = 'É o baseline'
 
 
 @dataclass(frozen=True)
@@ -63,7 +55,6 @@ class Avaliado:
     mae_folds: tuple[float, ...]
     medias: dict[str, float]
     intervalo_metodo: str = ''
-    confianca: str = ''
     premissas_nao_atendidas: str = ''
 
     @property
@@ -99,23 +90,6 @@ def diferenca_pareada(
     """Média e erro-padrão de `MAE_baseline - MAE_candidato` por fold."""
     d = np.subtract(baseline.mae_folds, candidato.mae_folds)
     return float(d.mean()), float(d.std(ddof=1) / np.sqrt(len(d)))
-
-
-def ganho_pareado(
-    baseline: Avaliado, modelo: Avaliado, nivel: float = NIVEL_IC_GANHO
-) -> tuple[float, float, float, str]:
-    """Ganho relativo ao baseline, IC t e status (alternativa à confiança)."""
-    media, ep = diferenca_pareada(baseline, modelo)
-    referencia = baseline.mae
-    meia = stats.t.ppf((1 + nivel) / 2, len(baseline.mae_folds) - 1) * ep
-    inferior = (media - meia) / referencia
-    superior = (media + meia) / referencia
-    status = INDISTINGUIVEL
-    if inferior > 0:
-        status = SUPERA
-    elif superior < 0:
-        status = PIOR
-    return media / referencia, inferior, superior, status
 
 
 def _simplicidade(run: Avaliado) -> tuple:
@@ -199,22 +173,6 @@ def _sinais(vencedor: Avaliado, aceitos: list[Avaliado]) -> tuple[str, ...]:
     return tuple(sinais)
 
 
-def avaliar_utilidade_confianca(status: dict[str, list[str]]) -> dict:
-    """Condições I1 a I3 do pré-registro; `status` por granularidade."""
-    todos = [s for lista in status.values() for s in lista]
-    fora = [s for s in todos if s != confianca.INSUFICIENTE]
-    condicoes = {
-        'I1': len(fora) < MIN_SELECIONADOS_CLASSIFICADOS,
-        'I2': len(set(fora)) < MIN_FAIXAS,
-        'I3': all(s == confianca.INSUFICIENTE for s in status['semanal']),
-    }
-    return {
-        **condicoes,
-        'fora_de_insuficiente': len(fora),
-        'inutil': any(condicoes.values()),
-    }
-
-
 def carregar_rodada(
     cfg: Settings, rodada: str
 ) -> dict[tuple[str, str], list[Avaliado]]:
@@ -254,7 +212,6 @@ def _avaliado(cliente: MlflowClient, run) -> Avaliado:
         tuple(m.value for m in sorted(historico, key=lambda m: m.step)),
         dict(run.data.metrics),
         tags.get('intervalo_metodo', ''),
-        tags.get('confianca', ''),
         tags.get('premissas_nao_atendidas', ''),
     )
 
@@ -313,7 +270,6 @@ def _comparacao(c: Comparacao) -> dict:
 def _linha(s: Selecao) -> str:
     v, b = s.vencedor, s.baseline
     media, ep = diferenca_pareada(b, v)
-    ganho = E_O_BASELINE if v.run_id == b.run_id else ganho_pareado(b, v)[3]
     cobertura = ' / '.join(
         f'{v.medias.get(f"cobertura_{n}", float("nan")):.2f}'
         for n in ('80', '95')
@@ -322,29 +278,20 @@ def _linha(s: Selecao) -> str:
         f'| {s.sku} {s.granularidade} | {v.algoritmo} {v.hiperparametros} | '
         f'{b.algoritmo} | {v.mae:.3f} | {b.mae:.3f} | {media:+.3f} | '
         f'{ep:.3f} | {v.medias["mase"]:.3f} | {cobertura} | '
-        f'{v.confianca} | {ganho} | {"; ".join(s.sinais) or "-"} |'
+        f'{"; ".join(s.sinais) or "-"} |'
     )
 
 
 def resumo_markdown(rodada: str, selecoes: list[Selecao]) -> str:
     """Resumo por série; números só do backtest, sem o OOT."""
-    status = {g: [] for g in GRANULARIDADES}
-    for s in selecoes:
-        status[s.granularidade].append(s.vencedor.confianca)
     linhas = [
         '# Resumo da seleção por série (#12)',
         '',
         f'Rodada `{rodada}`. Critério: `12-pre-registro.md`. Só backtest.',
         '',
         '| Série | Vencedor | Baseline | MAE | MAE baseline | d̄ | ep | '
-        'MASE | Cobertura 80/95 | Confiança | Ganho pareado | Sinais |',
-        '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- '
-        '| --- |',
+        'MASE | Cobertura 80/95 | Sinais |',
+        '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
         *[_linha(s) for s in selecoes],
-        '',
     ]
-    if status['semanal'] and status['diaria']:
-        linhas.append(
-            f'Utilidade da confiança: {avaliar_utilidade_confianca(status)}'
-        )
     return '\n'.join(linhas) + '\n'

@@ -193,7 +193,6 @@ def registro(base) -> dict[tuple[str, str], Registrado]:
             'item A',
             'diaria',
             11.0,
-            tags_versao={'confianca': 'Média'},
         ),
         ('item A', 'semanal'): naive(base, 'item A', 'semanal', 70.0),
         ('item B', 'diaria'): registrar(
@@ -279,9 +278,8 @@ def test_resposta_traz_o_contrato_completo(cliente, registro):
     )
 
 
-def test_confianca_e_opcional(cliente):
-    assert _pedir(cliente).json()['confianca'] == 'Média'
-    assert _pedir(cliente, granularidade='semanal').json()['confianca'] is None
+def test_resposta_nao_traz_confianca(cliente):
+    assert 'confianca' not in _pedir(cliente).json()
 
 
 @pytest.mark.parametrize('sku', ['A', 'a', 'item a', ' item A '])
@@ -761,7 +759,7 @@ def test_previsao_servida_e_gravada_por_periodo_alvo(base, registro, tmp_path):
     assert primeira['hash_artefato'] == corpo['hash_artefato']
     assert primeira['experimento_id'] == corpo['experimento_id']
     assert primeira['run_id'] == corpo['run_id']
-    assert primeira['confianca'] is None
+    assert 'confianca' not in primeira
     assert primeira['valor_unitario'] == pytest.approx(15)
     for campo in (
         'quantidade_prevista',

@@ -15,14 +15,8 @@ from case_mr_health.intervalos import INDISPONIVEL
 from case_mr_health.particoes import GRANULARIDADES, carregar_particoes
 from case_mr_health.selecao import (
     ALIAS_SELECIONADO,
-    E_O_BASELINE,
-    INDISTINGUIVEL,
-    PIOR,
-    SUPERA,
     Avaliado,
-    avaliar_utilidade_confianca,
     carregar_rodada,
-    ganho_pareado,
     publicar_selecao,
     resumo_markdown,
     selecionar,
@@ -164,53 +158,12 @@ def test_sinaliza_mudanca_na_sensibilidade_do_item_c():
     assert any('sem_periodo_atipico: naive' in s for s in selecao.sinais)
 
 
-@pytest.mark.parametrize(
-    ('maes', 'esperado'),
-    [
-        ([2, 2.1, 1.9, 2], SUPERA),
-        ([6, 6.1, 5.9, 6], PIOR),
-        ([0, 8, 0, 8], INDISTINGUIVEL),
-    ],
-)
-def test_ganho_pareado_classifica(maes, esperado):
-    assert ganho_pareado(BASE, _run('ets_ses', maes))[3] == esperado
-
-
-def test_ganho_pareado_e_relativo_ao_mae_do_baseline():
-    ganho, *_ = ganho_pareado(BASE, _run('ets_ses', [3, 3, 3, 3]))
-
-    assert ganho == pytest.approx(0.25)
-
-
-@pytest.mark.parametrize(
-    ('diaria', 'semanal', 'inuteis'),
-    [
-        (['Boa', 'Média', 'Boa', 'Ruim'], ['Boa'] * 4, []),
-        (
-            ['Boa', 'Média', 'Insuficiente', 'Insuficiente'],
-            ['Insuficiente', 'Insuficiente', 'Insuficiente', 'Boa'],
-            ['I1'],
-        ),
-        (['Boa'] * 4, ['Boa'] * 4, ['I2']),
-        (['Boa', 'Média', 'Ruim', 'Boa'], ['Insuficiente'] * 4, ['I3']),
-    ],
-)
-def test_condicoes_de_inutilidade(diaria, semanal, inuteis):
-    resultado = avaliar_utilidade_confianca({
-        'diaria': diaria,
-        'semanal': semanal,
-    })
-
-    assert [k for k in ('I1', 'I2', 'I3') if resultado[k]] == inuteis
-    assert resultado['inutil'] is bool(inuteis)
-
-
 def test_resumo_traz_o_baseline_vencedor_como_resultado():
     selecao = selecionar('item A', 'semanal', [BASE, MEDIA])
 
     texto = resumo_markdown('r1', [selecao])
 
-    assert E_O_BASELINE in texto
+    assert 'naive' in texto
     assert 'item A semanal' in texto
 
 

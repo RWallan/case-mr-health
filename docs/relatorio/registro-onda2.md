@@ -4,13 +4,14 @@
 
 | Ticket | Branch | Execução | Status | Registro |
 | --- | --- | --- | --- | --- |
-| #12 Seleção por série | `12-treino_selecao` | Coordenador | Treino e seleção feitos; D-019 e D-020 aguardam `approve` | `fase2/12.md`, `fase2/12-pre-registro.md` |
-| #14 API de predição | `14-api_predicao` | Agente em worktree | Implementado; 75 testes passam | `fase5/14.md` |
-| #17 Changelog na API | `17-changelog_api` | Agente em worktree | Implementado; 16 testes passam | `fase5/17.md` |
+| #12 Seleção por série | `12-treino_selecao` | Coordenador | Implementado; treino real concluído uma vez | `fase2/12.md`, `fase2/12-pre-registro.md` |
+| #14 API de predição | `14-api_predicao` | Agente em worktree | Implementado; 75 testes específicos passam | `fase5/14.md` |
+| #17 Changelog na API | `17-changelog_api` | Agente em worktree | Implementado; 16 testes específicos passam | `fase5/17.md` |
+| #27 Remoção da confiança | `27-remover_confianca` | Coordenador | Implementado; validação pendente | `issues/27.md` |
 
 ## Decisões do coordenador para o #14 e o #17
 
-Layout congelado do pacote `api/`; valor unitário em configuração, pois a tabela `sku` só existe no banco completo selado; origem da previsão fixa em `desenvolvimento_fim`; resposta por período, sem agregar intervalos; confiança opcional e lida num único ponto, porque pode sair da solução; `champion` só depois do #13, com versão fixada por configuração até lá.
+Layout congelado do pacote `api/`; valor unitário em configuração, pois a tabela `sku` só existe no banco completo selado; origem da previsão fixa em `desenvolvimento_fim`; resposta por período, sem agregar intervalos; confiança removida pela decisão D-020/#27; `champion` só depois do #13, com versão fixada por configuração até lá.
 
 ## Desvios do plano
 

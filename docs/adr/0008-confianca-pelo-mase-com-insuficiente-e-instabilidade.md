@@ -1,6 +1,6 @@
 # Confiança como metadado da versão, derivada do MASE do backtest, com Insuficiente para MASE indefinido ou instável
 
-Status: **proposto** (#9), aguarda aprovação do usuário.
+Status: **substituído em 2026-10-30** pela decisão D-020, após validação no #12. O texto abaixo preserva a regra histórica implementada pelo #9; ela não integra mais a solução final.
 
 A confiança de cada versão do modelo é calculada só com os folds do backtest (o OOT não entra) e gravada como tags da versão e do run. É metadado para o gestor: não entra em nenhuma seleção. As faixas de MASE ficam em `Settings.confianca_limites`, com limite superior inclusivo: até 0,50 é Ótima; até 0,75, Boa; até 1,00, Média; acima, Ruim. A faixa usa a média simples dos folds, sem arredondar.
 
@@ -26,3 +26,7 @@ A faixa que a média indicaria continua gravada em `confianca_faixa_pontual` qua
 - O #13 revisa a confiança depois do OOT sem apagar a do backtest: deve gravar tags próprias.
 - MASE abaixo de 1 não significa ganhar do baseline: a escala é o naive de um passo dentro do treino.
 - Esta decisão não muda a escala do MASE. A revisão pedida no ADR 0006 foi feita e não recomenda a troca para lag 7, que segue como decisão do usuário.
+
+## Revisão (2026-10-30, D-020)
+
+A validação repetida no #12 mostrou que a confiança é inútil pelo critério pré-registrado: apenas 2 dos 8 modelos selecionados saíram de Insuficiente; I1 e I3 dispararam; 45 dos 72 runs e todos os 12 semanais ficaram Insuficiente. A alternativa pareada também falhou nos baselines (2 de 12 pares, mínimo de 3). O usuário decidiu remover a confiança da solução final. O módulo, a configuração, as tags, o campo da API e o registro de confiança no histórico foram removidos no #27. O notebook de validação e os registros desta fase permanecem como evidência histórica.

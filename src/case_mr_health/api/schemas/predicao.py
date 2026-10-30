@@ -123,7 +123,6 @@ class RespostaPredicao(BaseModel):
                     'valor_unitario': 10.0,
                     'versao_modelo': '3',
                     'hash_artefato': 'a3f5…',
-                    'confianca': None,
                     'experimento_id': '1',
                     'run_id': '0a2bbfbec17244318eae019bd4c0b91e',
                     'periodos': [
@@ -163,12 +162,6 @@ class RespostaPredicao(BaseModel):
     versao_modelo: str = Field(description='Versão registrada no MLflow.')
     hash_artefato: str = Field(
         description='Hash do artefato, conferido no carregamento.'
-    )
-    confianca: str | None = Field(
-        default=None,
-        description=(
-            'Confiança da versão, se houver. Não é garantia de acerto.'
-        ),
     )
     experimento_id: str = Field(description='Experimento MLflow de origem.')
     run_id: str = Field(description='Execução MLflow de origem.')

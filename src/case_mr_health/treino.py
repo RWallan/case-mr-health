@@ -28,7 +28,7 @@ import pandas as pd
 from loguru import logger
 from mlflow import MlflowClient
 
-from case_mr_health import algoritmos, confianca, intervalos, metricas
+from case_mr_health import algoritmos, intervalos, metricas
 from case_mr_health.algoritmos_statsmodels import (
     DiagnosticoAjuste,
     FalhaConvergencia,
@@ -571,9 +571,6 @@ def _treinar_candidato(
             MlflowClient().set_model_version_tag(
                 nome, info.registered_model_version, chave, valor
             )
-        confianca.registrar(
-            nome, info.registered_model_version, resultado, ctx.cfg
-        )
     return ResumoRun(
         run.info.run_id,
         algoritmo,

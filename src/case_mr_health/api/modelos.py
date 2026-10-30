@@ -37,7 +37,6 @@ class ModeloServido:
     run_id: str
     experimento_id: str
     desenvolvimento_fim: date
-    confianca: str | None
     modelo: Any
 
     def prever(self, horizonte: int) -> pd.DataFrame:
@@ -132,7 +131,6 @@ def _carregar_serie(
         desenvolvimento_fim=date.fromisoformat(
             run.data.params['desenvolvimento_fim']
         ),
-        confianca=mlflow_cliente.ler_confianca(versao),
         modelo=mlflow_cliente.carregar_conferido(versao),
     )
     _conferir_contrato(servido, horizonte_maximo(cfg, granularidade))

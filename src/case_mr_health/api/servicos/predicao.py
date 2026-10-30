@@ -146,7 +146,6 @@ def _responder(
         valor_unitario=valor_unitario,
         versao_modelo=modelo.versao,
         hash_artefato=modelo.hash_artefato,
-        confianca=modelo.confianca,
         experimento_id=modelo.experimento_id,
         run_id=modelo.run_id,
         periodos=periodos,
@@ -172,7 +171,6 @@ def _linhas(resposta: RespostaPredicao) -> list[LinhaHistorico]:
             limite_superior_80=periodo.limite_superior_80,
             limite_inferior_95=periodo.limite_inferior_95,
             limite_superior_95=periodo.limite_superior_95,
-            confianca=resposta.confianca,
             experimento_id=resposta.experimento_id,
             run_id=resposta.run_id,
         )
