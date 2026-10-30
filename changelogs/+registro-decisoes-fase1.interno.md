@@ -1,1 +1,0 @@
-Decisões do usuário sobre pares repetidos, dias sem pedido, preço por unidade e item C registradas no registro da Fase 1, nos notebooks, na spec e no ticket #7; modelo de registro por fase em `docs/relatorio/_modelo-registro.md`.
