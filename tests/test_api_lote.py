@@ -5,7 +5,7 @@ as duas granularidades, `item B` diária e semanal, `item D` só semanal, e
 `item C` sem nenhum modelo servível.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from io import BytesIO
 
 import pytest
@@ -132,6 +132,21 @@ def test_lote_invalido_lista_todos_os_problemas_e_nao_grava_nada(cliente):
     assert _gravadas(cliente) == antes
 
 
+def test_lote_json_aceita_a_data_ausente(cliente):
+    itens = [
+        {'sku': 'item A', 'granularidade': 'diaria', 'horizonte': 2},
+        {'sku': 'item A', 'granularidade': 'semanal'},
+    ]
+
+    resposta = cliente.post('/predicoes/lote', json={'itens': itens})
+
+    assert resposta.status_code == HTTP_OK
+    referencias = [
+        r['previsao']['data_referencia'] for r in resposta.json()['resultados']
+    ]
+    assert referencias == [str(FIM_DIARIA), str(FIM_SEMANAL - timedelta(6))]
+
+
 def test_lote_aplica_as_mesmas_regras_da_individual(cliente):
     item = _item(data_referencia='2021-08-01')
 
@@ -155,7 +170,7 @@ def test_erro_de_contrato_indica_o_item_e_o_campo(cliente):
     campos = _campos(resposta)
     assert 'mensal não é servida' in campos['itens.1.granularidade']
     assert campos['itens.2.granularidade'] == 'campo obrigatório ausente'
-    assert campos['itens.2.data_referencia'] == 'campo obrigatório ausente'
+    assert 'itens.2.data_referencia' not in campos
 
 
 @pytest.mark.parametrize(
@@ -187,7 +202,8 @@ def test_template_tem_colunas_exemplos_e_instrucoes(cliente):
     instrucoes = ' '.join(
         str(c[0].value) for c in livro['Instruções'].iter_rows()
     )
-    assert 'data_referencia' in instrucoes
+    assert 'data_referencia (opcional)' in instrucoes
+    assert all(e[2] is None for e in exemplos)
     assert '14 dias' in instrucoes
     assert '2 semanas' in instrucoes
 
@@ -202,6 +218,21 @@ def test_template_preenchido_com_os_exemplos_e_aceito(cliente):
 
 
 # --- lote em XLSX --------------------------------------------------------
+
+
+def test_xlsx_com_data_em_branco_ou_sem_a_coluna_usa_o_fim_do_treino(cliente):
+    em_branco = _planilha([['item A', 'diaria', None, 1]])
+    sem_coluna = _planilha(
+        [['item A', 'semanal']], cabecalho=('sku', 'granularidade')
+    )
+
+    primeira = _enviar(cliente, em_branco)
+    segunda = _enviar(cliente, sem_coluna)
+
+    assert primeira.status_code == segunda.status_code == HTTP_OK
+    ref = lambda r: r.json()['resultados'][0]['previsao']['data_referencia']  # noqa: E731
+    assert ref(primeira) == str(FIM_DIARIA)
+    assert ref(segunda) == str(FIM_SEMANAL - timedelta(6))
 
 
 def test_xlsx_valido_com_datas_do_excel_e_em_texto(cliente):
@@ -286,13 +317,11 @@ def test_xlsx_ignora_linhas_em_branco_e_preserva_a_numeracao(cliente):
 
 
 def test_xlsx_sem_coluna_obrigatoria_aponta_o_cabecalho(cliente):
-    conteudo = _planilha(
-        [['item A', 'diaria']], cabecalho=('sku', 'granularidade')
-    )
+    conteudo = _planilha([['item A', 1]], cabecalho=('sku', 'horizonte'))
 
     campos = _campos(_enviar(cliente, conteudo))
 
-    assert list(campos) == ['linha 1 / data_referencia']
+    assert list(campos) == ['linha 1 / granularidade']
 
 
 def test_xlsx_cabecalho_aceita_caixa_e_ordem_diferentes(cliente):

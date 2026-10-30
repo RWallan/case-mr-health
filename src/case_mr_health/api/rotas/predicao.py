@@ -31,8 +31,9 @@ _ERROS = {
     ),
     422: _resposta_erro(
         (
-            'Entrada inválida: campo ausente, data inválida, granularidade '
-            'mensal ou não suportada, ou horizonte acima do limite validado '
+            'Entrada inválida: campo obrigatório ausente, data inválida, '
+            'granularidade mensal ou não suportada, ou horizonte acima do '
+            'limite validado '
             '(`requisicao_invalida`, `data_referencia_invalida` ou '
             '`horizonte_acima_do_limite`).'
         ),
@@ -70,6 +71,10 @@ def criar_predicao(
     pedido: PedidoPredicao, request: Request
 ) -> RespostaPredicao:
     """Prevê os períodos seguintes à data de referência, sem treinar nada.
+
+    `data_referencia` é opcional: ausente, vale o fim do treino do modelo
+    servido, e a resposta devolve a data usada, que é o início da previsão
+    (ADR 0013).
 
     A previsão é da **rede**, com a versão `champion` (ou a fixada por
     configuração) da série pedida. O modelo foi ajustado até o fim do

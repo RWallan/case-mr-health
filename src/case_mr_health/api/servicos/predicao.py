@@ -2,7 +2,8 @@
 
 A origem da previsão é fixa: o modelo foi ajustado até
 `desenvolvimento_fim` e só prevê os períodos seguintes a ele. A data de
-referência é o último período conhecido pelo solicitante, e os alvos são os
+referência é o último período conhecido pelo solicitante (ausente, o fim do
+treino do modelo servido, ADR 0013), e os alvos são os
 `horizonte` períodos depois dela. Logo, o modelo prevê
 `passo_inicial + horizonte` períodos, e só os últimos são servidos.
 """
@@ -88,7 +89,9 @@ def planejar(
             campo='horizonte',
         )
     modelo = modelos.obter(sku, granularidade)
-    referencia = normalizar_referencia(pedido.data_referencia, granularidade)
+    referencia = normalizar_referencia(
+        pedido.data_referencia or modelo.desenvolvimento_fim, granularidade
+    )
     passo = passo_inicial(
         referencia, modelo.desenvolvimento_fim, granularidade
     )
