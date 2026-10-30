@@ -5,6 +5,7 @@ Os casos 1 a 5 são os exemplos aprovados no #18. Na rota, o modelo semanal
 regra deve receber como previsão.
 """
 
+import json
 from contextlib import ExitStack
 from datetime import date, timedelta
 
@@ -310,3 +311,132 @@ def test_rota_esta_no_swagger(servir):
     rota = esquema['paths']['/recomendacoes/{sku}']['get']
     assert set(rota['responses']) >= {'200', '404', '503'}
     assert rota['description']
+
+
+# --- explicação (#20) -----------------------------------------------------
+
+
+def _servir_com_gerador(raiz, gerador) -> TestClient:
+    cfg = _configuracao(raiz, AUMENTO)
+    _registrar_semanal(cfg, [24, 26])
+    return TestClient(criar_app(cfg, gerador_llm=gerador))
+
+
+def test_explicacao_por_template_sem_chave(servir):
+    cliente = servir(AUMENTO, [24, 26])
+
+    corpo = cliente.get('/recomendacoes/item A').json()
+
+    assert corpo['explicacao']['origem'] == 'template'
+    assert '47,1%' in corpo['explicacao']['texto']
+    assert corpo['texto']  # campo anterior preservado
+
+
+def test_explicacao_do_llm_nao_muda_a_decisao(tmp_path):
+    texto = 'A média prevista é 25,0 contra 17,0 vendidos.'
+
+    def gerador(_entrada):
+        return json.dumps({'texto': texto})
+
+    with _servir_com_gerador(tmp_path, gerador) as cliente:
+        corpo = cliente.get('/recomendacoes/item A').json()
+
+    assert corpo['explicacao'] == {'texto': texto, 'origem': 'llm'}
+    assert corpo['resultado'] == 'aumento_significativo'
+
+
+def test_llm_com_numero_inventado_cai_no_template(tmp_path):
+    def gerador(_entrada):
+        return json.dumps({'texto': 'Estoque de 500.'})
+
+    with _servir_com_gerador(tmp_path, gerador) as cliente:
+        corpo = cliente.get('/recomendacoes/item A').json()
+
+    assert corpo['explicacao']['origem'] == 'template'
+    assert '500' not in corpo['explicacao']['texto']
+
+
+def test_falha_do_llm_nao_derruba_a_rota(tmp_path):
+    def gerador(_entrada):
+        raise ConnectionError('sem rede')
+
+    with _servir_com_gerador(tmp_path, gerador) as cliente:
+        resposta = cliente.get('/recomendacoes/item A')
+
+    assert resposta.status_code == HTTP_OK
+    assert resposta.json()['explicacao']['origem'] == 'template'
+
+
+def test_explicacao_documentada_no_swagger(servir):
+    esquema = servir(AUMENTO, [24, 26]).get('/openapi.json').json()
+
+    schemas = esquema['components']['schemas']
+    assert 'explicacao' in schemas['RespostaRecomendacao']['properties']
+    origem = schemas['ExplicacaoResposta']['properties']['origem']
+    assert origem['enum'] == ['llm', 'template']
+
+
+def test_chave_do_usuario_nos_cabecalhos_aciona_o_llm(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    chamadas = []
+    texto = 'A média prevista é 25,0 contra 17,0 vendidos.'
+
+    def falso(**kwargs):
+        chamadas.append(kwargs)
+        return litellm.ModelResponse(
+            choices=[
+                {
+                    'message': {
+                        'role': 'assistant',
+                        'content': json.dumps({'texto': texto}),
+                    }
+                }
+            ]
+        )
+
+    monkeypatch.setattr(litellm, 'completion', falso)
+    cliente = servir(AUMENTO, [24, 26])
+
+    corpo = cliente.get(
+        '/recomendacoes/item A',
+        headers={
+            'X-LLM-Modelo': 'openai/gpt-4o',
+            'X-LLM-Chave': 'chave-do-usuario',
+        },
+    ).json()
+
+    assert corpo['explicacao'] == {'texto': texto, 'origem': 'llm'}
+    assert chamadas[0]['model'] == 'openai/gpt-4o'
+    assert chamadas[0]['api_key'] == 'chave-do-usuario'
+    assert 'chave-do-usuario' not in json.dumps(corpo)
+
+
+def test_sem_cabecalhos_nao_chama_o_llm(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    def proibido(**_kwargs):
+        raise AssertionError('não deveria chamar o LLM')
+
+    monkeypatch.setattr(litellm, 'completion', proibido)
+
+    corpo = servir(AUMENTO, [24, 26]).get('/recomendacoes/item A').json()
+
+    assert corpo['explicacao']['origem'] == 'template'
+
+
+def test_chave_do_usuario_invalida_cai_no_template(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    def falha(**_kwargs):
+        raise litellm.AuthenticationError('chave ruim', 'openai', 'gpt-4o')
+
+    monkeypatch.setattr(litellm, 'completion', falha)
+
+    resposta = servir(AUMENTO, [24, 26]).get(
+        '/recomendacoes/item A',
+        headers={'X-LLM-Modelo': 'openai/gpt-4o', 'X-LLM-Chave': 'ruim'},
+    )
+
+    assert resposta.status_code == HTTP_OK
+    assert resposta.json()['explicacao']['origem'] == 'template'

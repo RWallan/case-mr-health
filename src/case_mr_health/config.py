@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -56,5 +56,10 @@ class Settings(BaseSettings):
     historico_db_path: Path = Path('data/servico/historico.duckdb')
     # Atualização de dados (#28, ADR 0011): cópia dos arquivos aplicados.
     atualizacoes_dir: Path = Path('data/atualizacoes')
+    # Explicação por LLM (#20): sem chave, vale o template determinístico.
+    llm_api_key: SecretStr | None = None
+    llm_modelo: str = 'claude-sonnet-5-5'
+    llm_timeout_s: float = 20.0
+    llm_max_tokens: int = 600
     api_host: str = '127.0.0.1'
     api_port: int = 8000
