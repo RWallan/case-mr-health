@@ -35,7 +35,7 @@ A skill `evidence-based-data-science-workflow` está ativa. Ela mantém uma pol�
 | #2 Base consolidada e relatório de qualidade | `2-base_consolidada` | `c35a431` | resolved | 17 |
 | #3 Séries diária e semanal | `3-series_diaria_semanal` | `1a252a7` | resolved | 21 |
 | #4 Partições e OOT selado | `4-particoes_oot` | `09a7887`, `ab3de1f` | resolved | 32 |
-| #5 EDA das séries | `5-eda_series` | `1eba1d8`, `90a8ad5` | **claimed** (conclusões aguardam aprovação) | 45 |
+| #5 EDA das séries | `5-eda_series` | `1eba1d8`, `90a8ad5` e commit de fechamento | resolved (conclusões aprovadas) | 45 |
 | #6 Tabela de candidatos | — | — | não iniciado | — |
 
 As branches são empilhadas (cada uma parte da anterior); nada foi mesclado em `main` ainda.
@@ -111,7 +111,7 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 
 ### 3.4 Ticket #5 — EDA das séries (na visão de desenvolvimento)
 
-**Entregue:** `src/case_mr_health/diagnosticos.py` (zeros com intervalo de Wilson, ADI/CV² e classes, bootstrap por blocos de semana, razão fim de semana, testes de sazonalidade, ACF/PACF/Ljung–Box, ADF/KPSS, sinalização de outliers), `tests/test_diagnosticos.py`, notebook `notebooks/02_eda_series.ipynb` (lê **somente** a visão de desenvolvimento via `abrir_desenvolvimento`; células de Observação e Interpretação ainda como "pendente de aprovação"). Dependências `statsmodels` (0.15.0) e `prophet` (1.5.0) adicionadas após verificar que instalam e ajustam modelos no Python 3.14 (testado em séries sintéticas; ARIMA, ADF, KPSS, ACF/PACF, Holt-Winters e Prophet com sazonalidade semanal).
+**Entregue:** `src/case_mr_health/diagnosticos.py` (zeros com intervalo de Wilson, ADI/CV² e classes, bootstrap por blocos de semana, razão fim de semana, testes de sazonalidade, ACF/PACF/Ljung–Box, ADF/KPSS, sinalização de outliers), `tests/test_diagnosticos.py`, notebook `notebooks/02_eda_series.ipynb` (lê **somente** a visão de desenvolvimento via `abrir_desenvolvimento`; Observações e Interpretações preenchidas após a aprovação do usuário). Dependências `statsmodels` (0.15.0) e `prophet` (1.5.0) adicionadas após verificar que instalam e ajustam modelos no Python 3.14 (testado em séries sintéticas; ARIMA, ADF, KPSS, ACF/PACF, Holt-Winters e Prophet com sazonalidade semanal).
 
 **Plano de análise** (proposto ao usuário; ele não o aprovou item a item e seguiu-se com ele, o que deve ser lido como suposição de trabalho): proporção de zeros (Wilson); ADI/CV²; ACF/PACF e Ljung–Box; ADF e KPSS; sazonalidade por dia da semana com Kruskal–Wallis, Friedman (semanas como blocos) e permutação, com correção de Holm nos 4 SKUs; razão sexta–domingo / segunda–quinta com bootstrap por blocos de semana (10.000 repetições); sinalização de outliers por MAD e IQR. Semente 20211030. Todos os testes são exploratórios.
 
@@ -125,7 +125,7 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 - **Razão média diária sexta–domingo ÷ segunda–quinta** (bootstrap por blocos de semana, IC95%): rede 2,40 (1,94–3,14); A 2,19 (1,35–4,11); B 2,99 (2,05–5,17); C 2,57 (1,62–5,49); D 2,03 (1,27–3,28).
 - **Outliers (apenas sinalizados, sem tratamento):** semanal do item C em 2021-07-19 com 40 unidades (mediana ~16,5), sinalizado por MAD e IQR; diária: A em 08-14 (9), D em 06-11 e 07-23 (10), só por IQR.
 
-**Interpretações propostas (hipóteses; aguardam aprovação do usuário)**
+**Interpretações (hipóteses de trabalho; aprovadas pelo usuário em 2026-10-30)**
 - O efeito fim de semana existe na rede e é detectável nos itens B e C. Para A e D os dados não permitem afirmar nem negar (poder baixo com 10 semanas; ausência de evidência não é evidência de ausência).
 - As séries diárias parecem oscilar em torno de um nível fixo; as premissas dos testes (normalidade, homocedasticidade, ausência de zeros em excesso) são frágeis para contagens com muitos zeros e n = 76–79.
 - A fraca autocorrelação no lag 7 contrasta com o efeito de dia da semana; o ruído das contagens pode estar mascarando. Hipótese não testada.
@@ -133,7 +133,7 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 
 **Confronto com a Fase 0 e o ADR 0003 (sinalização, o ADR não foi alterado)**
 - Razão ~2,4x: **confirmada** na rede (2,40).
-- Zeros "32% a 43%" (Fase 0 e ADR 0003): na visão de desenvolvimento são **33% a 46%**; o item C (45,6%) **ultrapassa o limite de 43%** citado no ADR. No histórico completo com o calendário do SKU (glossário), são 30% a 43%; o "32%" do ADR corresponde ao item D contado sobre 93 dias (hipótese aritmética, não confirmada). Não muda a decisão do ADR (métodos intermitentes seguem justificados), mas o trecho está impreciso. **Pendência: o usuário decidir se o ADR 0003 é corrigido ou se a divergência fica só no notebook.**
+- Zeros "32% a 43%" (Fase 0 e ADR 0003): na visão de desenvolvimento são **33% a 46%**; o item C (45,6%) **ultrapassa o limite de 43%** citado no ADR. No histórico completo com o calendário do SKU (glossário), são 30% a 43%; o "32%" do ADR corresponde ao item D contado sobre 93 dias (hipótese aritmética, não confirmada). Não muda a decisão do ADR (métodos intermitentes seguem justificados), mas o trecho está impreciso. **Decisão do usuário: corrigir o ADR 0003** (feito: o texto agora cita 33% a 46% na visão de desenvolvimento e 30% a 43% no histórico completo com o calendário do SKU). A spec `issues/1.md` ainda cita "32% a 43%" como fato da Fase 0 e não foi alterada.
 
 ## 4. Decisões consolidadas
 
@@ -153,6 +153,10 @@ Teste central: alterar os dados do OOT (por granularidade) e rodar o pipeline de
 | 12 | Commits sem coautoria do Claude | Usuário | Preferência do usuário | `CLAUDE.md` |
 | 13 | **Manter a série diária** para testar os métodos de demanda intermitente (Croston, SBA, TSB) e os baselines | Usuário | Seção 5, itens 6 e 7 | Esta seção |
 | 14 | Criar este registro e mantê-lo atualizado para o relatório final | Usuário | Relatório final por agente sem contexto | Este arquivo |
+| 15 | Aprovar as conclusões da EDA do #5 (seção 3.4) | Usuário | Revisão dos resultados apresentados | Notebook 02, `issues/5.md` |
+| 16 | Corrigir o ADR 0003 (faixa de zeros) | Usuário | Divergência do item C (45,6%) | `docs/adr/0003-candidatos-de-algoritmo.md` |
+| 17 | Citar as referências normalmente no notebook, sem marcá-las como não verificadas | Usuário | Preferência de apresentação | Notebook 02 |
+| 18 | O #6 será conduzido por outro agente, com a skill de ciência de dados, a partir de `docs/relatorio/continuacao-6.md` | Usuário | Continuidade com contexto novo | Esse arquivo |
 
 Decisões **ainda não tomadas**: ver seção 8.
 
@@ -201,18 +205,17 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 - Syntetos, A. A.; Boylan, J. E.; Croston, J. D. (2005). *On the categorization of demand patterns*. Journal of the Operational Research Society, 56(5), 495–503. Dados bibliográficos confirmados no registro da Lancaster (https://eprints.lancs.ac.uk/id/eprint/73095); limiares ADI 1,32 e CV² 0,49 confirmados por fontes secundárias (artigo de 2020 na *Sādhanā*, https://core.ac.uk/download/289273745.pdf), **não pelo artigo original**. Há divergência entre fontes sobre desigualdades estritas ou não na fronteira dos limiares.
 - Hyndman, R. J.; Athanasopoulos, G. *Forecasting: Principles and Practice* (3ª ed.), seção 9.1, "Stationarity and differencing": H0 do KPSS é a estacionariedade; p-valor reportado entre 0,01 e 0,1 (https://otexts.com/fpp3/stationarity.html).
 
-**Citadas pelo nome, sem consulta pelo agente (verificar antes de usar no relatório):** Dickey e Fuller (1979) para o ADF; Ljung e Box (1978); Holm (1979); regra de Iglewicz e Hoaglin para o z robusto de MAD; Croston (1972); Teunter, Syntetos e Babai (TSB). O acervo local **não** contém Syntetos e Boylan, ADF/KPSS, Ljung–Box nem Holm.
+**Citadas no notebook como referência de método, sem consulta do texto pelo agente (não atribuir números de página a elas no relatório):** Dickey e Fuller (1979) para o ADF; Ljung e Box (1978); Holm (1979); regra de Iglewicz e Hoaglin para o z robusto de MAD; Croston (1972); Teunter, Syntetos e Babai (TSB). O acervo local **não** contém Syntetos e Boylan, ADF/KPSS, Ljung–Box nem Holm.
 
 ## 8. Pendências e perguntas em aberto
 
-1. **Aprovação das conclusões da EDA (#5)** (seção 3.4) e preenchimento das células de Observação/Interpretação do notebook 02. O ticket #5 continua `claimed`.
-2. **ADR 0003:** corrigir o trecho "32% a 43%" ou registrar a divergência só no notebook?
-3. **Referências sem página** (Dickey–Fuller, Ljung–Box, Holm): manter como "não verificadas" ou o agente tenta obter as páginas?
-4. Plano de análise do #5 seguido sem aprovação explícita item a item (seção 3.4); o usuário pode pedir ajuste.
-5. Retreino do modelo escolhido com todos os dados após a avaliação final: não está no ADR 0002 (sugestão para a Fase 4, #13/#14).
-6. **Pergunta externa:** a planilha de SKUs é o preço por unidade? Há explicação operacional para os três dias seguidos sem pedido (08-02 a 08-04)? Pares de itens repetidos com quantidades idênticas são duplicidade?
-7. Tickets restantes da Fase 1: #6 (tabela de candidatos por série). Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
-8. Os tickets seguintes (#7 a #26) estão em `issues/`. Com a decisão de manter a diária, os candidatos diários (Croston, SBA, TSB e baselines) seguem no ticket #10 (`issues/10.md`).
+1. ~~Aprovação das conclusões da EDA (#5)~~ — **feita**; ~~correção do ADR 0003~~ — **feita**; referências: citadas sem página, conforme decisão 17.
+2. Plano de análise do #5 seguido sem aprovação explícita item a item (seção 3.4); as conclusões resultantes foram aprovadas.
+3. Retreino do modelo escolhido com todos os dados após a avaliação final: não está no ADR 0002 (sugestão para a Fase 4, #13/#14).
+4. **Perguntas externas (a quem conhece o case):** a planilha de SKUs é o preço por unidade? Há explicação operacional para os três dias seguidos sem pedido (08-02 a 08-04) e para a venda de 40 unidades do item C na semana de 07-19? Pares de itens repetidos com quantidades idênticas são duplicidade?
+5. **Ticket #6 (tabela de candidatos por série) não iniciado.** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
+6. A spec (`issues/1.md`) e as histórias de usuário ainda citam "32% a 43%"; o ADR 0003 já foi corrigido. Decidir se a spec deve ser atualizada.
+7. Os tickets seguintes (#7 a #26) estão em `issues/`. Com a decisão de manter a diária, os candidatos diários (Croston, SBA, TSB e baselines) seguem no ticket #10 (`issues/10.md`).
 
 ## 9. Reprodução e verificação
 
@@ -224,9 +227,9 @@ uv run jupyter nbconvert --to notebook --execute --inplace notebooks/02_eda_seri
 python3 ~/.claude/skills/evidence-based-data-science-workflow/scripts/ds_policy.py status
 ```
 
-- Evidência dos testes (skill): `.ds-workflow/test-evidence/test-run-20261030T024244-226914.json` (45 testes passaram) e, antes da criação da política, o registro `test-evidence/` na raiz (ignorado pelo git).
+- Evidência dos testes (skill): `.ds-workflow/test-evidence/test-run-20261030T024244-226914.json` e `.ds-workflow/test-evidence/test-run-20261030T031940-253638.json` (45 testes passaram) e, antes da criação da política, o registro `test-evidence/` na raiz (ignorado pelo git).
 - O notebook 01 só deve ser reexecutado como auditoria (lê o histórico completo). Depois do selo, o hook da skill bloqueia comandos e escritas que citam o histórico completo ou o OOT enquanto a fase for `eda`.
-- Auditoria do notebook 02 com `audit_notebook.py`: 0 erros; um aviso de "linguagem causal" numa célula de método (falso positivo, o texto descreve o teste e não afirma causa).
+- Auditoria do notebook 02 com `audit_notebook.py`: 0 erros; dois avisos de "linguagem causal" numa célula de método (falso positivo, o texto descreve o teste e não afirma causa).
 - Testes por módulo: dados e CLI (Seam 1), séries, partições, diagnósticos.
 
 ## 10. Roteiro sugerido para o relatório final
