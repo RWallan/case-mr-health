@@ -86,7 +86,11 @@ frontend = { cmd = "npm run dev", cwd = "frontend" }
 frontend-build = { cmd = "npm run build", cwd = "frontend" }
 docs = "mkdocs serve --dev-addr 127.0.0.1:8001"
 docs-build = "mkdocs build --strict"
-app = { parallel = ["backend", "mlflow", "frontend", "docs"] }
+parar = "python scripts/parar_app.py"
+app = [
+    "parar",
+    { parallel = ["backend", "mlflow", "frontend", "docs"] },
+]
 test-rapido = { cmd = "pytest -x -m 'not lento'", env = { CASE_MR_HEALTH_INTERVALO_MAX_ORIGENS = "5" } }
 test-frontend = "node --test 'frontend/src/*.test.js'"
 
