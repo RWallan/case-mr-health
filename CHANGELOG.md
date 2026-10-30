@@ -1,3 +1,36 @@
+# case-mr-health 0.4.0 (2026-10-30)
+
+## Adicionado
+
+- Comando `treinar --todas`, que treina as 8 séries numa mesma rodada, e comando `selecionar`, que aplica o critério pré-registrado no backtest, marca a versão com o alias `selecionado`, grava o gráfico por série no MLflow e gera o resumo. Tarefa `poe test-rapido` e marcador `lento` para separar os testes que treinam modelos. ([#12](issues/12.md))
+- Adicionados os comandos `avaliar-final`, que abre o OOT uma única vez e registra métricas e cobertura das 8 versões selecionadas, e `promover`, que atribui o alias `champion` a uma versão avaliada com decisão de publicação aprovada. ([#13](issues/13.md))
+- API de predição individual (`POST /predicoes`) e comando `case-mr-health servir`: carrega na inicialização a versão `champion` ou fixada (`modelos_fixados`) de cada SKU e granularidade, confere o hash do artefato, nunca treina e responde a previsão da rede por período-alvo, com quantidade, valor, limites de 80% e 95%, versão, hash, experimento e confiança opcional. Série sem modelo fica indisponível sem derrubar a API; mensal, data inválida e horizonte além do máximo validado são rejeitados com justificativa. Cada período servido é gravado no histórico em DuckDB exclusivo do serviço (`historico_db_path`), com um único worker. Swagger com descrições, exemplos e erros. ([#14](issues/14.md))
+- Adicionadas a predição em lote (JSON e XLSX) e o template XLSX, com validação tudo ou nada e erros por item, linha e coluna. ([#15](issues/15.md))
+- Adicionadas consultas paginadas do histórico de previsões, catálogo de versões do MLflow e exportação do histórico para XLSX. ([#16](issues/16.md))
+- Rota `GET /changelog` com o changelog estruturado do projeto: versões na ordem do arquivo, data e mudanças por tipo, cada uma com o texto e os IDs das issues ligadas, extraídas do `CHANGELOG.md` do towncrier (caminho em `Settings.changelog_path`). Changelog ausente ou vazio responde 200 com `versoes` vazia, e conteúdo fora do formato é ignorado com aviso no log. ([#17](issues/17.md))
+- Adicionada a rota `GET /recomendacoes/{sku}`, que recomenda aumento significativo, redução significativa, estável ou insuficiente pela regra determinística do modelo semanal (4 semanas vendidas contra 2 previstas, limite no Q3 histórico), sempre com o aviso de baixa confiabilidade estatística. ([#19](issues/19.md))
+- Adicionado dashboard Svelte para consultar o histórico de desenvolvimento e visualizar previsões da rede com intervalos de 80% e 95%. ([#22](issues/22.md))
+- Removida a classificação de confiança dos modelos, da API e do histórico de previsões após a validação mostrar baixa utilidade nas séries disponíveis. ([#27](issues/27.md)) ([#27](issues/27.md))
+- Adicionada a ingestão de pedidos novos (planilhas de pedidos e itens) na base, com validação por planilha e linha, hash dos dados e reconstrução das séries. ([#28](issues/28.md))
+- Adicionado o reajuste do modelo servido na série estendida, que registra uma nova versão com o mesmo algoritmo e hiperparâmetros e rastreabilidade dos dados. ([#29](issues/29.md))
+- Adicionadas as rotas `POST /dados/pedidos` e `GET /dados/atualizacoes/{id}`, que ingerem pedidos novos e reajustam os modelos em segundo plano, e o comando `reajustar`; a API passa a informar a origem do modelo. ([#30](issues/30.md))
+- Adicionado ao dashboard o envio de pedidos novos, com erros por planilha e linha, acompanhamento do reajuste e atualização do gráfico. ([#31](issues/31.md))
+
+## Correções
+
+- Corrigido o `GET /modelos`, que não mostrava o alias `champion` com o MLflow real. ([#30](issues/30.md))
+
+## Alterado
+
+- Removido da especificação o campo `quantidade` da predição em batch (#15): o contrato da predição individual não muda. ([#15](issues/15.md))
+- A exportação XLSX e a consulta de previsões ganharam a coluna/campo `recomendacao`, gravada no histórico pelas chamadas de `GET /recomendacoes/{sku}`; bancos de histórico antigos são migrados na abertura. ([#19](issues/19.md))
+
+## Interno
+
+- Especificação detalhada da regra de recomendação aprovada, com casos de exemplo para o #19. ([#18](issues/18.md))
+- Proposto o ADR 0011 e abertos os tickets #28 a #31 para ingestão de pedidos novos e reajuste do modelo pela API.
+
+
 # case-mr-health 0.3.0 (2026-10-30)
 
 ## Adicionado
