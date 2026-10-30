@@ -51,7 +51,7 @@ Status das conclusões: **APPROVED (D-005, 2026-10-30)**. A seção 5 (interpret
 2. **TSB** com α = β.
 3. **ADR 0003:** a exclusão do SARIMA semanal é aritmética (ciclo de 4 ou 52 semanas não cabe em 10 pontos); o ADR não foi alterado.
 4. **Correção ao registro (3.5):** a mediana de 16,5 do item C é a das 10 semanas; a das outras 9 é 16,0.
-5. O branch tem alterações sem commit (git sob seu controle).
+5. Commit `0459a8a` e release 0.2.0 (`5390ff6`) feitos no branch local `6-tabela_candidatos`; sem tag, push nem PR.
 
 ## 8. Conclusões
 
@@ -67,4 +67,4 @@ uv version 0.2.0
 uv run towncrier build --yes --version 0.2.0
 ```
 
-Aguarda a sua ordem para executar (o `towncrier build` consome os fragmentos).
+Executado em 2026-10-30 (`5390ff6`).

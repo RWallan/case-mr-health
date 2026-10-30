@@ -36,7 +36,7 @@ A skill `evidence-based-data-science-workflow` está ativa. Ela mantém uma pol�
 | #3 Séries diária e semanal | `3-series_diaria_semanal` | `1a252a7` | resolved | 21 |
 | #4 Partições e OOT selado | `4-particoes_oot` | `09a7887`, `ab3de1f` | resolved | 32 |
 | #5 EDA das séries | `5-eda_series` | `1eba1d8`, `90a8ad5` e commit de fechamento | resolved (conclusões aprovadas) | 45 |
-| #6 Tabela de candidatos | `6-tabela_candidatos` (a partir de `main`) | sem commit (git sob controle do usuário) | `resolved` (D-005 aprovada em 2026-10-30) | 90 |
+| #6 Tabela de candidatos | `6-tabela_candidatos` (a partir de `main`) | `0459a8a`, `5390ff6` (release 0.2.0) | `resolved` (D-005 aprovada em 2026-10-30) | 90 |
 
 As branches eram empilhadas. **Atualização (2026-10-30, ao iniciar o #6):** os PRs #3, #4 e #5 já foram mesclados em `main` (`98d6b8b`, `b643f99`, `9e6b8a4`); a branch do #6 parte de `main`, e a `5-eda_series` não existe mais localmente.
 
@@ -160,7 +160,7 @@ O usuário pediu (2026-10-30) pesquisar alternativas ou avaliar o impacto caso s
 
 ### 3.6 Ticket #6 — tabela de candidatos por série
 
-**Entregue (sem commit; git sob controle do usuário):** `src/case_mr_health/candidatos.py` (catálogo consumível pelo treino: `candidatos(sku, granularidade)`, `tabela()`, `Candidato.combinacoes()`), `tests/test_candidatos.py`, `notebooks/03_candidatos.ipynb` (lê só a visão de desenvolvimento, recalcula a evidência do #5 e confere com o módulo; não ajusta modelos), `docs/analysis/plano-candidatos.md` (plano pré-análise curto, congelado), `changelogs/6.adicionado.md`. Ticket `issues/6.md` marcado `claimed`.
+**Entregue (commit `0459a8a`; release 0.2.0 em `5390ff6`):** `src/case_mr_health/candidatos.py` (catálogo consumível pelo treino: `candidatos(sku, granularidade)`, `tabela()`, `Candidato.combinacoes()`), `tests/test_candidatos.py`, `notebooks/03_candidatos.ipynb` (lê só a visão de desenvolvimento, recalcula a evidência do #5 e confere com o módulo; não ajusta modelos), `docs/analysis/plano-candidatos.md` (plano pré-análise curto, congelado), `changelogs/6.adicionado.md`. Ticket `issues/6.md` marcado `claimed`.
 
 **Fluxo da skill:** direção D-003 (`analysis_direction`, aprovada pelo usuário em 2026-10-30) → fase `analysis_planning` → plano D-004 (`analysis_plan`, congelado; sha256 `ac9df33b…`; aprovado) → fase `modeling`. Dispensa do template completo do plano: concordância do usuário com o item 5 da direção.
 
@@ -282,7 +282,7 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 2. Plano de análise do #5 seguido sem aprovação explícita item a item (seção 3.4); as conclusões resultantes foram aprovadas.
 3. Retreino do modelo escolhido com todos os dados após a avaliação final: não está no ADR 0002 (sugestão para a Fase 4, #13/#14).
 4. **Perguntas respondidas pelo usuário em 2026-10-30:** a planilha de SKUs segue como preço por unidade (suposição mantida); os pares repetidos não são duplicidade; não há explicação para os três dias sem pedido (sem tratamento) nem para as 40 unidades do item C (decisões 20, 21 e 23). O tratamento do item C na semana de 07-19 foi decidido (alternativa 1, decisão 24): a análise de sensibilidade será feita no backtest (#7 em diante).
-5. **Ticket #6 (tabela de candidatos por série) **executado e aprovado (D-005); `resolved`. Pendentes: commit, versão 0.2.0 do changelog (sugerida, aguarda ordem do usuário) e o #7 (instruções em `docs/relatorio/continuacao-7.md`).** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
+5. **Ticket #6 (tabela de candidatos por série) **executado e aprovado (D-005); `resolved`. Commit `0459a8a` e versão 0.2.0 com `towncrier build` (`5390ff6`) feitos em 2026-10-30 no branch local `6-tabela_candidatos`. Pendentes: tag, push e PR para `main` (sem ordem do usuário) e o #7 (instruções em `docs/relatorio/continuacao-7.md`).** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
 6. ~~Spec com "32% a 43%"~~ — resolvido pela decisão 19: texto mantido, observação acrescentada.
 7. Os tickets seguintes (#7 a #26) estão em `issues/`. Com a decisão de manter a diária, os candidatos diários (Croston, SBA, TSB e baselines) seguem no ticket #10 (`issues/10.md`).
 

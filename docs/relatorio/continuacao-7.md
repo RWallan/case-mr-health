@@ -26,6 +26,6 @@ Vamos executar o ticket #7 da Fase 2 do projeto MR. HEALTH (`issues/7.md`; spec 
 - Atualize `docs/relatorio/registro-fase2.md` (parta de `docs/relatorio/_modelo-registro.md`), ADRs se houver decisão de arquitetura e a seção `## Answer` do ticket.
 
 ### 3. Pendências herdadas
-- O #6 e a Fase 1 estão **aprovados** (D-005) e `resolved`. Falta o usuário mandar commitar e fazer o `towncrier build` da versão 0.2.0 sugerida (não faça por conta própria).
+- O #6 e a Fase 1 estão **aprovados** (D-005) e `resolved`. O commit do #6 (`0459a8a`) e a versão 0.2.0 com o `towncrier build` (`5390ff6`) já foram feitos no branch local `6-tabela_candidatos`. Ainda não há tag, push nem PR para `main`; não os faça sem o usuário pedir.
 - Pontos sinalizados para revisão: SARIMA diário só com sazonal (1,0,0,7); TSB com α = β; exclusão do SARIMA semanal contra o ADR 0003 (aritmética).
 - Retreino do modelo escolhido com todos os dados após a avaliação final não está no ADR 0002 (sugestão para #13/#14).
