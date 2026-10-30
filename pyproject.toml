@@ -59,7 +59,7 @@ addopts = "-p no:warnings"
 lint = "ruff check"
 _pre_format = "ruff check --fix"
 _format = "ruff format"
-_test = "pytest -s -x -vv --cov=src"
+_test = { cmd = "pytest -s -x -vv --cov=src", env = { CASE_MR_HEALTH_INTERVALO_MAX_ORIGENS = "5" } }
 _post_test = "coverage html"
 format = ["_pre_format", "_format"]
 test = ["lint", "_test", "_post_test"]

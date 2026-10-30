@@ -243,11 +243,11 @@ def _ets_arima(ev: EvidenciaSerie, diaria: bool) -> list[Candidato]:
                 'arima',
                 'arima',
                 'candidato',
-                True,
-                REGRA,
-                'Contraste não sazonal: d = 0 apoiado pelo ADF/KPSS. A '
-                'autocorrelação fraca sugere pouco a modelar (hipótese: '
-                'perto da média).',
+                False,
+                DECISAO_USUARIO,
+                'Corte de 2026-10-30, decisão do usuário (emenda a D-004): '
+                'autocorrelação fraca nas 4 séries (Ljung-Box não rejeita '
+                'ruído), logo pouco a modelar e tende a repetir a média.',
                 (nivel, ruido),
                 {'ordem': ((1, 0, 0), (0, 0, 1), (1, 0, 1))},
                 'Com constante.',
@@ -260,10 +260,11 @@ def _ets_arima(ev: EvidenciaSerie, diaria: bool) -> list[Candidato]:
                 _base_sazonal(ev),
                 'ARIMA com termo sazonal AR(1) de período 7. O sazonal '
                 '(0,0,0,7) coincide com o ARIMA sem sazonal e não é '
-                'repetido.',
+                'repetido. Sem ordens não sazonais desde o corte de '
+                '2026-10-30 (decisão do usuário; emenda a D-004).',
                 (_premissa_sazonal(ev), nivel, ruido),
                 {
-                    'ordem': ((0, 0, 0), (1, 0, 0), (0, 0, 1)),
+                    'ordem': ((0, 0, 0),),
                     'ordem_sazonal': ((1, 0, 0, 7),),
                 },
                 'Com constante.',
@@ -275,10 +276,11 @@ def _ets_arima(ev: EvidenciaSerie, diaria: bool) -> list[Candidato]:
             'ets_holt_amortecido',
             'ets',
             'candidato',
-            True,
-            REGRA,
-            'Tendência amortecida (AAdN); não há teste de tendência com '
-            '10 pontos.',
+            False,
+            DECISAO_USUARIO,
+            'Corte de 2026-10-30, decisão do usuário (emenda a D-004): '
+            '5 parâmetros mais a variância em 6 a 10 pontos; razão de '
+            'parâmetros por observação não atendida em 20 de 20 ajustes.',
             (
                 Premissa(
                     'Possível tendência amortecida',
@@ -294,12 +296,12 @@ def _ets_arima(ev: EvidenciaSerie, diaria: bool) -> list[Candidato]:
             'arima',
             'arima',
             'candidato',
-            True,
+            False,
             DECISAO_USUARIO,
-            'ARIMA mínimo incluído por decisão do usuário, para contraste '
-            'com as demais opções. Base fraca: estacionariedade e '
+            'Corte de 2026-10-30, decisão do usuário (emenda a D-004): '
+            'reverte a inclusão anterior. Base fraca: estacionariedade e '
             'autocorrelação semanais não são testáveis (n = 10 < 30); '
-            'com 6 pontos no primeiro fold, até 3 parâmetros.',
+            '(0,1,1) é próximo do SES.',
             (
                 Premissa(
                     'Estacionariedade (escolha de d)',
@@ -400,10 +402,12 @@ def _prophet(ev: EvidenciaSerie, diaria: bool) -> list[Candidato]:
             'prophet',
             'prophet',
             'candidato',
-            True,
-            _base_sazonal(ev),
-            'Só sazonalidade semanal aditiva, sem anual, mensal nem '
-            'feriados; tendência linear sem pontos de mudança.',
+            False,
+            DECISAO_USUARIO,
+            'Corte de 2026-10-30, decisão do usuário (emenda a D-004): '
+            'reverte a inclusão anterior. Com cerca de 80 dias, só a '
+            'sazonalidade semanal é utilizável, o que o torna redundante '
+            'com Holt-Winters e SARIMA.',
             (_premissa_sazonal(ev),),
             {'ordem_fourier': (2, 3), 'escala_sazonalidade': (1.0, 10.0)},
             'prophet 1.5.0 instala e ajusta no Python 3.14 (#5).',

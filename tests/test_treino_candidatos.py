@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from importlib import metadata
 from pathlib import Path
 
@@ -8,7 +9,7 @@ import pandas as pd
 import pytest
 from mlflow import MlflowClient
 
-from case_mr_health import algoritmos
+from case_mr_health import algoritmos, treino
 from case_mr_health.algoritmos_statsmodels import (
     DiagnosticoAjuste,
     FalhaConvergencia,
@@ -16,11 +17,22 @@ from case_mr_health.algoritmos_statsmodels import (
 )
 from case_mr_health.candidatos import NAO_TESTAVEL
 from case_mr_health.config import Settings
-from case_mr_health.treino import requisitos_pip, treinar_serie
-from tests.test_treino import N_DIAS, PADROES, _gravar_origem, _particao
+from case_mr_health.treino import (
+    carregar_serie,
+    requisitos_pip,
+    treinar_serie,
+)
+from tests.test_treino import (
+    N_DIAS,
+    PADROES,
+    _gravar_origem,
+    _particao,
+    _por_algoritmo,
+)
 
 HORIZONTE = 7
-RUNS_SEMANAIS = 6  # naive, média, SES, Holt amortecido e 2 ARIMA
+RUNS_SEMANAIS = 3  # naive, média e SES
+INTERMITENTES = ('croston', 'sba', 'tsb')
 PROPHET = {'ordem_fourier': 2, 'escala_sazonalidade': 1.0}
 VENDAS = np.random.default_rng(20261030).poisson(
     [1, 1, 2, 2, 6, 7, 5] * (N_DIAS // 7)
@@ -47,13 +59,24 @@ def cfg(tmp_path) -> Settings:
 
 @pytest.fixture
 def so_estes(monkeypatch):
-    """Reduz o registro aos algoritmos pedidos, para o teste ser rápido."""
+    """Reduz o registro aos pedidos e reativa os cortados da tabela."""
 
     def restringir(*nomes):
         monkeypatch.setattr(
             algoritmos,
             'ALGORITMOS',
             {n: algoritmos.ALGORITMOS[n] for n in nomes},
+        )
+        tabela = treino.candidatos
+        monkeypatch.setattr(
+            treino,
+            'candidatos',
+            lambda sku, granularidade: tuple(
+                replace(c, entra=True)
+                if c.algoritmo in nomes and c.espaco
+                else c
+                for c in tabela(sku, granularidade)
+            ),
         )
 
     return restringir
@@ -80,8 +103,6 @@ def test_semanal_treina_todos_os_candidatos_e_os_modelos_carregam(cfg):
         'naive',
         'media_historica',
         'ets_ses',
-        'ets_holt_amortecido',
-        'arima',
     }
     for run in resumo.runs:
         previsao = _prever(run)
@@ -277,3 +298,42 @@ def test_serie_sazonal_gera_diagnostico_de_sazonalidade(cfg, so_estes):
     ajustes = _diagnosticos(resumo.runs[0].run_id)
     premissas = {p['premissa'] for p in ajustes[0]['premissas']}
     assert 'sazonalidade' in premissas
+
+
+def test_intermitentes_treinam_na_diaria_com_as_tres_combinacoes(
+    cfg, so_estes
+):
+    so_estes('naive', *INTERMITENTES)
+
+    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
+    runs = [r for r in resumo.runs if r.algoritmo in INTERMITENTES]
+    serie = carregar_serie(cfg, 'item B', 'diaria').to_numpy()
+
+    treinados = {(r.algoritmo, *r.hiperparametros.values()) for r in runs}
+
+    assert len(runs) == len(INTERMITENTES) * 3
+    assert treinados == {
+        (nome, alfa) for nome in INTERMITENTES for alfa in (0.1, 0.2, 0.3)
+    }
+    for r in runs:
+        run = mlflow.get_run(r.run_id)
+        chave = next(iter(r.hiperparametros))
+        assert run.data.tags['algoritmo'] == r.algoritmo
+        assert run.data.tags['papel'] == 'candidato'
+        assert run.data.params[f'hp.{chave}'] == str(r.hiperparametros[chave])
+        assert 'mae' in run.data.metrics
+        modelo = mlflow.pyfunc.load_model(f'runs:/{r.run_id}/modelo')
+        previsao = modelo.predict(pd.DataFrame({'horizonte': [HORIZONTE]}))
+        esperado = algoritmos.criar(r.algoritmo, r.hiperparametros, 7)
+        assert list(previsao) == list(
+            esperado.ajustar(serie).prever(HORIZONTE)
+        )
+
+
+def test_intermitentes_ficam_fora_da_semanal(cfg, so_estes):
+    so_estes('naive', *INTERMITENTES)
+
+    resumo = treinar_serie(cfg, 'item B', 'semanal', seed=7)
+
+    assert set(_por_algoritmo(resumo)).isdisjoint(INTERMITENTES)
+    assert set(resumo.sem_implementacao).isdisjoint(INTERMITENTES)

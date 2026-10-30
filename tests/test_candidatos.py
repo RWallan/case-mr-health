@@ -14,7 +14,7 @@ from case_mr_health.candidatos import (
 )
 
 SERIES = list(product(SKUS, ('diaria', 'semanal')))
-COMBINACOES_SARIMA = 3
+COMBINACOES_SARIMA = 1
 INTERMITENTES = {'croston', 'sba', 'tsb'}
 SAZONAL_CONFIRMADA = {'item B', 'item C'}
 
@@ -77,22 +77,24 @@ def test_intermitentes_so_na_diaria(sku):
 
 
 @pytest.mark.parametrize('sku', SKUS)
-def test_prophet_so_na_diaria_por_decisao_do_usuario_na_semanal(sku):
-    assert _por_nome(sku, 'diaria')['prophet'].entra
-    semanal = _por_nome(sku, 'semanal')['prophet']
+def test_prophet_fora_por_decisao_do_usuario(sku):
+    for granularidade in ('diaria', 'semanal'):
+        c = _por_nome(sku, granularidade)['prophet']
 
-    assert not semanal.entra
-    assert semanal.base == DECISAO_USUARIO
+        assert not c.entra
+        assert c.base == DECISAO_USUARIO
 
 
 @pytest.mark.parametrize('sku', SKUS)
-def test_arima_semanal_entra_por_decisao_do_usuario(sku):
-    c = _por_nome(sku, 'semanal')['arima']
+def test_corte_de_arima_e_holt_amortecido_por_decisao_do_usuario(sku):
+    cortados = (
+        _por_nome(sku, 'diaria')['arima'],
+        _por_nome(sku, 'semanal')['arima'],
+        _por_nome(sku, 'semanal')['ets_holt_amortecido'],
+    )
 
-    assert c.entra
-    assert c.base == DECISAO_USUARIO
-    assert c.espaco == {'ordem': ((1, 0, 0), (0, 1, 1))}
-    assert 'não são testáveis' in c.motivo
+    assert not any(c.entra for c in cortados)
+    assert {c.base for c in cortados} == {DECISAO_USUARIO}
 
 
 @pytest.mark.parametrize('sku', SKUS)
@@ -109,13 +111,6 @@ def test_sarima_diaria_usa_so_o_sazonal_ar1():
 
     assert c.espaco['ordem_sazonal'] == ((1, 0, 0, 7),)
     assert c.n_combinacoes == COMBINACOES_SARIMA
-
-
-def test_prophet_tem_4_combinacoes_e_so_sazonalidade_semanal():
-    c = _por_nome('item A', 'diaria')['prophet']
-
-    assert c.n_combinacoes == MAX_COMBINACOES
-    assert set(c.combinacoes()[0]) == {'ordem_fourier', 'escala_sazonalidade'}
 
 
 def test_tabela_cobre_as_8_series_em_linhas_planas():
