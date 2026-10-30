@@ -33,7 +33,6 @@ SEED_DE_20210901 = 20210901
 N_DIAS = 91  # 13 semanas completas: 5 folds na diária e 5 na semanal
 SEED = 5
 BASELINES = {'naive', 'media_historica', 'naive_sazonal'}
-INTERMITENTES = {'croston', 'sba', 'tsb'}
 SEMANAS_SERVIDAS = 2
 
 
@@ -94,6 +93,16 @@ def _gravar_origem(cfg: Settings, padroes: dict) -> None:
     finally:
         con.close()
     separar_series(cfg)
+
+
+@pytest.fixture(autouse=True)
+def so_baselines(monkeypatch):
+    """Fluxo com baselines; os demais: `test_treino_candidatos`."""
+    monkeypatch.setattr(
+        algoritmos,
+        'ALGORITMOS',
+        {n: algoritmos.ALGORITMOS[n] for n in sorted(BASELINES)},
+    )
 
 
 @pytest.fixture
@@ -302,39 +311,6 @@ def test_candidatos_sem_implementacao_sao_reportados(cfg):
 
     assert 'ets_ses' in resumo.sem_implementacao
     assert set(resumo.sem_implementacao).isdisjoint(algoritmos.ALGORITMOS)
-
-
-def test_intermitentes_treinam_na_diaria_com_as_tres_combinacoes(cfg):
-    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
-    runs = [r for r in resumo.runs if r.algoritmo in INTERMITENTES]
-    serie = carregar_serie(cfg, 'item B', 'diaria').to_numpy()
-
-    treinados = {(r.algoritmo, *r.hiperparametros.values()) for r in runs}
-
-    assert len(runs) == len(INTERMITENTES) * 3
-    assert treinados == {
-        (nome, alfa) for nome in INTERMITENTES for alfa in (0.1, 0.2, 0.3)
-    }
-    for r in runs:
-        run = mlflow.get_run(r.run_id)
-        chave = next(iter(r.hiperparametros))
-        assert run.data.tags['algoritmo'] == r.algoritmo
-        assert run.data.tags['papel'] == 'candidato'
-        assert run.data.params[f'hp.{chave}'] == str(r.hiperparametros[chave])
-        assert 'mae' in run.data.metrics
-        modelo = mlflow.pyfunc.load_model(f'runs:/{r.run_id}/modelo')
-        previsao = modelo.predict(pd.DataFrame({'horizonte': [HORIZONTE]}))
-        esperado = algoritmos.criar(r.algoritmo, r.hiperparametros, 7)
-        assert list(previsao) == list(
-            esperado.ajustar(serie).prever(HORIZONTE)
-        )
-
-
-def test_intermitentes_ficam_fora_da_semanal(cfg):
-    resumo = treinar_serie(cfg, 'item B', 'semanal', seed=7)
-
-    assert set(_por_algoritmo(resumo)).isdisjoint(INTERMITENTES)
-    assert set(resumo.sem_implementacao).isdisjoint(INTERMITENTES)
 
 
 def test_candidato_plugado_entra_no_fluxo_sem_mudancas(cfg, monkeypatch):

@@ -13,7 +13,7 @@ import hashlib
 import json
 import random
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from importlib import metadata
 from pathlib import Path
@@ -27,8 +27,19 @@ from loguru import logger
 from mlflow import MlflowClient
 
 from case_mr_health import algoritmos, confianca, intervalos, metricas
+from case_mr_health.algoritmos_statsmodels import (
+    DiagnosticoAjuste,
+    FalhaConvergencia,
+    coletar_diagnosticos,
+)
 from case_mr_health.backtest import ResultadoBacktest, rodar_backtest
-from case_mr_health.candidatos import SKUS, candidatos
+from case_mr_health.candidatos import (
+    NAO_ATENDIDA,
+    NAO_TESTAVEL,
+    SKUS,
+    Candidato,
+    candidatos,
+)
 from case_mr_health.config import Settings
 from case_mr_health.intervalos import Calibracao, ConfigIntervalos, rotulo
 from case_mr_health.particoes import (
@@ -40,6 +51,8 @@ from case_mr_health.particoes import (
 
 PREFIXO_EXPERIMENTO = 'demanda'
 CAMINHO_MODELO = 'modelo'
+ARTEFATO_DIAGNOSTICOS = 'diagnosticos.json'
+LIMITE_TAG = 5000
 _COLUNA_DATA = {
     'diaria': ('serie_diaria', 'data'),
     'semanal': (
@@ -75,12 +88,25 @@ class ResumoRun:
 
 
 @dataclass(frozen=True)
+class ResumoFalha:
+    """Combinação que não convergiu; o run existe, sem métricas nem versão."""
+
+    run_id: str
+    algoritmo: str
+    papel: str
+    hiperparametros: dict
+    ajuste: str  # `fold_<i>` ou `modelo_final`
+    motivo: str
+
+
+@dataclass(frozen=True)
 class ResumoTreino:
     sku: str
     granularidade: str
     seed: int
     runs: tuple[ResumoRun, ...]
     sem_implementacao: tuple[str, ...]
+    falhas: tuple[ResumoFalha, ...] = ()
 
 
 def nome_modelo(sku: str, granularidade: str) -> str:
@@ -244,7 +270,7 @@ def treinar_serie(
         versao_codigo(),
     )
 
-    runs, pendentes = [], []
+    runs, falhas, pendentes = [], [], []
     for candidato in candidatos(sku, granularidade):
         if not candidato.entra:
             continue
@@ -252,14 +278,11 @@ def treinar_serie(
             pendentes.append(candidato.algoritmo)
             continue
         for hiperparametros in candidato.combinacoes():
-            runs.append(
-                _treinar_candidato(
-                    contexto,
-                    candidato.algoritmo,
-                    candidato.papel,
-                    hiperparametros,
-                )
+            resultado = _treinar_monitorado(
+                contexto, candidato, hiperparametros
             )
+            destino = falhas if isinstance(resultado, ResumoFalha) else runs
+            destino.append(resultado)
     if pendentes:
         logger.warning(
             '{}/{}: sem implementação, não treinados: {}',
@@ -268,7 +291,12 @@ def treinar_serie(
             ', '.join(pendentes),
         )
     return ResumoTreino(
-        sku, granularidade, seed, tuple(runs), tuple(pendentes)
+        sku,
+        granularidade,
+        seed,
+        tuple(runs),
+        tuple(pendentes),
+        tuple(falhas),
     )
 
 
@@ -277,6 +305,156 @@ def _particao(cfg: Settings, sku: str, granularidade: str) -> Particao:
         if (p.sku, p.granularidade) == (sku, granularidade):
             return p
     raise ValueError(f'Série {sku}/{granularidade} sem partição')
+
+
+def _treinar_monitorado(
+    ctx: Contexto, candidato: Candidato, hiperparametros: dict
+) -> ResumoRun | ResumoFalha:
+    """Uma combinação; falha de convergência vira run, nunca exceção.
+
+    Basta um fold (ou o ajuste final) falhar para a combinação inteira
+    falhar: média de menos folds não é comparável com a dos outros (ADR 0010).
+    """
+    with coletar_diagnosticos() as diagnosticos:
+        try:
+            resumo = _treinar_candidato(
+                ctx, candidato.algoritmo, candidato.papel, hiperparametros
+            )
+        except FalhaConvergencia as falha:
+            return _registrar_falha(
+                ctx, candidato, hiperparametros, falha, diagnosticos
+            )
+    if diagnosticos:
+        _registrar_diagnosticos(ctx, resumo.run_id, diagnosticos)
+    return resumo
+
+
+def _rotulo_ajuste(ctx: Contexto, n_treino: int) -> str:
+    """Identifica o ajuste pelo tamanho do treino (janela expansiva)."""
+    if n_treino == len(ctx.serie):
+        return 'modelo_final'
+    indice = pd.DatetimeIndex(ctx.serie.index).normalize()
+    for i, fold in enumerate(ctx.particao.folds, start=1):
+        if n_treino == (indice <= pd.Timestamp(fold.treino_fim)).sum():
+            return f'fold_{i}'
+    return f'ajuste_n{n_treino}'
+
+
+def _ajustes_do_backtest(
+    ctx: Contexto, diagnosticos: list[DiagnosticoAjuste]
+) -> list[tuple[str, DiagnosticoAjuste]]:
+    """Folds e modelo final, sem os ajustes extras da calibração (#8).
+
+    A calibração ajusta em treinos muito curtos, que não dizem nada sobre
+    as premissas do modelo avaliado, e repete tamanhos de fold.
+    """
+    ajustes: dict[str, DiagnosticoAjuste] = {}
+    for d in diagnosticos:
+        rotulo = _rotulo_ajuste(ctx, d.n_treino)
+        if not rotulo.startswith('ajuste_n'):
+            ajustes.setdefault(rotulo, d)
+    return list(ajustes.items())
+
+
+def _payload_diagnosticos(
+    ctx: Contexto, diagnosticos: list[DiagnosticoAjuste]
+) -> dict:
+    return {
+        'ajustes': [
+            {'ajuste': rotulo, **asdict(d)}
+            for rotulo, d in _ajustes_do_backtest(ctx, diagnosticos)
+        ]
+    }
+
+
+def _premissas_em(diagnosticos: list[DiagnosticoAjuste], situacao: str) -> str:
+    return ','.join(
+        sorted({
+            p.premissa
+            for d in diagnosticos
+            for p in d.premissas
+            if p.situacao == situacao
+        })
+    )
+
+
+def _registrar_diagnosticos(
+    ctx: Contexto, run_id: str, diagnosticos: list[DiagnosticoAjuste]
+) -> None:
+    cliente = MlflowClient()
+    cliente.log_dict(
+        run_id,
+        _payload_diagnosticos(ctx, diagnosticos),
+        ARTEFATO_DIAGNOSTICOS,
+    )
+    principais = [d for _, d in _ajustes_do_backtest(ctx, diagnosticos)]
+    cliente.set_tag(
+        run_id,
+        'premissas_nao_atendidas',
+        _premissas_em(principais, NAO_ATENDIDA),
+    )
+    cliente.set_tag(
+        run_id,
+        'premissas_nao_testaveis',
+        _premissas_em(principais, NAO_TESTAVEL),
+    )
+
+
+def _registrar_falha(
+    ctx: Contexto,
+    candidato: Candidato,
+    hiperparametros: dict,
+    falha: FalhaConvergencia,
+    diagnosticos: list[DiagnosticoAjuste],
+) -> ResumoFalha:
+    """Abre um run `FAILED`, sem métricas e sem versão de modelo."""
+    ajuste = _rotulo_ajuste(ctx, falha.n_treino)
+    texto_hp = json.dumps(hiperparametros, default=str)
+    run = mlflow.start_run(
+        experiment_id=ctx.experimento_id,
+        run_name=f'{candidato.algoritmo}-{texto_hp}',
+    )
+    try:
+        mlflow.set_tags({
+            'sku': ctx.particao.sku,
+            'granularidade': ctx.particao.granularidade,
+            'algoritmo': candidato.algoritmo,
+            'papel': candidato.papel,
+            'falha_convergencia': 'true',
+            'falha_ajuste': ajuste,
+            'falha_motivo': falha.motivo[:LIMITE_TAG],
+        })
+        _registrar_parametros(ctx, hiperparametros)
+        mlflow.log_dict(
+            _payload_diagnosticos(ctx, diagnosticos), ARTEFATO_DIAGNOSTICOS
+        )
+    finally:
+        mlflow.end_run(status='FAILED')
+    logger.warning(
+        '{}/{}: {} {} não convergiu em {}: {}',
+        ctx.particao.sku,
+        ctx.particao.granularidade,
+        candidato.algoritmo,
+        texto_hp,
+        ajuste,
+        falha.motivo,
+    )
+    return ResumoFalha(
+        run.info.run_id,
+        candidato.algoritmo,
+        candidato.papel,
+        hiperparametros,
+        ajuste,
+        falha.motivo,
+    )
+
+
+def requisitos_pip(previsor: algoritmos.Previsor) -> list[str]:
+    """Dependências do previsor com as versões instaladas (do pickle)."""
+    return [
+        f'{nome}=={metadata.version(nome)}'
+        for nome in getattr(previsor, 'dependencias', ('numpy',))
+    ]
 
 
 def horizonte_maximo(cfg: Settings, granularidade: str) -> int:
@@ -344,7 +522,7 @@ def _treinar_candidato(
             name=CAMINHO_MODELO,
             python_model=ModeloDemanda(modelo_final, calibracao),
             registered_model_name=nome,
-            pip_requirements=['numpy'],
+            pip_requirements=requisitos_pip(modelo_final),
         )
         artefato = Path(mlflow.artifacts.download_artifacts(info.model_uri))
         hash_modelo = hash_artefato(artefato)
