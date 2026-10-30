@@ -93,3 +93,6 @@ class NaiveSazonal:
 
     def prever(self, horizonte):
         return np.resize(self._ciclo, horizonte)
+
+
+from case_mr_health import algoritmos_prophet, algoritmos_statsmodels  # noqa: E402, F401

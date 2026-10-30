@@ -92,6 +92,16 @@ def _gravar_origem(cfg: Settings, padroes: dict) -> None:
     separar_series(cfg)
 
 
+@pytest.fixture(autouse=True)
+def so_baselines(monkeypatch):
+    """Fluxo com baselines; os demais: `test_treino_candidatos`."""
+    monkeypatch.setattr(
+        algoritmos,
+        'ALGORITMOS',
+        {n: algoritmos.ALGORITMOS[n] for n in sorted(BASELINES)},
+    )
+
+
 @pytest.fixture
 def cfg(tmp_path) -> Settings:
     cfg = Settings(
