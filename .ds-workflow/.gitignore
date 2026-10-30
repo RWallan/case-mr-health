@@ -1,0 +1,2 @@
+# keep policy/decisions under version control; ignore bulky evidence if desired
+test-evidence/*.log

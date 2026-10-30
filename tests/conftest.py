@@ -86,8 +86,8 @@ def faker_br() -> Faker:
 def planilhas(tmp_path, faker_br) -> Planilhas:
     precos = {f'item {letra}': faker_br.random_int(5, 40) for letra in 'ABCD'}
     pedidos = []
-    for seq in range(1, 31):
-        dia = faker_br.date_between(date(2021, 6, 1), date(2021, 6, 30))
+    for seq in range(1, 121):
+        dia = faker_br.date_between(date(2021, 6, 1), date(2021, 9, 1))
         pedidos.append((int(f'{seq}{dia:%Y%m%d}'), f'{dia:%Y-%m-%d}'))
     itens = []
     for id_pedido, _ in pedidos:
@@ -109,4 +109,6 @@ def settings(tmp_path, planilhas) -> Settings:
         raw_dir=planilhas.raw_dir,
         db_path=tmp_path / 'saida' / 'base.duckdb',
         relatorio_path=tmp_path / 'saida' / 'relatorio.md',
+        desenvolvimento_db_path=tmp_path / 'saida' / 'desenvolvimento.duckdb',
+        oot_db_path=tmp_path / 'saida' / 'oot.duckdb',
     )

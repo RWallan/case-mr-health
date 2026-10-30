@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "eda_sample": [
+    "data/processed/desenvolvimento.duckdb"
+  ],
+  "development_data": [
+    "data/processed/desenvolvimento.duckdb"
+  ],
+  "full_data": [
+    "data/processed/base.duckdb"
+  ],
+  "test_data": [
+    "data/processed/oot.duckdb"
+  ],
+  "no_test_set_reason": null,
+  "split_status": "declared",
+  "match_basenames": true,
+  "created_at": "2026-10-30T05:26:45+00:00"
+}

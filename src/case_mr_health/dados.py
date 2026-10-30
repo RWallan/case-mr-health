@@ -6,6 +6,7 @@ import duckdb
 from loguru import logger
 
 from case_mr_health.config import Settings
+from case_mr_health.particoes import separar_series
 from case_mr_health.series import construir_series
 
 CABECALHO_PEDIDO = ('ID_PEDIDO', 'DATA', 'VALOR_TOTAL')
@@ -102,6 +103,7 @@ def preparar_dados(cfg: Settings | None = None) -> RelatorioQualidade:
     if hashes != {nome: _sha256(p) for nome, p in origens.items()}:
         raise RuntimeError('Planilhas de origem foram alteradas.')
     logger.info('Base consolidada gravada em {}', cfg.db_path)
+    separar_series(cfg)
     return relatorio
 
 

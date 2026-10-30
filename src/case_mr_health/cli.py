@@ -18,8 +18,14 @@ def preparar(
     relatorio_path: Annotated[
         Path | None, Parameter(name='--relatorio-path')
     ] = None,
+    desenvolvimento_db_path: Annotated[
+        Path | None, Parameter(name='--desenvolvimento-db-path')
+    ] = None,
+    oot_db_path: Annotated[
+        Path | None, Parameter(name='--oot-db-path')
+    ] = None,
 ) -> int:
-    """Consolida as planilhas brutas em DuckDB e gera o relatório de qualidade.
+    """Consolida as planilhas, gera o relatório e separa o OOT.
 
     Parameters
     ----------
@@ -29,6 +35,10 @@ def preparar(
         Arquivo DuckDB de saída (padrão: configuração).
     relatorio_path
         Relatório de qualidade em markdown (padrão: configuração).
+    desenvolvimento_db_path
+        DuckDB da visão de desenvolvimento, sem o OOT (padrão: configuração).
+    oot_db_path
+        DuckDB do OOT selado (padrão: configuração).
     """
     cfg = Settings()
     configurar_logs(cfg.log_level)
@@ -41,6 +51,8 @@ def preparar(
                         'raw_dir': raw_dir,
                         'db_path': db_path,
                         'relatorio_path': relatorio_path,
+                        'desenvolvimento_db_path': desenvolvimento_db_path,
+                        'oot_db_path': oot_db_path,
                     }.items()
                     if v is not None
                 }

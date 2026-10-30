@@ -14,6 +14,10 @@ def test_preparar_dados_gera_base_e_relatorio(settings, planilhas):
             str(settings.db_path),
             '--relatorio-path',
             str(settings.relatorio_path),
+            '--desenvolvimento-db-path',
+            str(settings.desenvolvimento_db_path),
+            '--oot-db-path',
+            str(settings.oot_db_path),
         ],
         result_action='return_value',
     )
@@ -43,6 +47,10 @@ def test_preparar_dados_devolve_erro_com_dados_invalidos(settings, planilhas):
             str(settings.raw_dir),
             '--db-path',
             str(settings.db_path),
+            '--desenvolvimento-db-path',
+            str(settings.desenvolvimento_db_path),
+            '--oot-db-path',
+            str(settings.oot_db_path),
         ],
         result_action='return_value',
     )
