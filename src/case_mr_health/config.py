@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         'data/processed/desenvolvimento.duckdb'
     )
     oot_db_path: Path = Path('data/processed/oot.duckdb')
+    changelog_path: Path = Path('CHANGELOG.md')
     arquivo_pedido: str = 'PEDIDO-_1_.xlsx'
     arquivo_item_pedido: str = 'ITEM_PEDIDO-_2_.xlsx'
     arquivo_sku: str = 'ITENS-_3_.xlsx'
