@@ -1,5 +1,5 @@
 {
-  "phase": "awaiting_user_direction",
+  "phase": "modeling",
   "history": [
     {
       "at": "2026-10-30T05:26:45+00:00",
@@ -29,7 +29,29 @@
       "decision": null,
       "note": null,
       "decision_events": 4
+    },
+    {
+      "at": "2026-10-30T07:01:33+00:00",
+      "from": "awaiting_user_direction",
+      "phase": "analysis_planning",
+      "decision": "D-003",
+      "note": null,
+      "decision_events": 6
+    },
+    {
+      "at": "2026-10-30T07:03:55+00:00",
+      "from": "analysis_planning",
+      "phase": "modeling",
+      "decision": "D-004",
+      "note": null,
+      "decision_events": 8
     }
   ],
-  "frozen": {}
+  "frozen": {
+    "pre_analysis_plan": {
+      "path": "/home/rwallan/git/case-mr-health/docs/analysis/plano-candidatos.md",
+      "sha256": "ac9df33babb91091673129f61d65e6b02de00f069c4d45a20a04c79d5e467d5e",
+      "at": "2026-10-30T07:02:48+00:00"
+    }
+  }
 }

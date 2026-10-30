@@ -36,9 +36,9 @@ A skill `evidence-based-data-science-workflow` está ativa. Ela mantém uma pol�
 | #3 Séries diária e semanal | `3-series_diaria_semanal` | `1a252a7` | resolved | 21 |
 | #4 Partições e OOT selado | `4-particoes_oot` | `09a7887`, `ab3de1f` | resolved | 32 |
 | #5 EDA das séries | `5-eda_series` | `1eba1d8`, `90a8ad5` e commit de fechamento | resolved (conclusões aprovadas) | 45 |
-| #6 Tabela de candidatos | — | — | não iniciado | — |
+| #6 Tabela de candidatos | `6-tabela_candidatos` (a partir de `main`) | `0459a8a`, `5390ff6` (release 0.2.0) | `resolved` (D-005 aprovada em 2026-10-30) | 90 |
 
-As branches são empilhadas (cada uma parte da anterior); nada foi mesclado em `main` ainda.
+As branches eram empilhadas. **Atualização (2026-10-30, ao iniciar o #6):** os PRs #3, #4 e #5 já foram mesclados em `main` (`98d6b8b`, `b643f99`, `9e6b8a4`); a branch do #6 parte de `main`, e a `5-eda_series` não existe mais localmente.
 
 ### 3.1 Ticket #2 — base consolidada e relatório de qualidade
 
@@ -158,6 +158,37 @@ O usuário pediu (2026-10-30) pesquisar alternativas ou avaliar o impacto caso s
 
 **Decisão do usuário (2026-10-30): alternativa 1.** A recomendação do agente era: alternativa 1 (manter e mostrar sensibilidade), com as alternativas 4 e 5 como complemento para os candidatos que as aceitam. Evitar 2 e 3 enquanto não houver razão para crer que o registro é erro, porque o dado diário é consistente e as alternativas 2 e 3 quebrariam a igualdade entre as séries diária e semanal.
 
+### 3.6 Ticket #6 — tabela de candidatos por série
+
+**Entregue (commit `0459a8a`; release 0.2.0 em `5390ff6`):** `src/case_mr_health/candidatos.py` (catálogo consumível pelo treino: `candidatos(sku, granularidade)`, `tabela()`, `Candidato.combinacoes()`), `tests/test_candidatos.py`, `notebooks/03_candidatos.ipynb` (lê só a visão de desenvolvimento, recalcula a evidência do #5 e confere com o módulo; não ajusta modelos), `docs/analysis/plano-candidatos.md` (plano pré-análise curto, congelado), `changelogs/6.adicionado.md`. Ticket `issues/6.md` marcado `claimed`.
+
+**Fluxo da skill:** direção D-003 (`analysis_direction`, aprovada pelo usuário em 2026-10-30) → fase `analysis_planning` → plano D-004 (`analysis_plan`, congelado; sha256 `ac9df33b…`; aprovado) → fase `modeling`. Dispensa do template completo do plano: concordância do usuário com o item 5 da direção.
+
+**Decisões do usuário nesta etapa**
+- Branch `6-tabela_candidatos` a partir de `main` e #6 `claimed`: aprovado.
+- Naive sazonal (lag 7) em A e D: **incluir como hipótese** (o teste formal é inconclusivo, mas o IC95% da razão fim de semana exclui 1: A 1,35–4,11; D 1,27–3,28).
+- Semanal: **ARIMA mínimo entra** nas 4 séries "para testar contra as outras opções" (recomendação inicial do agente era excluir; ver Q&A abaixo). Prophet **não** entra na semanal.
+- Itens 1 a 5 da direção: de acordo (Prophet só nas diárias; ETS/ARIMA/SARIMA diários; Croston, SBA e TSB nas diárias com α em {0,1; 0,2; 0,3}; teto de 4 combinações e sem busca automática de ordem; plano completo dispensado).
+
+**Catálogo resultante** (detalhe e espaços de hiperparâmetros em `docs/analysis/plano-candidatos.md` e `notebooks/03_candidatos.ipynb`)
+- Diária (as 4 séries, 11 candidatos cada): naive, média histórica, naive sazonal (lag 7), SES, Holt-Winters aditivo, ARIMA, SARIMA, Croston, SBA, TSB e Prophet. Sazonais com base **evidência** em B e C e **hipótese** em A e D.
+- Semanal (as 4 séries, 5 candidatos cada): naive, média histórica, SES, Holt amortecido e ARIMA mínimo (decisão do usuário, base fraca). Fora: naive sazonal e SARIMA (aritmética), Croston/SBA/TSB (ADI = 1), Prophet (decisão do usuário).
+- Combinações por candidato: no máximo 4 (Prophet = 4; ARIMA diário = 3; SARIMA diário = 3; intermitentes = 3; ARIMA semanal = 2).
+
+**Interpretações do agente a revisar (sinalizadas):** (i) SARIMA diário usa só o sazonal (1,0,0,7), pois o (0,0,0,7) citado na direção coincide com o ARIMA sem sazonal; (ii) TSB com α = β; (iii) ETS "estimado" (α, φ) conta como uma combinação; (iv) o rótulo "sazonalidade confirmada" reproduz a leitura aprovada no #5 (pelo menos 2 dos 3 testes com p-Holm < 0,05: B 3, C 2, A e D 0), e não é teste novo.
+
+**Sinalização contra o ADR 0003:** o ADR prevê ARIMA/SARIMA/ETS. A exclusão do SARIMA semanal é aritmética (ciclo de 4 ou 52 semanas não cabe em 10 pontos) e a do naive sazonal semanal idem; o ADR não foi alterado.
+
+**Fatos verificados no notebook 03** (visão de desenvolvimento): o recálculo reproduz o #5 (diárias intermitentes com ADI 1,49–1,84 e CV² 0,20–0,40; semanais suaves; diárias estacionárias em nível; Ljung–Box lags 7 e 14 com p mínimo de 0,14 a 0,39; sazonalidade B e C confirmadas, A e D inconclusivas). Item C semanal: a semana 07-19 (40) é o teste do fold 1; nas outras 9 semanas o valor vai de 4 a 19 com mediana 16,0.
+
+**Correção ao registro (3.5):** a mediana de 16,5 citada para "as outras 9 semanas" é a das 10 semanas (com a de 07-19); a das outras 9 é 16,0. As demais contas da 3.5 não foram refeitas.
+
+**Requisito de backtest (item C semanal):** métricas com todas as semanas de teste, sem a semana 07-19 e sem os folds 1 e 2 (decisão 24); ARIMA mínimo com variante de intervenção opcional.
+
+**Testes:** `uv run poe test` — 90 passaram (45 anteriores + 45 do `test_candidatos`), cobertura de `candidatos.py` 100%; evidência da skill: arquivo `test-run-20261030T041123-299382.json` em `.ds-workflow/test-evidence/`. `audit_notebook.py` do notebook 03: 0 erros, 0 avisos.
+
+**Status das conclusões:** APROVADAS pelo usuário em 2026-10-30 (D-005). Ticket `issues/6.md` com `Status: resolved` e seção `## Answer`. Apresentação de encerramento: `docs/relatorio/encerramento-fase1.md`. Interpretações (hipóteses H1 a H5 do plano) continuam hipóteses para o #7 em diante.
+
 ## 4. Decisões consolidadas
 
 | # | Decisão | Quem | Justificativa | Onde está registrado |
@@ -185,6 +216,11 @@ O usuário pediu (2026-10-30) pesquisar alternativas ou avaliar o impacto caso s
 | 21 | Sem explicação operacional para os 3 dias seguidos sem pedido (08-02 a 08-04) nem para as 40 unidades do item C na semana de 07-19. **Os 3 dias zerados não precisam de tratamento** (permanecem zeros imputados). **Item C:** pesquisar alternativas de tratamento ou avaliar o impacto caso só esse registro seja o outlier (ver seção 3.5); depois escolhida a alternativa 1 (decisão 24) | Usuário (versão revisada em 2026-10-30; a anterior os tratava ambos como outliers) | Ausência de explicação | Notebooks 01 e 02, seção 3.5 |
 | 24 | **Item C, semana de 07-19: alternativa 1** — manter o valor (40) e relatar a sensibilidade das métricas, sem alterar a série. Calcular as métricas do item C semanal com e sem essa semana (e com e sem os folds 1 e 2). Alternativas 4 (variável de intervenção) e 5 (métricas robustas) ficam como complemento opcional para os candidatos que as aceitam; as alternativas 2 e 3 (limitar ou substituir) estão descartadas por ora | Usuário | Dado diário consistente; não alterar a série preserva a igualdade entre a diária e a semanal | Seção 3.5, `issues/7.md` (comentário) |
 | 23 | Os pares de itens repetidos (inclusive os 4 com quantidades idênticas) **não são duplicidade**; as quantidades seguem somadas | Usuário | Resposta à dúvida do ticket #2 | Notebook 01, seção 3.1 |
+| 25 | Branch `6-tabela_candidatos` a partir de `main`; #6 `claimed` | Usuário | PRs #3 a #5 já mesclados | Seção 3.6 |
+| 26 | Naive sazonal entra em A e D como hipótese | Usuário (recomendação do agente) | IC95% da razão exclui 1, teste formal inconclusivo | `docs/analysis/plano-candidatos.md`, D-003 |
+| 27 | ARIMA mínimo entra na semanal; Prophet não entra na semanal | Usuário | Contraste com as demais opções; decisão própria sobre o Prophet | D-003, D-004 |
+| 28 | Direção da tabela (itens 1 a 5) e plano curto congelado | Usuário | Aprovações D-003 e D-004 (`human_cli`) | log de decisões em `.ds-workflow/` |
+| 29 | Conclusão do #6 e encerramento da Fase 1 (tabela de candidatos pronta para o #7; #6 `resolved`) | Usuário | Aprovação D-005 (`human_cli`) | `issues/6.md`, `docs/relatorio/encerramento-fase1.md` |
 | 22 | Não executar operações de git até nova ordem (as alterações de documentação desta rodada ficam sem commit) | Usuário | Controle do histórico pelo usuário | Este arquivo |
 
 Decisões **ainda não tomadas**: ver seção 8.
@@ -210,6 +246,9 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 6. **"Muitos zeros tornam o modelo diário fraco ou instável?"** Resposta: mais difícil de avaliar e de prever, não inutilizável. Dificuldades: métricas percentuais não funcionam com zero; o erro fica dominado pelos dias com venda; ARIMA/ETS supõem valores contínuos e simétricos; intervalos limitados em zero; métodos intermitentes ignoram o dia da semana. Atenuante: os zeros não são aleatórios (dependem do dia da semana). Hipótese do agente: confiança baixa ou "Insuficiente" em vários produtos na diária. Status: respondida.
 7. **"Qual o impacto de descartar a modelagem diária?"** Resposta: perderia as histórias 1, 3 e 5 da spec (previsão de 14 dias, alternar granularidade, histórico com previsão), a visão por dia da semana (efeito forte) e a razão de ser dos métodos intermitentes; ganharia 4 modelos em vez de 8, ausência do vazamento entre granularidades e menos métricas frágeis; as recomendações (ADR 0004) já usam só o modelo semanal. Exigiria rever ADRs 0001, 0002 e 0003, a spec, vários tickets de #6 a #26 e as decisões 7–9. Alternativa intermediária descrita: manter a diária só com baselines e métodos intermitentes. **Decisão do usuário: manter a série diária para testar esses modelos** (decisão 13). Status: decidida.
 8. **"O que são métodos de demanda intermitente?"** Resposta: Croston (1972) estima separadamente o tamanho da venda e o intervalo entre vendas, previsão = tamanho ÷ intervalo (tende a superestimar); SBA (Syntetos–Boylan) é o Croston com correção do viés; TSB (Teunter–Syntetos–Babai) estima a probabilidade de venda em cada período e a atualiza também nos dias sem venda. Limitação: previsão constante, sem dia da semana; pensados para séries longas. Serão implementados em código próprio (ADR 0003). Status: respondida.
+9. **"Me explique o ETS."** Resposta: família de suavização exponencial (Erro, Tendência, Sazonalidade); SES ("ANN") atualiza o nível com peso α e fica entre o naive (α alto) e a média (α baixo); Holt amortecido adiciona tendência que se achata; Holt-Winters adiciona sazonalidade; o componente multiplicativo não funciona com zeros. Status: respondida.
+10. **"Se não me engano, você disse que a série diária não tem intermitência?"** Resposta: não; as diárias são intermitentes (ADI 1,49–1,84); o que não tem zeros e é "suave" é a semanal. Status: respondida.
+11. **"ARIMA/SARIMA para o modelo semanal não estão sendo cogitados por quê?"** Resposta: era recomendação do agente, não decisão. SARIMA: ciclo de 4 ou 52 semanas não cabe em 10 pontos (aritmética). ARIMA: estacionariedade e autocorrelação semanais não testáveis; 6 pontos no primeiro fold; ARIMA(0,1,1) ≈ SES; mais candidatos em 4 folds elevam o risco de escolha por acaso; mas a exclusão contrariaria o universo do ADR 0003. **Decisão do usuário: incluir o ARIMA mínimo** (decisão 27). Status: respondida e decidida.
 
 ## 6. Limitações (devem constar do relatório final)
 
@@ -220,6 +259,7 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 - O vazamento parcial entre granularidades (08-16 a 08-18) foi aceito na opção A.
 - Dados com aparência sintética (quantidades de 1 a 5, preços redondos): padrões aparentes exigem teste formal (ver spec, "Further Notes").
 - Os números da Fase 0 e do ADR 0003 sobre zeros divergem da visão de desenvolvimento (seção 3.4).
+- A tabela do #6 decide entrada, não desempenho; com 11 candidatos diários e 4 a 5 folds, há risco de escolha por acaso; "sazonalidade confirmada" é leitura de testes exploratórios; o ARIMA semanal tem base fraca; a exclusão do SARIMA semanal restringe o universo do ADR 0003 (seção 3.6).
 
 ## 7. Referências
 
@@ -242,7 +282,7 @@ Cada item é uma pergunta feita pelo usuário durante a Fase 1, com a resposta r
 2. Plano de análise do #5 seguido sem aprovação explícita item a item (seção 3.4); as conclusões resultantes foram aprovadas.
 3. Retreino do modelo escolhido com todos os dados após a avaliação final: não está no ADR 0002 (sugestão para a Fase 4, #13/#14).
 4. **Perguntas respondidas pelo usuário em 2026-10-30:** a planilha de SKUs segue como preço por unidade (suposição mantida); os pares repetidos não são duplicidade; não há explicação para os três dias sem pedido (sem tratamento) nem para as 40 unidades do item C (decisões 20, 21 e 23). O tratamento do item C na semana de 07-19 foi decidido (alternativa 1, decisão 24): a análise de sensibilidade será feita no backtest (#7 em diante).
-5. **Ticket #6 (tabela de candidatos por série) não iniciado.** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
+5. **Ticket #6 (tabela de candidatos por série) **executado e aprovado (D-005); `resolved`. Commit `0459a8a` e versão 0.2.0 com `towncrier build` (`5390ff6`) feitos em 2026-10-30 no branch local `6-tabela_candidatos`. Pendentes: tag, push e PR para `main` (sem ordem do usuário) e o #7 (instruções em `docs/relatorio/continuacao-7.md`).** Instruções para o agente que o conduzirá: `docs/relatorio/continuacao-6.md`. Ao fechar o #6 o usuário pediu uma **apresentação de encerramento da Fase 1** com: o que foi feito, testes, decisões, limitações e conclusões. Também sugerir versão (Semantic Versioning) para o `towncrier build` ao concluir um marco (`CLAUDE.md`).
 6. ~~Spec com "32% a 43%"~~ — resolvido pela decisão 19: texto mantido, observação acrescentada.
 7. Os tickets seguintes (#7 a #26) estão em `issues/`. Com a decisão de manter a diária, os candidatos diários (Croston, SBA, TSB e baselines) seguem no ticket #10 (`issues/10.md`).
 
