@@ -1,0 +1,78 @@
+/* Fonte única das cores, fontes, espaçamentos, raios e sombras do app (#42).
+   Nenhum hexadecimal fora deste arquivo em frontend/src. */
+:root {
+  /* Marca */
+  --cor-verde: #234d3e;
+  --cor-verde-escuro: #1a4032;
+  --cor-verde-link: #2c594c;
+  --cor-lima: #d9f17b;
+  --cor-lima-suave: #edf5d8;
+  --cor-lima-texto: #4f6a2a;
+
+  /* Superfícies e bordas */
+  --cor-fundo: #f7f8f4;
+  --cor-superficie: #fff;
+  --cor-superficie-neutra: #f0f3ee;
+  --cor-borda: #e6ebe6;
+  --cor-borda-campo: #7d8e86;
+  --cor-borda-suave: #edf0ec;
+
+  /* Texto (todos com contraste AA, 4,5:1, sobre branco e sobre o fundo) */
+  --cor-texto: #172b36;
+  --cor-texto-forte: #243b40;
+  --cor-texto-secundario: #4d5f58;
+  --cor-texto-suave: #5a6b65;
+  --cor-texto-sobre-escuro: #fff;
+
+  /* Foco e estados */
+  --cor-foco: #1d6b52;
+  --cor-foco-halo: #d9efaa;
+  --cor-status: #82b646;
+  --cor-erro: #8c423d;
+  --cor-erro-fundo: #fff3f0;
+  --cor-erro-borda: #e3b5ae;
+  --cor-alerta: #7a4a12;
+  --cor-alerta-fundo: #fff3d6;
+  --cor-alerta-borda: #e3c277;
+  --cor-info: #2b5873;
+  --cor-info-fundo: #f3f8fb;
+  --cor-sucesso: #4d6b33;
+  --cor-sucesso-fundo: #f7faf3;
+  --cor-aumento: #9c3f17;
+  --cor-aumento-fundo: #fff7f2;
+  --cor-neutro-fundo: #f6f7f6;
+
+  /* Dados (gráficos) */
+  --cor-historico: #739354;
+  --cor-previsao: #d3944f;
+  --cor-previsao-texto: #8a5415;
+  --cor-intervalo-95: #edcfab;
+  --cor-intervalo-80: #cc9c68;
+  --cor-eixo: #cfd8d0;
+  --cor-grade: #e4e9e4;
+  --cor-divisao: #8d9d91;
+  --cor-serie-1: #739354;
+  --cor-serie-2: #d3944f;
+  --cor-serie-3: #3d6f8e;
+  --cor-serie-4: #a0527c;
+
+  /* Tipografia */
+  --fonte-texto: 'DM Sans', 'Segoe UI', sans-serif;
+  --fonte-titulo: Manrope, sans-serif;
+  --texto-xs: 12px;
+  --texto-sm: 13px;
+  --texto-md: 15px;
+
+  /* Espaçamentos, raios e sombras */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 24px;
+  --espaco-6: 32px;
+  --raio-sm: 8px;
+  --raio-md: 14px;
+  --raio-pilula: 999px;
+  --sombra-cartao: 0 4px 20px #163b2510;
+  --sombra-seletor: 0 1px 4px #132d2418;
+}

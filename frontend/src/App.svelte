@@ -160,7 +160,7 @@
     <div class="topbar-right">
       <span class="network-label"><span class="status-dot"></span> Visão da rede</span>
       <LinksApi {api} />
-      <a class="mlflow-link" href={mlflow} target="_blank" rel="noreferrer">Abrir MLflow <span aria-hidden="true">↗</span></a>
+      <a class="link" href={mlflow} target="_blank" rel="noreferrer">Abrir MLflow <span aria-hidden="true">↗</span></a>
     </div>
   </header>
 
@@ -180,22 +180,22 @@
           <span class="step">01</span>
           <div><h2>Escolha a série</h2><p>Defina o produto e o período.</p></div>
         </div>
-        <label for="sku">SKU</label>
-        <select id="sku" bind:value={sku}>
+        <label class="rotulo" for="sku">SKU</label>
+        <select id="sku" class="campo" bind:value={sku}>
           {#each skus as opcao}<option value={opcao}>{opcao}</option>{/each}
         </select>
-        <label for="granularidade">Granularidade</label>
-        <div class="segmented" role="group" aria-label="Granularidade">
+        <span class="rotulo" id="rotulo-granularidade">Granularidade</span>
+        <div class="segmented" role="group" aria-labelledby="rotulo-granularidade">
           {#each granularidades as opcao}
-            <button class:active={granularidade === opcao} onclick={() => (granularidade = opcao)}>{opcao === 'diaria' ? 'Diária' : 'Semanal'}</button>
+            <button type="button" class:active={granularidade === opcao} aria-pressed={granularidade === opcao} onclick={() => (granularidade = opcao)}>{opcao === 'diaria' ? 'Diária' : 'Semanal'}</button>
           {/each}
         </div>
         <form onsubmit={buscar}>
-          <label for="referencia">Último período conhecido</label>
-          <input id="referencia" type="date" bind:value={dataReferencia} required />
-          <label for="horizonte">Períodos a prever</label>
-          <input id="horizonte" type="number" min="1" max={granularidade === 'diaria' ? 14 : 2} bind:value={horizonte} required />
-          <button class="primary" type="submit" disabled={carregando || !dataReferencia}>
+          <label class="rotulo" for="referencia">Último período conhecido</label>
+          <input id="referencia" class="campo" type="date" bind:value={dataReferencia} required />
+          <label class="rotulo" for="horizonte">Períodos a prever</label>
+          <input id="horizonte" class="campo" type="number" min="1" max={granularidade === 'diaria' ? 14 : 2} bind:value={horizonte} required />
+          <button class="btn btn-bloco" type="submit" disabled={carregando || !dataReferencia} aria-busy={carregando}>
             {carregando ? 'Carregando…' : 'Gerar previsão'} <span aria-hidden="true">→</span>
           </button>
         </form>
@@ -211,7 +211,7 @@
           <div class="legend"><span class="legend-history"></span> Histórico <span class="legend-forecast"></span> Previsão <span class="legend-interval"></span> Intervalo 80% / 95%</div>
         </div>
 
-        {#if erro}<div class="error" role="alert">{erro}</div>{/if}
+        {#if erro}<div class="alerta alerta-erro" role="alert">{erro}</div>{/if}
         {#if historico.length}
           <div class="chart-wrap">
             <svg viewBox="0 0 900 290" role="img" aria-label="Gráfico do histórico e da previsão de vendas">
@@ -252,25 +252,29 @@
       </section>
     </section>
 
+    <EntradaPrevisoes />
+    <ComparacaoSkus {api} {sku} {granularidade} {skus} />
+    <Recomendacoes {api} {skus} />
+
     <section class="card update" aria-label="Atualizar dados">
       <div class="section-heading">
-        <span class="step">03</span>
+        <span class="step">06</span>
         <div><h2>Enviar pedidos novos</h2><p>Os modelos são reajustados com o histórico atualizado.</p></div>
       </div>
       <form onsubmit={enviarPedidos}>
-        <label for="pedidos">Planilha de pedidos (.xlsx)</label>
-        <input id="pedidos" type="file" accept=".xlsx" bind:files={arquivoPedidos} required />
-        <label for="itens">Planilha de itens de pedido (.xlsx)</label>
-        <input id="itens" type="file" accept=".xlsx" bind:files={arquivoItens} required />
-        <button class="primary" type="submit" disabled={enviando || !arquivoPedidos?.length || !arquivoItens?.length}>
+        <label class="rotulo" for="pedidos">Planilha de pedidos (.xlsx)</label>
+        <input id="pedidos" class="campo" type="file" accept=".xlsx" bind:files={arquivoPedidos} required />
+        <label class="rotulo" for="itens">Planilha de itens de pedido (.xlsx)</label>
+        <input id="itens" class="campo" type="file" accept=".xlsx" bind:files={arquivoItens} required />
+        <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivoPedidos?.length || !arquivoItens?.length} aria-busy={enviando}>
           {enviando ? 'Enviando…' : 'Enviar e reajustar'} <span aria-hidden="true">→</span>
         </button>
       </form>
       {#if mensagemEnvio}
-        <div class="error" role="alert">
+        <div class="alerta alerta-erro" role="alert">
           {mensagemEnvio}
           {#if errosEnvio.length}
-            <table class="erros">
+            <table class="tabela">
               <thead><tr><th>Onde</th><th>Problema</th></tr></thead>
               <tbody>{#each errosEnvio as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
             </table>
@@ -282,7 +286,7 @@
           <strong>{rotuloEstado[atualizacao.estado]}</strong>
           <p>{atualizacao.pedidos_novos} pedidos novos · {atualizacao.itens_novos} itens · dados até {fmtData(atualizacao.ultimo_dia)}</p>
           {#if atualizacao.series.length}
-            <table class="erros">
+            <table class="tabela">
               <thead><tr><th>Série</th><th>Situação</th><th>Versão</th></tr></thead>
               <tbody>
                 {#each atualizacao.series as serie}
@@ -299,10 +303,6 @@
         </div>
       {/if}
     </section>
-
-    <EntradaPrevisoes />
-    <ComparacaoSkus {api} {sku} {granularidade} {skus} />
-    <Recomendacoes {api} {skus} />
 
     <footer><span>MR. HEALTH · Planejamento de demanda</span><span>Previsões da rede · Só o envio de pedidos novos reajusta os modelos</span></footer>
   </main>
