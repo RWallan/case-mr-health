@@ -61,43 +61,43 @@
 
 <section class="card update" aria-label="Pedir previsões">
   <div class="section-heading">
-    <span class="step">04</span>
+    <span class="step">03</span>
     <div><h2>Pedir previsões</h2><p>Preencha uma solicitação ou envie uma planilha com várias.</p></div>
   </div>
 
   <form onsubmit={enviarManual}>
-    <label for="entrada-sku">SKU</label>
-    <select id="entrada-sku" bind:value={sku} required>
+    <label class="rotulo" for="entrada-sku">SKU</label>
+    <select id="entrada-sku" class="campo" bind:value={sku} required>
       {#each skus as opcao}<option value={opcao}>{opcao}</option>{/each}
     </select>
-    <label for="entrada-granularidade">Granularidade</label>
-    <select id="entrada-granularidade" bind:value={granularidade} required>
+    <label class="rotulo" for="entrada-granularidade">Granularidade</label>
+    <select id="entrada-granularidade" class="campo" bind:value={granularidade} required>
       <option value="diaria">Diária</option>
       <option value="semanal">Semanal</option>
     </select>
-    <label for="entrada-data">Último período conhecido</label>
-    <input id="entrada-data" type="date" bind:value={dataReferencia} pattern={'\\d{4}-\\d{2}-\\d{2}'} required />
-    <label for="entrada-horizonte">Períodos a prever (1 a {maxHorizonte[granularidade]})</label>
-    <input id="entrada-horizonte" type="number" min="1" max={maxHorizonte[granularidade]} step="1" bind:value={horizonte} required />
-    <button class="primary" type="submit" disabled={enviando}>
+    <label class="rotulo" for="entrada-data">Último período conhecido</label>
+    <input id="entrada-data" class="campo" type="date" bind:value={dataReferencia} pattern={'\\d{4}-\\d{2}-\\d{2}'} required />
+    <label class="rotulo" for="entrada-horizonte">Períodos a prever (1 a {maxHorizonte[granularidade]})</label>
+    <input id="entrada-horizonte" class="campo" type="number" min="1" max={maxHorizonte[granularidade]} step="1" bind:value={horizonte} required />
+    <button class="btn btn-bloco" type="submit" disabled={enviando} aria-busy={enviando}>
       {enviando ? 'Enviando…' : 'Gerar previsão'} <span aria-hidden="true">→</span>
     </button>
   </form>
 
   <form onsubmit={enviarPlanilha}>
-    <label for="entrada-arquivo">Planilha de solicitações (.xlsx)</label>
-    <input id="entrada-arquivo" type="file" accept=".xlsx" bind:files={arquivo} required />
-    <a href={`${api}/predicoes/lote/template.xlsx`} download>Baixar o template (.xlsx)</a>
-    <button class="primary" type="submit" disabled={enviando || !arquivo?.length}>
+    <label class="rotulo" for="entrada-arquivo">Planilha de solicitações (.xlsx)</label>
+    <input id="entrada-arquivo" class="campo" type="file" accept=".xlsx" bind:files={arquivo} required />
+    <a class="link" href={`${api}/predicoes/lote/template.xlsx`} download>Baixar o template (.xlsx)</a>
+    <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivo?.length} aria-busy={enviando}>
       {enviando ? 'Enviando…' : 'Enviar planilha'} <span aria-hidden="true">→</span>
     </button>
   </form>
 
   {#if mensagem}
-    <div class="error" role="alert">
+    <div class="alerta alerta-erro" role="alert">
       {mensagem}
       {#if erros.length}
-        <table class="erros">
+        <table class="tabela">
           <thead><tr><th>Campo / linha</th><th>Problema</th></tr></thead>
           <tbody>{#each erros as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
         </table>
@@ -108,7 +108,7 @@
   {#if resultados.length}
     <div class="update-status" aria-live="polite">
       <strong>{resultados.length} previsão(ões) gerada(s)</strong>
-      <table class="erros">
+      <table class="tabela">
         <thead><tr><th>Linha</th><th>Série</th><th>Períodos</th><th>Total previsto</th></tr></thead>
         <tbody>
           {#each resultados as item}

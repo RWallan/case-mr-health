@@ -92,25 +92,25 @@
 
 <section class="card recomendacoes" aria-label="Recomendações">
   <div class="section-heading">
-    <span class="step">04</span>
+    <span class="step">05</span>
     <div><h2>Recomendações por SKU</h2><p>Variação da demanda prevista (2 semanas) contra a venda recente (4 semanas), comparada ao Q3 histórico.</p></div>
   </div>
 
   <form class="llm-form" onsubmit={(evento) => { evento.preventDefault(); carregar(); }}>
     <h3>LLM da explicação (opcional)</h3>
     <p class="nota">Informe o modelo (formato <code>provedor/modelo</code>) e a sua chave de API. Funciona com OpenAI, Anthropic, Gemini e outros. A chave é enviada só nas consultas desta página, não é armazenada e não aparece em log. Sem chave, a explicação vem do template.</p>
-    <label>Modelo
-      <input list="modelos-llm" bind:value={modeloLlm} placeholder="openai/gpt-4o" required={!!chaveLlm} pattern="[^/\s]+/\S+" title="Use o formato provedor/modelo, por exemplo openai/gpt-4o" autocomplete="off" />
+    <label class="rotulo">Modelo
+      <input class="campo" list="modelos-llm" bind:value={modeloLlm} placeholder="openai/gpt-4o" required={!!chaveLlm} pattern="[^/\s]+/\S+" title="Use o formato provedor/modelo, por exemplo openai/gpt-4o" autocomplete="off" />
     </label>
     <datalist id="modelos-llm">{#each modelosSugeridos as modelo}<option value={modelo}></option>{/each}</datalist>
-    <label>Chave de API
-      <input type="password" bind:value={chaveLlm} autocomplete="off" placeholder="sk-…" />
+    <label class="rotulo">Chave de API
+      <input class="campo" type="password" bind:value={chaveLlm} autocomplete="off" placeholder="sk-…" />
     </label>
-    <button type="submit" disabled={carregando}>Aplicar e recarregar</button>
+    <button class="btn btn-secundario" type="submit" disabled={carregando} aria-busy={carregando}>Aplicar e recarregar</button>
   </form>
 
-  {#if erro}<div class="error" role="alert">{erro}</div>{/if}
-  {#if carregando}<p class="nota">Carregando…</p>{/if}
+  {#if erro}<div class="alerta alerta-erro" role="alert">{erro}</div>{/if}
+  {#if carregando}<p class="carregando" role="status">Carregando…</p>{/if}
 
   <ul class="lista">
     {#each itens as item (item.sku)}
@@ -122,7 +122,7 @@
           {/if}
         </div>
         {#if item.erro}
-          <div class="error" role="alert">{item.erro}</div>
+          <div class="alerta alerta-erro" role="alert">{item.erro}</div>
         {:else}
           <dl class="numeros">
             <div><dt>Variação</dt><dd>{fmtPct(item.variacao)}</dd></div>
@@ -139,14 +139,14 @@
 
   <form class="alerta-form" onsubmit={verAlerta}>
     <h3>Ver e-mail de alerta</h3>
-    <label for="alerta-sku">SKU</label>
-    <select id="alerta-sku" bind:value={skuAlerta}>{#each skus as item}<option value={item}>{item}</option>{/each}</select>
-    <label for="alerta-email">E-mail do gestor</label>
-    <input id="alerta-email" type="email" required placeholder="gestor@exemplo.com.br" bind:value={email} />
-    <button type="submit" disabled={enviando}>{enviando ? 'Gerando…' : 'Ver alerta'}</button>
+    <label class="rotulo" for="alerta-sku">SKU</label>
+    <select id="alerta-sku" class="campo" bind:value={skuAlerta}>{#each skus as item}<option value={item}>{item}</option>{/each}</select>
+    <label class="rotulo" for="alerta-email">E-mail do gestor</label>
+    <input id="alerta-email" class="campo" type="email" required placeholder="gestor@exemplo.com.br" bind:value={email} />
+    <button class="btn btn-secundario" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Gerando…' : 'Ver alerta'}</button>
   </form>
 
-  {#if erroAlerta}<div class="error" role="alert">{erroAlerta}</div>{/if}
+  {#if erroAlerta}<div class="alerta alerta-erro" role="alert">{erroAlerta}</div>{/if}
   {#if alerta}
     <article class="email" aria-live="polite">
       <p class="simulado" role="status">ENVIO SIMULADO · {alerta.aviso_envio}</p>
@@ -155,7 +155,7 @@
       <p class="selo" data-resultado={alerta.recomendacao.resultado}><span aria-hidden="true">{rotulos[alerta.recomendacao.resultado].sinal}</span> {rotulos[alerta.recomendacao.resultado].texto}</p>
       <p>{alerta.recomendacao.texto}</p>
       <p>Variação {fmtPct(alerta.recomendacao.variacao)} · Q3 {fmtLimite(alerta.recomendacao.limite_aplicado)}</p>
-      <table class="erros">
+      <table class="tabela">
         <thead><tr><th>Semana</th><th>Demanda</th><th>Intervalo 80%</th><th>Intervalo 95%</th><th>Valor (R$)</th></tr></thead>
         <tbody>
           {#each alerta.periodos as periodo}
@@ -177,34 +177,32 @@
 
 <style>
   .recomendacoes { margin-top: 24px; padding: 24px 25px; }
-  .nota { color: #74837d; font-size: 12px; }
+  .nota { color: var(--cor-texto-suave); font-size: var(--texto-xs); }
   .lista { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .item { border: 1px solid #e6ebe6; border-left-width: 5px; border-radius: 10px; padding: 14px; font-size: 12px; }
-  .item[data-resultado='aumento_significativo'] { border-left-color: #c0572b; background: #fff7f2; }
-  .item[data-resultado='reducao_significativa'] { border-left-color: #3d6f8e; background: #f3f8fb; }
-  .item[data-resultado='estavel'] { border-left-color: #739354; background: #f7faf3; }
-  .item[data-resultado='insuficiente'] { border-left-color: #8a9891; border-left-style: dashed; background: #f6f7f6; }
+  .item { border: 1px solid var(--cor-borda); border-left-width: 5px; border-radius: 10px; padding: 14px; font-size: var(--texto-xs); }
+  .item[data-resultado='aumento_significativo'] { border-left-color: var(--cor-aumento); background: var(--cor-aumento-fundo); }
+  .item[data-resultado='reducao_significativa'] { border-left-color: var(--cor-info); background: var(--cor-info-fundo); }
+  .item[data-resultado='estavel'] { border-left-color: var(--cor-historico); background: var(--cor-sucesso-fundo); }
+  .item[data-resultado='insuficiente'] { border-left-color: var(--cor-texto-suave); border-left-style: dashed; background: var(--cor-neutro-fundo); }
   .topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .selo { display: inline-block; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid currentColor; }
-  .selo[data-resultado='aumento_significativo'] { color: #9c3f17; }
-  .selo[data-resultado='reducao_significativa'] { color: #2b5873; }
-  .selo[data-resultado='estavel'] { color: #4d6b33; }
-  .selo[data-resultado='insuficiente'] { color: #5b6b64; }
+  .selo { display: inline-block; font-weight: 700; font-size: var(--texto-xs); padding: 3px 8px; border-radius: var(--raio-pilula); border: 1px solid currentColor; }
+  .selo[data-resultado='aumento_significativo'] { color: var(--cor-aumento); }
+  .selo[data-resultado='reducao_significativa'] { color: var(--cor-info); }
+  .selo[data-resultado='estavel'] { color: var(--cor-sucesso); }
+  .selo[data-resultado='insuficiente'] { color: var(--cor-texto-secundario); }
   .numeros { display: flex; gap: 22px; margin: 12px 0 6px; }
   .numeros div { display: grid; gap: 2px; }
-  dt { color: #87958e; font-size: 10px; font-weight: 700; letter-spacing: .08em; }
-  dd { margin: 0; font-size: 16px; font-weight: 700; font-family: Manrope, sans-serif; }
-  .motivo, .aviso { color: #9a5f1f; margin: 4px 0; }
+  dt { color: var(--cor-texto-suave); font-size: var(--texto-xs); font-weight: 700; letter-spacing: .08em; }
+  dd { margin: 0; font-size: 16px; font-weight: 700; font-family: var(--fonte-titulo); }
+  .motivo, .aviso { color: var(--cor-alerta); margin: 4px 0; }
   .explicacao { margin: 8px 0 4px; line-height: 1.5; }
-  .origem { margin: 0; font-size: 10px; color: #74837d; font-weight: 600; }
-  .llm-form { margin-top: 16px; display: grid; gap: 6px; max-width: 32rem; font-size: 12px; }
+  .origem { margin: 0; font-size: var(--texto-xs); color: var(--cor-texto-suave); font-weight: 600; }
+  .llm-form { margin-top: 16px; display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .llm-form h3 { font-size: 14px; margin-bottom: 0; }
-  .alerta-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid #e6ebe6; display: grid; gap: 6px; max-width: 32rem; font-size: 12px; }
+  .alerta-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--cor-borda); display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .alerta-form h3 { font-size: 14px; margin-bottom: 4px; }
-  .llm-form input, .alerta-form input, .alerta-form select { height: 38px; border: 1px solid #dfe6df; border-radius: 8px; padding: 0 12px; }
-  button { justify-self: start; height: 38px; margin-top: 6px; padding: 0 16px; border: 0; border-radius: 8px; background: #234d3e; color: #fff; font-weight: 600; font-size: 12px; cursor: pointer; }
-  button:disabled { opacity: .55; cursor: wait; }
-  .email { margin-top: 16px; border: 1px solid #dfe6df; border-radius: 10px; padding: 16px; font-size: 12px; max-width: 46rem; }
+  .llm-form .btn, .alerta-form .btn { justify-self: start; margin-top: 6px; }
+  .email { margin-top: 16px; border: 1px solid var(--cor-borda-campo); border-radius: 10px; padding: 16px; font-size: var(--texto-xs); max-width: 46rem; }
   .email p { margin: 6px 0; }
-  .simulado { background: #fff3d6; color: #6b4a0b; font-weight: 700; padding: 8px 10px; border-radius: 8px; border: 1px solid #e3c277; }
+  .simulado { background: var(--cor-alerta-fundo); color: var(--cor-alerta); font-weight: 700; padding: 8px 10px; border-radius: var(--raio-sm); border: 1px solid var(--cor-alerta-borda); }
 </style>
