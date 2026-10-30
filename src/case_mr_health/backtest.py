@@ -2,7 +2,8 @@
 
 Recebe só a visão de desenvolvimento: a série já chega sem o OOT. Cada
 fold ajusta o previsor apenas com o treino do fold, prevê o horizonte do
-teste e trunca a previsão em zero.
+teste e trunca a previsão em zero. Com `intervalos`, mede também a
+cobertura no teste de cada fold (#8), calibrando só com o treino do fold.
 """
 
 from dataclasses import dataclass, field
@@ -11,8 +12,14 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
+from case_mr_health import intervalos as mod_intervalos
 from case_mr_health import metricas
 from case_mr_health.algoritmos import criar
+from case_mr_health.intervalos import (
+    ConfigIntervalos,
+    IntervalosFold,
+    ResumoIntervalos,
+)
 from case_mr_health.particoes import Particao
 
 # Períodos de teste mantidos na série por decisão do usuário (registro da
@@ -33,6 +40,7 @@ class ResultadoFold:
     previsto: tuple[float, ...]
     escala_mase: float
     metricas: dict[str, float]
+    intervalos: IntervalosFold | None = None
 
 
 @dataclass(frozen=True)
@@ -40,6 +48,7 @@ class ResultadoBacktest:
     folds: tuple[ResultadoFold, ...]
     medias: dict[str, float]
     sensibilidade: dict[str, dict[str, float]] = field(default_factory=dict)
+    intervalos: ResumoIntervalos | None = None
 
 
 def media_dos_folds(folds: list[dict[str, float]]) -> dict[str, float]:
@@ -51,14 +60,18 @@ def media_dos_folds(folds: list[dict[str, float]]) -> dict[str, float]:
     }
 
 
-def rodar_backtest(
+def rodar_backtest(  # noqa: PLR0913, PLR0917
     serie: pd.Series,
     particao: Particao,
     algoritmo: str,
     hiperparametros: dict,
     seed: int,
+    intervalos: ConfigIntervalos | None = None,
 ) -> ResultadoBacktest:
-    """Executa todos os folds da partição para um previsor da tabela."""
+    """Executa todos os folds da partição para um previsor da tabela.
+
+    Sem `intervalos`, só a previsão pontual: nada a mais é ajustado.
+    """
     if not particao.folds:
         raise ValueError(f'{particao.sku}/{particao.granularidade} sem folds')
     indice = pd.DatetimeIndex(serie.index).normalize()
@@ -77,6 +90,15 @@ def rodar_backtest(
         previsto = np.clip(
             previsor.ajustar(treino).prever(len(teste)), 0, None
         )
+        intervalos_fold = None
+        if intervalos is not None:
+            intervalos_fold = mod_intervalos.intervalos_do_fold(
+                lambda: criar(algoritmo, hiperparametros, seed),
+                previsor,
+                treino,
+                previsto,
+                intervalos,
+            )
         resultados.append(
             ResultadoFold(
                 fold=i,
@@ -87,16 +109,44 @@ def rodar_backtest(
                 previsto=tuple(previsto),
                 escala_mase=metricas.escala_mase(treino),
                 metricas=metricas.calcular(teste, previsto, treino),
+                intervalos=intervalos_fold,
             )
         )
+    atipico = PERIODOS_ATIPICOS.get((particao.sku, particao.granularidade))
+    periodos = _periodos_teste(particao, indice)
     return ResultadoBacktest(
         folds=tuple(resultados),
         medias=media_dos_folds([r.metricas for r in resultados]),
         sensibilidade=sensibilidade(
-            resultados,
-            PERIODOS_ATIPICOS.get((particao.sku, particao.granularidade)),
-            indice_periodos=_periodos_teste(particao, indice),
+            resultados, atipico, indice_periodos=periodos
         ),
+        intervalos=(
+            None
+            if intervalos is None
+            else _resumir_intervalos(
+                resultados, atipico, periodos, intervalos.niveis
+            )
+        ),
+    )
+
+
+def _resumir_intervalos(
+    resultados: list[ResultadoFold],
+    atipico: date | None,
+    periodos: list[list[pd.Timestamp]],
+    niveis: tuple[float, ...],
+) -> ResumoIntervalos:
+    manter = None
+    if atipico is not None:
+        manter = [
+            np.array([p.date() != atipico for p in fold], dtype=bool)
+            for fold in periodos
+        ]
+    return mod_intervalos.resumir(
+        [r.intervalos for r in resultados],
+        [np.asarray(r.observado, dtype=float) for r in resultados],
+        niveis,
+        manter,
     )
 
 
