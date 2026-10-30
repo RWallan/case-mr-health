@@ -84,6 +84,54 @@ class Historico:
                 'no histórico.'
             ) from erro
 
+    def consultar(
+        self,
+        sku: str | None,
+        granularidade: str | None,
+        limite: int | None = 100,
+        deslocamento: int = 0,
+    ) -> tuple[list[LinhaHistorico], int]:
+        """Consulta previsões registradas, com filtros e paginação."""
+        filtros, parametros = [], []
+        if sku is not None:
+            filtros.append('sku = ?')
+            parametros.append(sku)
+        if granularidade is not None:
+            filtros.append('granularidade = ?')
+            parametros.append(granularidade)
+        where = f' WHERE {" AND ".join(filtros)}' if filtros else ''
+        try:
+            with self._trava:
+                total, linhas = self._consultar_linhas(
+                    where, parametros, limite, deslocamento
+                )
+        except duckdb.Error as erro:
+            raise HistoricoIndisponivel(
+                'O histórico de previsões não está disponível.'
+            ) from erro
+        return [LinhaHistorico(*linha) for linha in linhas], total
+
+    def _consultar_linhas(
+        self,
+        where: str,
+        parametros: list[str],
+        limite: int | None,
+        deslocamento: int,
+    ) -> tuple[int, list[tuple]]:
+        total = self._con.execute(
+            f'SELECT count(*) FROM previsoes{where}', parametros
+        ).fetchone()[0]
+        sql = (
+            f'SELECT {_COLUNAS} FROM previsoes{where} '
+            'ORDER BY data_geracao DESC, id_requisicao, data_alvo'
+        )
+        parametros_pagina = parametros
+        if limite is not None:
+            sql += ' LIMIT ? OFFSET ?'
+            parametros_pagina = [*parametros, limite, deslocamento]
+        linhas = self._con.execute(sql, parametros_pagina).fetchall()
+        return total, linhas
+
     def _gravar(self, linhas: Sequence[LinhaHistorico]) -> None:
         self._con.begin()
         try:

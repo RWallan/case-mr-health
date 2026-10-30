@@ -5,14 +5,24 @@ from contextlib import asynccontextmanager
 from importlib import metadata
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from case_mr_health.api.erros import registrar_tratadores
 from case_mr_health.api.historico import Historico
 from case_mr_health.api.modelos import carregar_modelos
-from case_mr_health.api.rotas import changelog, predicao
+from case_mr_health.api.rotas import (
+    changelog,
+    consultas,
+    predicao,
+    recomendacoes,
+)
 from case_mr_health.config import Settings
 
-ROTEADORES = (predicao.router, changelog.router)
+ROTEADORES = (
+    predicao.router,
+    changelog.router,
+    consultas.router,
+)
 
 
 def criar_app(cfg: Settings | None = None) -> FastAPI:
@@ -37,6 +47,15 @@ def criar_app(cfg: Settings | None = None) -> FastAPI:
         lifespan=ciclo_de_vida,
     )
     registrar_tratadores(app)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+        ],
+        allow_methods=['GET', 'POST'],
+        allow_headers=['content-type'],
+    )
     for roteador in ROTEADORES:
         app.include_router(roteador)
     return app
