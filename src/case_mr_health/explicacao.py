@@ -286,7 +286,11 @@ def criar_gerador(
                 {'role': 'user', 'content': entrada.model_dump_json()},
             ],
         )
-        return resposta.choices[0].message.content or ''
+        bruto = resposta.choices[0].message.content or ''
+        if api_key in bruto:
+            # Um LLM que devolve a chave não a leva à resposta nem ao log.
+            raise ValueError('a saída do LLM continha a chave')
+        return bruto
 
     return gerar
 
@@ -336,11 +340,14 @@ def explicar(
     """LLM validado; template em qualquer outro caso. Nunca levanta erro."""
     if gerador is not None:
         try:
-            return Explicacao(
-                texto=_validar(gerador(entrada), entrada), origem='llm'
-            )
-        except (ValueError, ValidationError) as erro:
-            logger.warning('Saída do LLM rejeitada: {}', erro)
+            bruto = gerador(entrada)
         except Exception as erro:  # noqa: BLE001
+            # Só o tipo: a mensagem de uma exceção do provedor pode trazer
+            # a chave (#44).
             logger.warning('Falha do LLM: {}', type(erro).__name__)
+        else:
+            try:
+                return Explicacao(texto=_validar(bruto, entrada), origem='llm')
+            except (ValueError, ValidationError) as erro:
+                logger.warning('Saída do LLM rejeitada: {}', erro)
     return Explicacao(texto=montar_template(entrada), origem='template')

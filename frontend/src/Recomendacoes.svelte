@@ -1,5 +1,6 @@
 <script>
   // Recomendações por SKU, explicação (LLM ou template) e e-mail de alerta simulado (#23).
+  import { PROVEDORES, montarModelo, modeloValido, cabecalhosLlm, avisoTemplate } from './llm.js';
   let { api, skus } = $props();
 
   const rotulos = {
@@ -21,18 +22,15 @@
   const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
   const fmtData = (valor) => new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T12:00:00`));
 
-  const modelosSugeridos = [
-    'anthropic/claude-sonnet-5-5',
-    'openai/gpt-4o',
-    'gemini/gemini-2.0-flash',
-    'mistral/mistral-large-latest',
-  ];
   // A chave fica só na memória desta página: não vai para o armazenamento do navegador.
+  let provedor = $state('openai');
   let modeloLlm = $state('');
   let chaveLlm = $state('');
+  let mostrarChave = $state(false);
 
-  const cabecalhosLlm = () =>
-    chaveLlm ? { 'X-LLM-Modelo': modeloLlm.trim(), 'X-LLM-Chave': chaveLlm.trim() } : {};
+  const provedorAtual = $derived(PROVEDORES.find((p) => p.id === provedor));
+  const modeloComposto = $derived(montarModelo(provedor, modeloLlm));
+  const modeloInvalido = $derived(!!chaveLlm && !modeloValido(modeloComposto));
 
   let itens = $state([]);
   let erro = $state('');
@@ -44,24 +42,29 @@
   let alerta = $state(null);
   let erroAlerta = $state('');
 
+  async function carregarSku(item, cabecalhos) {
+    try {
+      const resposta = await fetch(`${api}/recomendacoes/${encodeURIComponent(item)}`, { headers: cabecalhos });
+      const corpo = await resposta.json();
+      if (!resposta.ok) return { sku: item, erro: corpo.mensagem ?? 'Recomendação indisponível.' };
+      return { sku: item, usouLlm: 'X-LLM-Chave' in cabecalhos, ...corpo };
+    } catch (falha) {
+      return { sku: item, erro: falha.message };
+    }
+  }
+
   async function carregar() {
     erro = '';
     carregando = true;
-    try {
-      itens = await Promise.all(
-        skus.map(async (item) => {
-          const resposta = await fetch(`${api}/recomendacoes/${encodeURIComponent(item)}`, { headers: cabecalhosLlm() });
-          const corpo = await resposta.json();
-          if (!resposta.ok) return { sku: item, erro: corpo.mensagem ?? 'Recomendação indisponível.' };
-          return { sku: item, ...corpo };
-        }),
-      );
-    } catch (falha) {
-      erro = falha.message;
-      itens = [];
-    } finally {
-      carregando = false;
-    }
+    const cabecalhos = cabecalhosLlm(provedor, modeloLlm, chaveLlm);
+    itens = skus.map((item) => ({ sku: item, processando: true }));
+    await Promise.all(
+      skus.map(async (item, i) => {
+        const pronto = await carregarSku(item, cabecalhos);
+        itens[i] = pronto;
+      }),
+    );
+    carregando = false;
   }
 
   async function verAlerta(evento) {
@@ -99,18 +102,20 @@
   <form class="llm-form" onsubmit={(evento) => { evento.preventDefault(); carregar(); }}>
     <h3>LLM da explicação (opcional)</h3>
     <p class="nota">Informe o modelo (formato <code>provedor/modelo</code>) e a sua chave de API. Funciona com OpenAI, Anthropic, Gemini e outros. A chave é enviada só nas consultas desta página, não é armazenada e não aparece em log. Sem chave, a explicação vem do template.</p>
-    <label class="rotulo">Modelo
-      <input class="campo" list="modelos-llm" bind:value={modeloLlm} placeholder="openai/gpt-4o" required={!!chaveLlm} pattern="[^/\s]+/\S+" title="Use o formato provedor/modelo, por exemplo openai/gpt-4o" autocomplete="off" />
-    </label>
-    <datalist id="modelos-llm">{#each modelosSugeridos as modelo}<option value={modelo}></option>{/each}</datalist>
-    <label class="rotulo">Chave de API
-      <input class="campo" type="password" bind:value={chaveLlm} autocomplete="off" placeholder="sk-…" />
-    </label>
-    <button class="btn btn-secundario" type="submit" disabled={carregando} aria-busy={carregando}>Aplicar e recarregar</button>
+    <label class="rotulo" for="llm-provedor">Provedor</label>
+    <select id="llm-provedor" class="campo" bind:value={provedor}>{#each PROVEDORES as p}<option value={p.id}>{p.rotulo}</option>{/each}</select>
+    <label class="rotulo" for="llm-modelo">Modelo{provedor === 'outro' ? ' (provedor/modelo)' : ''}</label>
+    <input id="llm-modelo" class="campo" bind:value={modeloLlm} placeholder={provedorAtual.exemplo} aria-invalid={modeloInvalido} aria-describedby="llm-modelo-ajuda" autocomplete="off" />
+    <p id="llm-modelo-ajuda" class="nota">Enviado como <code>{modeloComposto || 'provedor/modelo'}</code>.{#if modeloInvalido} <span class="erro-campo" role="alert">Informe o modelo no formato provedor/modelo; sem ele a chave não é enviada.</span>{/if}</p>
+    <label class="rotulo" for="llm-chave">Chave de API</label>
+    <div class="chave">
+      <input id="llm-chave" class="campo" type={mostrarChave ? 'text' : 'password'} bind:value={chaveLlm} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…" />
+      <button class="btn btn-secundario" type="button" aria-pressed={mostrarChave} onclick={() => (mostrarChave = !mostrarChave)}>{mostrarChave ? 'Ocultar' : 'Mostrar'}</button>
+    </div>
+    <button class="btn btn-secundario" type="submit" disabled={carregando} aria-busy={carregando}>{carregando ? 'Carregando…' : 'Aplicar e recarregar'}</button>
   </form>
 
   {#if erro}<div class="alerta alerta-erro" role="alert">{erro}</div>{/if}
-  {#if carregando}<p class="carregando" role="status">Carregando…</p>{/if}
 
   <ul class="lista">
     {#each itens as item (item.sku)}
@@ -121,7 +126,9 @@
             <span class="selo" data-resultado={item.resultado}><span aria-hidden="true">{rotulos[item.resultado].sinal}</span> {rotulos[item.resultado].texto}</span>
           {/if}
         </div>
-        {#if item.erro}
+        {#if item.processando}
+          <p class="carregando" role="status">Processando…</p>
+        {:else if item.erro}
           <div class="alerta alerta-erro" role="alert">{item.erro}</div>
         {:else}
           <dl class="numeros">
@@ -132,6 +139,7 @@
           <p class="aviso">Aviso: {item.aviso}</p>
           <p class="explicacao">{item.explicacao.texto}</p>
           <p class="origem" data-origem={item.explicacao.origem}>{origens[item.explicacao.origem] ?? item.explicacao.origem}</p>
+          {#if avisoTemplate(item.explicacao.origem, item.usouLlm)}<p class="motivo" role="status">{avisoTemplate(item.explicacao.origem, item.usouLlm)}</p>{/if}
         {/if}
       </li>
     {/each}
@@ -199,6 +207,9 @@
   .origem { margin: 0; font-size: var(--texto-xs); color: var(--cor-texto-suave); font-weight: 600; }
   .llm-form { margin-top: 16px; display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .llm-form h3 { font-size: 14px; margin-bottom: 0; }
+  .chave { display: flex; gap: var(--espaco-2); }
+  .chave .campo { flex: 1; }
+  .erro-campo { color: var(--cor-erro); font-weight: 600; }
   .alerta-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--cor-borda); display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .alerta-form h3 { font-size: 14px; margin-bottom: 4px; }
   .llm-form .btn, .alerta-form .btn { justify-self: start; margin-top: 6px; }
