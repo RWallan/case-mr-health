@@ -1,0 +1,87 @@
+site_name: case-mr-health
+site_description: Documentação do modelo preditivo de demanda.
+docs_dir: docs/guia
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  language: pt-BR
+  font:
+    text: DM Sans
+    code: Roboto Mono
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Tema escuro
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Tema claro
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+extra_css:
+  - stylesheets/tokens.css
+  - stylesheets/tema.css
+
+plugins:
+  - search:
+      lang: pt
+  - gen-files:
+      scripts:
+        - scripts/gen_docs.py
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Início: index.md
+  - Negócio:
+      - negocio/index.md
+      - Contexto: negocio/contexto.md
+      - Glossário: negocio/glossario.md
+  - Arquitetura:
+      - arquitetura/index.md
+      - Visão geral: arquitetura/visao-geral.md
+      - Fluxos: arquitetura/fluxos.md
+      - Armazenamento: arquitetura/armazenamento.md
+  - Funcional:
+      - funcional/index.md
+      - Regras por funcionalidade: funcional/regras.md
+  - Ciência de dados:
+      - ciencia-de-dados/index.md
+      - Dados e partições: ciencia-de-dados/dados-e-particoes.md
+      - Candidatos e backtest: ciencia-de-dados/candidatos-e-backtest.md
+      - Seleção e intervalos: ciencia-de-dados/selecao-e-intervalos.md
+      - Reajuste e avaliação final: ciencia-de-dados/reajuste-e-avaliacao.md
+  - Operação:
+      - operacao/index.md
+      - Instalação e configuração: operacao/instalacao.md
+      - Execução, testes e logs: operacao/execucao.md
+      - Retreino e troubleshooting: operacao/retreino-e-troubleshooting.md
+  - Decisões:
+      - decisoes/index.md
+  - Rastreabilidade: rastreabilidade.md

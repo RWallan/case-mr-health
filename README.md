@@ -119,8 +119,18 @@ As planilhas brutas ficam em `data/raw/` (`PEDIDO-_1_.xlsx`,
    da API só aceita o dashboard em `127.0.0.1:5173` e `localhost:5173`; para
    servir o build por outra porta, inclua-a em `src/case_mr_health/api/app.py`.
 
-Para subir os três de uma vez (API, UI do MLflow e dashboard), use
-`uv run poe app`; Ctrl+C encerra todos.
+7. **Documentação** (MkDocs Material, porta 8001; instale o grupo com
+   `uv sync --group docs`).
+
+   ```bash
+   uv run poe docs         # servidor local em http://127.0.0.1:8001
+   uv run poe docs-build   # build com --strict (gera site/, ignorado)
+   ```
+
+   A publicação (GitHub Pages ou outra) ainda não está definida.
+
+Para subir tudo de uma vez (API, UI do MLflow, dashboard e documentação),
+use `uv run poe app`; Ctrl+C encerra todos.
 
 A API nunca treina: serve o `champion` de cada série. Se a base mudar, o
 envio de pedidos novos pelo dashboard (`POST /dados/pedidos`) reajusta os
@@ -147,7 +157,8 @@ passam a ser guardados conforme o servidor.
 
 **Endereços do dashboard.** O frontend lê `VITE_API_URL` (padrão
 `http://localhost:8000`) e `VITE_MLFLOW_URL` (padrão `http://localhost:5000`;
-é o destino do link para a UI do MLflow). Defina-os em
+é o destino do link para a UI do MLflow) e `VITE_DOCS_URL` (padrão
+`http://localhost:8001`, link "Documentação"). Defina-os em
 `frontend/.env.local`.
 
 ## Testes

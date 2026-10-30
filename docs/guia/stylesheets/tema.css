@@ -1,0 +1,38 @@
+/* Mapeia os tokens de design/tokens.css (copiados para tokens.css no build)
+   para as variáveis do Material. O tema escuro é derivado só aqui. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&display=swap');
+
+:root,
+[data-md-color-scheme='default'] {
+  --md-primary-fg-color: var(--cor-verde);
+  --md-primary-fg-color--light: var(--cor-verde-link);
+  --md-primary-fg-color--dark: var(--cor-verde-escuro);
+  --md-primary-bg-color: var(--cor-texto-sobre-escuro);
+  --md-accent-fg-color: var(--cor-foco);
+  --md-default-bg-color: var(--cor-fundo);
+  --md-default-fg-color: var(--cor-texto);
+  --md-default-fg-color--light: var(--cor-texto-secundario);
+  --md-typeset-color: var(--cor-texto);
+  --md-typeset-a-color: var(--cor-verde-link);
+  --md-code-bg-color: var(--cor-superficie-neutra);
+  --md-code-fg-color: var(--cor-texto-forte);
+}
+
+[data-md-color-scheme='slate'] {
+  --md-primary-fg-color: var(--cor-verde-escuro);
+  --md-default-bg-color: #101a16;
+  --md-default-bg-color--light: #1a2822;
+  --md-default-fg-color: #e6ebe6;
+  --md-default-fg-color--light: #b9c6bf;
+  --md-typeset-color: #e6ebe6;
+  --md-typeset-a-color: var(--cor-lima);
+  --md-accent-fg-color: var(--cor-lima);
+  --md-code-bg-color: #1a2822;
+  --md-code-fg-color: #e6ebe6;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-family: Manrope, var(--fonte-texto);
+}
