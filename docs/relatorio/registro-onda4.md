@@ -31,3 +31,7 @@ mantendo os dois lados).
 - Cada carga da lista de recomendações faz 4 chamadas; com chave de LLM,
   são 4 chamadas pagas, sem cache.
 - Os PRs ainda não foram abertos.
+
+## Integração (2026-10-30)
+
+Um PR por ticket, mesclado pelo GitHub na ordem #20 (PR #20), #21 (PR #21), #24 (PR #22), #25 (PR #23) e #23. O GitHub recusou a aprovação do próprio autor ("Can not approve your own pull request"); o merge foi feito a pedido explícito do usuário, sem aprovação registrada. Decisões do usuário no mesmo dia: o LLM é agnóstico ao provedor (litellm), com modelo e chave informados pelo usuário no dashboard (cabeçalhos `X-LLM-Modelo` e `X-LLM-Chave`); os alertas continuam só semanais.
