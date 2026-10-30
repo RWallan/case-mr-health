@@ -22,6 +22,7 @@ ROTEADORES = (
     predicao.router,
     changelog.router,
     consultas.router,
+    recomendacoes.router,
 )
 
 
