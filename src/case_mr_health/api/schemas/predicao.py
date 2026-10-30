@@ -23,7 +23,6 @@ class PedidoPredicao(BaseModel):
                 {
                     'sku': 'item A',
                     'granularidade': 'diaria',
-                    'data_referencia': '2021-08-19',
                     'horizonte': 3,
                 }
             ]
@@ -39,13 +38,15 @@ class PedidoPredicao(BaseModel):
             'só modelo diário.'
         )
     )
-    data_referencia: date = Field(
+    data_referencia: date | None = Field(
+        default=None,
         description=(
-            'Último período conhecido pelo solicitante, `AAAA-MM-DD`; os '
-            'períodos-alvo são os seguintes. Na semanal, é normalizada para '
-            'a segunda-feira da semana. Não pode ser anterior ao último '
-            'período do treino do modelo.'
-        )
+            'Opcional. Último período conhecido pelo solicitante, '
+            '`AAAA-MM-DD`; os períodos-alvo são os seguintes. Ausente, vale '
+            'o fim do treino do modelo servido (ADR 0013). Na semanal, é '
+            'normalizada para a segunda-feira da semana. Não pode ser '
+            'anterior ao último período do treino do modelo.'
+        ),
     )
     horizonte: int = Field(
         default=1,
@@ -154,7 +155,11 @@ class RespostaPredicao(BaseModel):
         ),
     )
     data_referencia: date = Field(
-        description='Data de referência usada (normalizada, na semanal).'
+        description=(
+            'Data de referência usada (a informada ou, se ausente, o fim do '
+            'treino do modelo), normalizada na semanal. É o início da '
+            'previsão: os períodos-alvo vêm depois dela.'
+        )
     )
     data_geracao: datetime = Field(description='Momento em que foi gerada.')
     valor_unitario: float = Field(

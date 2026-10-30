@@ -20,13 +20,11 @@ class PedidoLote(BaseModel):
                         {
                             'sku': 'item A',
                             'granularidade': 'diaria',
-                            'data_referencia': '2021-08-19',
                             'horizonte': 3,
                         },
                         {
                             'sku': 'B',
                             'granularidade': 'semanal',
-                            'data_referencia': '2021-08-16',
                         },
                     ]
                 }

@@ -103,7 +103,8 @@ def criar_lote_xlsx(
     """Mesmas regras do lote em JSON, com o erro apontando a linha.
 
     Baixe o template em `GET /predicoes/lote/template.xlsx`. Colunas:
-    `sku`, `granularidade`, `data_referencia` e, opcional, `horizonte`.
+    `sku`, `granularidade` e, opcionais, `data_referencia` (em branco, vale
+    o fim do treino do modelo) e `horizonte`.
     Qualquer erro cancela o arquivo inteiro.
     """
     estado = request.app.state

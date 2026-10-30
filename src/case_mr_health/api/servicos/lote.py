@@ -7,7 +7,7 @@ e os problemas voltam juntos, cada um com seu campo (e a linha, na planilha).
 
 import re
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import datetime
 from io import BytesIO
 from zipfile import BadZipFile
 
@@ -33,7 +33,7 @@ from case_mr_health.treino import horizonte_maximo
 ABA = 'Solicitações'
 ABA_INSTRUCOES = 'Instruções'
 COLUNAS = ('sku', 'granularidade', 'data_referencia', 'horizonte')
-OBRIGATORIAS = ('sku', 'granularidade', 'data_referencia')
+OBRIGATORIAS = ('sku', 'granularidade')
 MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
@@ -216,8 +216,8 @@ def template_xlsx(modelos: CatalogoModelos, cfg: Settings) -> bytes:
     aba.append(list(COLUNAS))
     for celula in aba[1]:
         celula.font = Font(bold=True)
-    for sku, granularidade, referencia in _exemplos(modelos):
-        aba.append([sku, granularidade, referencia, 1])
+    for sku, granularidade in _exemplos(modelos):
+        aba.append([sku, granularidade, None, 1])
     aba.freeze_panes = 'A2'
     for coluna, largura in zip('ABCD', (14, 16, 18, 12), strict=True):
         aba.column_dimensions[coluna].width = largura
@@ -230,22 +230,14 @@ def template_xlsx(modelos: CatalogoModelos, cfg: Settings) -> bytes:
     return saida.getvalue()
 
 
-def _exemplos(modelos: CatalogoModelos) -> list[tuple[str, str, date]]:
-    """Uma linha por granularidade, na referência que o modelo aceita."""
+def _exemplos(modelos: CatalogoModelos) -> list[tuple[str, str]]:
+    """Uma linha por granularidade, sem data: vale o fim do treino."""
     exemplos = {}
-    for (sku, granularidade), modelo in sorted(modelos.modelos.items()):
-        if granularidade in exemplos:
-            continue
-        referencia = predicao.normalizar_referencia(
-            modelo.desenvolvimento_fim, granularidade
-        )
-        exemplos[granularidade] = (sku, granularidade, referencia)
+    for sku, granularidade in sorted(modelos.modelos):
+        exemplos.setdefault(granularidade, (sku, granularidade))
     if exemplos:
         return list(exemplos.values())
-    return [
-        ('item A', 'diaria', date(2021, 8, 19)),
-        ('item A', 'semanal', date(2021, 8, 16)),
-    ]
+    return [('item A', 'diaria'), ('item A', 'semanal')]
 
 
 def _instrucoes(cfg: Settings) -> list[str]:
@@ -257,10 +249,10 @@ def _instrucoes(cfg: Settings) -> list[str]:
         'sku (obrigatório): `item A` ou só `A`.',
         'granularidade (obrigatório): `diaria` ou `semanal`. A mensal não é '
         'servida.',
-        'data_referencia (obrigatório): último período conhecido, no '
-        'formato AAAA-MM-DD ou como data do Excel. Na semanal, vale a '
-        'segunda-feira da semana. Não pode ser anterior ao fim do treino '
-        'do modelo.',
+        'data_referencia (opcional): último período conhecido, no formato '
+        'AAAA-MM-DD ou como data do Excel. Em branco, vale o fim do treino '
+        'do modelo servido. Na semanal, vale a segunda-feira da semana. Não '
+        'pode ser anterior ao fim do treino do modelo.',
         f'horizonte (opcional, padrão 1): períodos a prever, inteiro maior '
         f'que zero. Somado ao intervalo entre o fim do treino e a data de '
         f'referência, não pode passar de {diaria} dias ou {semanal} semanas.',

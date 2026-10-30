@@ -526,6 +526,36 @@ def test_referencia_depois_do_treino_fatia_os_passos_seguintes(cliente):
     ]
 
 
+@pytest.mark.parametrize('granularidade', ['diaria', 'semanal'])
+def test_sem_referencia_vale_o_fim_do_treino(cliente, granularidade):
+    resposta = cliente.post(
+        '/predicoes',
+        json={
+            'sku': 'item B',
+            'granularidade': granularidade,
+            'horizonte': 2,
+        },
+    )
+
+    informada = _pedir(cliente, 'item B', granularidade, horizonte=2)
+    assert resposta.status_code == HTTP_OK
+    assert resposta.json()['data_referencia'] == str(
+        FIM_DIARIA if granularidade == 'diaria' else SEGUNDA_FINAL
+    )
+    assert _alvos(resposta) == _alvos(informada)
+    assert _quantidades(resposta) == _quantidades(informada)
+
+
+def test_sem_referencia_na_semanal_normaliza_para_a_segunda(cliente):
+    resposta = cliente.post(
+        '/predicoes', json={'sku': 'item A', 'granularidade': 'semanal'}
+    )
+
+    assert resposta.json()['data_referencia'] == str(SEGUNDA_FINAL)
+    assert SEGUNDA_FINAL.weekday() == 0
+    assert _alvos(resposta) == [str(SEGUNDA_FINAL + timedelta(days=7))]
+
+
 def test_ultimo_passo_validado_e_servido(cliente):
     referencia = FIM_DIARIA + timedelta(days=13)
 
@@ -684,7 +714,7 @@ def test_data_invalida_e_rejeitada(cliente, data):
     assert 'AAAA-MM-DD' in _detalhes(resposta)['data_referencia']
 
 
-@pytest.mark.parametrize('campo', ['sku', 'granularidade', 'data_referencia'])
+@pytest.mark.parametrize('campo', ['sku', 'granularidade'])
 def test_campo_ausente_e_rejeitado(cliente, campo):
     corpo = {
         'sku': 'item A',
