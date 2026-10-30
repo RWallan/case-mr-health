@@ -323,3 +323,36 @@ def test_modelos_documenta_catalogo_e_exportacao_no_openapi(cliente):
         'responses'
     ]['200']['content']
     assert any(tipo.endswith('spreadsheetml.sheet') for tipo in conteudo)
+
+
+def _escopo(conteudo: bytes) -> dict:
+    aba = load_workbook(BytesIO(conteudo), read_only=True)['Escopo']
+    return {linha[0]: linha[1] for linha in aba.iter_rows(values_only=True)}
+
+
+def test_exportacao_sem_filtro_declara_escopo_completo(cliente, app):
+    app.state.historico.registrar([_linha(1), _linha(2)])
+
+    resposta = cliente.get('/previsoes/exportacao.xlsx')
+
+    escopo = _escopo(resposta.content)
+    assert escopo['Escopo'] == 'Completo'
+    assert escopo['SKU'] == 'Todos'
+    assert escopo['Granularidade'] == 'Todas'
+    assert escopo['Linhas'] == 2  # noqa: PLR2004
+    assert resposta.headers['x-escopo'] == 'completo'
+
+
+def test_exportacao_filtrada_declara_escopo_filtrado(cliente, app):
+    linha = _linha(1)
+    app.state.historico.registrar([linha])
+
+    resposta = cliente.get(
+        '/previsoes/exportacao.xlsx', params={'sku': linha.sku}
+    )
+
+    escopo = _escopo(resposta.content)
+    assert escopo['Escopo'] == 'Filtrado'
+    assert escopo['SKU'] == linha.sku
+    assert escopo['Granularidade'] == 'Todas'
+    assert resposta.headers['x-escopo'] == 'filtrado'
