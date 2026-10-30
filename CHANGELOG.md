@@ -1,3 +1,35 @@
+# case-mr-health 0.6.0 (2026-10-30)
+
+## Adicionado
+
+- Componente de upload reutilizável (`Upload.svelte`) nas três planilhas do app: arrastar e soltar, teclado, nome e tamanho, trocar e remover, recusa de extensão diferente de `.xlsx` e de arquivo acima de 5 MB (limite só do cliente; o backend não impõe limite). ([#43](issues/43.md))
+- Visão `#/changelog` no app, que mostra versões, data, tipos e itens do `CHANGELOG.md` lidos de `GET /changelog`, com estados de carregamento, vazio e erro. ([#46](issues/46.md))
+- Documentação em MkDocs Material (`mkdocs.yml`, `docs/guia/`, grupo `docs`), com tema pelos tokens de `design/tokens.css`, ADRs injetados no build, tarefas `docs` e `docs-build`, `docs` em `app` e link "Documentação" no cabeçalho do frontend (`VITE_DOCS_URL`). ([#47](issues/47.md))
+- Guia de negócio, arquitetura, fluxos ponta a ponta e regras funcionais com evidências e rastreabilidade das lacunas conhecidas. ([#48](issues/48.md))
+- Documentação de Ciência de Dados e Machine Learning em `docs/guia/ciencia-de-dados/`: séries e partições, candidatos e backtest, seleção e intervalos, reajuste e avaliação final, com fonte e localizador em cada número, a premissa de um modelo por SKU e granularidade verificada no código e no MLflow, e a situação da confiança (removida). ([#49](issues/49.md))
+- Páginas de operação da documentação: instalação, configuração (`CASE_MR_HEALTH_*`, `.env`, `VITE_*`), execução, testes, logs, Swagger, retreino, troubleshooting e a ausência de Docker e de deploy. ([#50](issues/50.md))
+
+## Correções
+
+- Gráfico de previsão com eixo por data, histórico em janela recente, início da previsão rotulado, tooltip, intervalos só quando calculados e alerta de previsão toda zero (também na tabela do lote). ([#38](issues/38.md))
+
+## Alterado
+
+- O `data/mlflow/` (Model Registry e artefatos dos modelos `champion`) passa a ser versionado, para que o clone da demonstração funcione sem retreinar; o README explica as ressalvas (caminhos absolutos, bases DuckDB geradas e retreino total). ([#32](issues/32.md))
+- `POST /predicoes` e o lote (JSON e XLSX) aceitam `data_referencia` ausente: vale o fim do treino do modelo servido (ADR 0013). O template e o Swagger refletem a data opcional. ([#39](issues/39.md))
+- Reajustadas as 8 séries na base atual (ADR 0011): versões `origem=atualizacao` promovidas a `champion`, com o fim do treino no último período histórico; o ruff deixa de entrar em `data/`. ([#40](issues/40.md))
+- O formulário de previsão pede só SKU, granularidade e períodos a prever; a data de referência saiu do fluxo padrão e fica em "Avançado". O painel e "Pedir previsões" passam a usar o mesmo componente. ([#41](issues/41.md))
+- Tokens de design em `design/tokens.css` e componentes base (botão, campo, link, alerta, tabela, carregando) no frontend; numeração das seções corrigida e contraste AA. ([#42](issues/42.md))
+- Seção Recomendações com seleção de provedor (OpenAI, Anthropic, Gemini, Mistral ou outro) e modelo, botão mostrar/ocultar da chave, estado de processamento por SKU e aviso quando a explicação veio do template. Auditoria de segurança da chave do LLM: a mensagem de exceções do provedor deixou de ser registrada em log e uma saída do LLM que repete a chave é descartada; teste com chave sentinela em logs e respostas. ([#44](issues/44.md))
+- Responsividade e acessibilidade do frontend: tabelas e o gráfico de comparação rolam dentro de contêiner próprio (sem rolagem horizontal da página em 360 px), cabeçalho que quebra linha, link para pular ao conteúdo, regiões `aria-live` persistentes, `th scope`, alvos de toque maiores, `prefers-reduced-motion` global e contraste AA verificado por teste (três tokens do gráfico e da linha de divisão escurecidos para atingir 3:1). ([#45](issues/45.md))
+
+## Interno
+
+- Decidido o fluxo de reavaliação de demonstração no OOT para quem retreina o projeto (ADR 0012): caminho `--demonstracao` separado dos portões formais e promoção com justificativa; implementação na issue #37. ([#34](issues/34.md))
+- Revisão cruzada da onda 6, fechamento do registro e consolidação de divergências e limitações da documentação. ([#51](issues/51.md))
+- Planejada a onda 6 (interface, gráfico de previsão, documentação em MkDocs): ADR 0013 (referência automática da previsão), termos no glossário, issues #38 a #51 e registro em `docs/relatorio/registro-onda6.md`.
+
+
 # case-mr-health 0.5.0 (2026-10-30)
 
 ## Adicionado
