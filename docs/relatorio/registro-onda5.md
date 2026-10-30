@@ -10,7 +10,7 @@ aplicou: não houve treino, modelagem nem bug a diagnosticar.
 
 | Ticket | Branch | Status | Entrega |
 | --- | --- | --- | --- |
-| #26 | `26-verificacao_sistema` | `claimed` (aguarda revisão final do usuário) | `README.md`, passada de fumaça, `changelogs/26.interno.md` |
+| #26 | `26-verificacao_sistema` | `resolved` | `README.md`, passada de fumaça, `changelogs/26.interno.md` |
 
 ## Passada de fumaça (sem retreinar, `champion` já promovido)
 
@@ -46,7 +46,6 @@ lentos excluídos (187 s). Nenhum treino rodou.
 
 ## Pendências
 
-- Revisão final do usuário; só depois a issue vira `resolved`.
 - Processos da passada de fumaça (API na 8000, UI do MLflow na 5000) foram encerrados depois; as portas ficaram livres.
 - Sugestão (CLAUDE.md): fechar o marco com `uv version` e `towncrier build`.
   Fragmentos pendentes incluem `adicionado`, portanto MINOR (0.5.0), a
