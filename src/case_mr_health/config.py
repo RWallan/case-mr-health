@@ -51,3 +51,7 @@ class Settings(BaseSettings):
                 'confianca_limites deve ser positivo e estritamente crescente'
             )
         return limites
+
+    # Intervalos de previsão (#8, docs/analysis/plano-intervalos.md).
+    niveis_intervalo: tuple[float, ...] = (0.80, 0.95)
+    intervalo_max_origens: int = 70
