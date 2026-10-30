@@ -1,4 +1,4 @@
-"""Consultas do histórico, versões do Registry e série de desenvolvimento."""
+"""Consultas do histórico, versões do Registry e série de vendas."""
 
 from datetime import UTC, datetime
 from io import BytesIO
@@ -146,7 +146,7 @@ def consultar_modelos(request: Request) -> RespostaModelos:
         503: _erro(
             'Série indisponível.',
             'historico_indisponivel',
-            'A série de desenvolvimento não está disponível.',
+            'A série de vendas não está disponível.',
         ),
     },
 )
@@ -155,7 +155,7 @@ def consultar_serie(
     sku: str,
     granularidade: Literal['diaria', 'semanal'],
 ) -> SerieHistorica:
-    """Lê apenas o banco de desenvolvimento, que não contém o OOT."""
+    """Lê a série completa da base consolidada, com os pedidos ingeridos."""
     try:
         sku = normalizar_sku(sku)
     except ValueError as erro:

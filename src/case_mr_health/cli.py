@@ -7,10 +7,14 @@ from loguru import logger
 
 from case_mr_health.api.app import criar_app
 from case_mr_health.api.mlflow_cliente import ModeloRecusado
+from case_mr_health.atualizacao import hash_dados_atual
 from case_mr_health.avaliacao_final import avaliar_final, promover
+from case_mr_health.candidatos import SKUS
 from case_mr_health.config import Settings
 from case_mr_health.dados import DadosInvalidosError, preparar_dados
 from case_mr_health.logs import configurar_logs
+from case_mr_health.particoes import GRANULARIDADES
+from case_mr_health.reajuste import reajustar_serie
 from case_mr_health.selecao import publicar_selecao
 from case_mr_health.treino import (
     ResumoTreino,
@@ -236,3 +240,26 @@ def promover_cmd(
         logger.error('{}', erro)
         return 1
     return 0
+
+
+@app.command(name='reajustar')
+def reajustar_cmd() -> int:
+    """Reajusta as 8 séries na base atual (ADR 0011).
+
+    Uso de recuperação, quando a API caiu no meio de uma atualização: mesmo
+    algoritmo e hiperparâmetros de cada versão servida, série completa de
+    `db_path`. Cada série com falha é relatada e as demais seguem.
+    """
+    cfg = Settings()
+    configurar_logs(cfg.log_level)
+    hash_dados = hash_dados_atual(cfg)
+    falhas = 0
+    for sku in SKUS:
+        for granularidade in GRANULARIDADES:
+            try:
+                reajustar_serie(cfg, sku, granularidade, hash_dados)
+            # Uma série com falha não interrompe as outras.
+            except Exception as erro:  # noqa: BLE001
+                falhas += 1
+                logger.error('{}/{}: {}', sku, granularidade, erro)
+    return 1 if falhas else 0

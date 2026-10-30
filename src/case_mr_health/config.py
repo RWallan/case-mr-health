@@ -54,5 +54,7 @@ class Settings(BaseSettings):
         }
     )
     historico_db_path: Path = Path('data/servico/historico.duckdb')
+    # Atualização de dados (#28, ADR 0011): cópia dos arquivos aplicados.
+    atualizacoes_dir: Path = Path('data/atualizacoes')
     api_host: str = '127.0.0.1'
     api_port: int = 8000

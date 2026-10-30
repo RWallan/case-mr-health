@@ -27,7 +27,7 @@ def configuracao(tmp_path) -> Settings:
     return Settings(
         _env_file=None,
         historico_db_path=tmp_path / 'historico.duckdb',
-        desenvolvimento_db_path=tmp_path / 'desenvolvimento.duckdb',
+        db_path=tmp_path / 'base.duckdb',
         mlflow_tracking_uri=f'sqlite:///{tmp_path / "mlflow.db"}',
         mlflow_artifact_dir=tmp_path / 'artefatos',
     )
@@ -222,7 +222,6 @@ def test_listar_modelos_retorna_alias_e_rastreabilidade(
 ):
     versao = SimpleNamespace(
         version='4',
-        aliases=['champion'],
         tags={'algoritmo': 'tsb', 'hash_artefato': fake.sha256()},
         run_id=fake.uuid4().replace('-', ''),
         creation_timestamp=1_798_000_000_000,
@@ -233,7 +232,12 @@ def test_listar_modelos_retorna_alias_e_rastreabilidade(
             return [versao]
         return []
 
-    cliente = SimpleNamespace(search_model_versions=buscar_versoes)
+    cliente = SimpleNamespace(
+        search_model_versions=buscar_versoes,
+        get_registered_model=lambda nome: SimpleNamespace(
+            aliases={'champion': 4, 'selecionado': 3}
+        ),
+    )
     monkeypatch.setattr(consultas, 'conectar', lambda cfg: cliente)
 
     modelos = consultas.listar_modelos(configuracao)
@@ -247,12 +251,12 @@ def test_listar_modelos_retorna_alias_e_rastreabilidade(
     assert modelos[0].run_id == versao.run_id
 
 
-def test_serie_diaria_le_desenvolvimento_e_marca_zeros(cliente, configuracao):
+def test_serie_diaria_le_a_base_e_marca_zeros(cliente, configuracao):
     rng = fake
     inicio = date(2021, 6, 1)
     valores = [rng.random_int(min=0, max=5) for _ in range(5)]
     imputados = [rng.boolean() for _ in valores]
-    con = duckdb.connect(str(configuracao.desenvolvimento_db_path))
+    con = duckdb.connect(str(configuracao.db_path))
     con.execute(
         'CREATE TABLE serie_diaria '
         '(sku VARCHAR, data DATE, quantidade BIGINT, imputado BOOLEAN)'
@@ -280,7 +284,7 @@ def test_serie_diaria_le_desenvolvimento_e_marca_zeros(cliente, configuracao):
 def test_serie_semanal_marca_imputado_como_falso(cliente, configuracao):
     inicio = date(2021, 6, 7)
     valores = [fake.random_int(min=0, max=50) for _ in range(4)]
-    con = duckdb.connect(str(configuracao.desenvolvimento_db_path))
+    con = duckdb.connect(str(configuracao.db_path))
     con.execute(
         'CREATE TABLE serie_semanal '
         '(sku VARCHAR, semana DATE, quantidade BIGINT)'
@@ -302,7 +306,7 @@ def test_serie_semanal_marca_imputado_como_falso(cliente, configuracao):
     assert all(not ponto['imputado'] for ponto in pontos)
 
 
-def test_serie_sem_banco_de_desenvolvimento_responde_503(cliente):
+def test_serie_sem_base_responde_503(cliente):
     resposta = cliente.get('/series/A/diaria')
 
     assert resposta.status_code == HTTP_SERVICE_UNAVAILABLE

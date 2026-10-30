@@ -162,6 +162,7 @@ def _responder(
         valor_unitario=valor_unitario,
         versao_modelo=modelo.versao,
         hash_artefato=modelo.hash_artefato,
+        origem_modelo=modelo.origem,
         experimento_id=modelo.experimento_id,
         run_id=modelo.run_id,
         periodos=periodos,

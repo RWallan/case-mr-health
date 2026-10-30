@@ -163,7 +163,7 @@ def _configuracao(raiz, vendas: list[int]) -> Settings:
         mlflow_tracking_uri=f'sqlite:///{raiz / "mlflow.db"}',
         mlflow_artifact_dir=raiz / 'artefatos',
         historico_db_path=raiz / 'servico' / 'historico.duckdb',
-        desenvolvimento_db_path=caminho,
+        db_path=caminho,
         modelos_fixados={},
     )
 

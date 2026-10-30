@@ -26,10 +26,16 @@ class ErroApi(Exception):
     status = 500
     codigo = 'erro_interno'
 
-    def __init__(self, mensagem: str, campo: str | None = None):
+    def __init__(
+        self,
+        mensagem: str,
+        campo: str | None = None,
+        detalhes: list[DetalheErro] | None = None,
+    ):
         super().__init__(mensagem)
         self.mensagem = mensagem
         self.campo = campo
+        self.detalhes = detalhes
 
 
 class SkuInexistente(ErroApi):
@@ -57,9 +63,24 @@ class DataReferenciaInvalida(ErroApi):
     codigo = 'data_referencia_invalida'
 
 
+class DadosInvalidos(ErroApi):
+    status = 422
+    codigo = 'dados_invalidos'
+
+
+class AtualizacaoRecusada(ErroApi):
+    status = 409
+    codigo = 'atualizacao_recusada'
+
+
+class AtualizacaoInexistente(ErroApi):
+    status = 404
+    codigo = 'atualizacao_inexistente'
+
+
 def _erro_api(_: Request, erro: ErroApi) -> JSONResponse:
-    detalhes = []
-    if erro.campo is not None:
+    detalhes = erro.detalhes or []
+    if not detalhes and erro.campo is not None:
         detalhes = [DetalheErro(campo=erro.campo, mensagem=erro.mensagem)]
     corpo = ErroResposta(
         codigo=erro.codigo, mensagem=erro.mensagem, detalhes=detalhes

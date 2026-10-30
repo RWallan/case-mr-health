@@ -38,6 +38,7 @@ class ModeloServido:
     experimento_id: str
     desenvolvimento_fim: date
     modelo: Any
+    origem: str = 'treino'
 
     def prever(self, horizonte: int) -> pd.DataFrame:
         """Os próximos `horizonte` períodos após `desenvolvimento_fim`."""
@@ -67,6 +68,23 @@ class CatalogoModelos:
                 'usa outro modelo nem treina um novo.'
             )
         return modelo
+
+    def atualizar(self, modelo: ModeloServido) -> None:
+        """Troca a versão servida de uma série sem reiniciar a API."""
+        serie = (modelo.sku, modelo.granularidade)
+        self.modelos[serie] = modelo
+        self.indisponiveis.pop(serie, None)
+
+
+def recarregar_serie(
+    cfg: Settings, catalogo: CatalogoModelos, sku: str, granularidade: str
+) -> ModeloServido:
+    """Recarrega a versão servida da série; se falhar, mantém a atual."""
+    servido = _carregar_serie(
+        cfg, mlflow_cliente.conectar(cfg), sku, granularidade
+    )
+    catalogo.atualizar(servido)
+    return servido
 
 
 def carregar_modelos(cfg: Settings) -> CatalogoModelos:
@@ -132,6 +150,7 @@ def _carregar_serie(
             run.data.params['desenvolvimento_fim']
         ),
         modelo=mlflow_cliente.carregar_conferido(versao),
+        origem=versao.tags.get('origem', 'treino'),
     )
     _conferir_contrato(servido, horizonte_maximo(cfg, granularidade))
     return servido

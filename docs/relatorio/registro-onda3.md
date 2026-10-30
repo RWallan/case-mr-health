@@ -74,6 +74,22 @@ cd frontend && npm run build
    `final_evaluation`; só então executar #13 uma vez.
 4. Registrar a decisão de publicação por série antes de atribuir `champion`.
 
+## Mudança de escopo: pedidos novos e reajuste (2026-10-30)
+
+- Pergunta do usuário: com pedidos novos (xlsx 1 e 2), é preciso reajustar para atualizar o gráfico com a previsão? Resposta dada: sim, o modelo ajustado não enxerga dados novos; só o reajuste muda a previsão.
+- Decisão do usuário: o upload pela API dispara o reajuste. Contraria o ADR 0005 ("a API nunca treina"); por isso o `docs/adr/0011-atualizacao-de-dados-pela-api-com-reajuste.md` está **proposto**, não aprovado.
+- Correção minha: antes eu havia dito que a predição não precisava mais de dados novos; estava errado quanto ao fluxo de dados, que o usuário corrigiu.
+- Tickets abertos como `needs-info`, à espera do ADR: #28 (ingestão), #29 (reajuste), #30 (rota assíncrona), #31 (dashboard).
+- Desvio do plano: o #26 e o README devem documentar o novo fluxo; o "treino real roda uma vez" vale para o treino com seleção do #12, não para o reajuste.
+
+## Registro dos tickets #28 a #30 (ADR 0011, aprovado em 2026-10-30)
+
+- Decisão do usuário: aprovou o ADR 0011 como proposto (promoção automática do `champion` à versão reajustada; antigo OOT como histórico no reajuste).
+- Entregue: `atualizacao.py` (#28), `reajuste.py` (#29), rotas `POST /dados/pedidos` e `GET /dados/atualizacoes/{id}`, gerente em segundo plano e recarga do catálogo (#30), comando `reajustar`. Testes: `test_atualizacao.py` (14), `test_reajuste.py` (11), `test_api_atualizacao.py` (16). Suíte rápida: 541 passaram, 48 lentos fora (evidência `.ds-workflow/test-evidence/test-run-20261030T094959-1151433.json`).
+- Desvios e achados: (1) o `GET /series` e a recomendação passaram a ler `db_path` (base completa), não a visão de desenvolvimento, porque o antigo OOT virou histórico; (2) o `GET /modelos` do #16 não mostrava o `champion` com o MLflow real (a busca de versões não devolve aliases), corrigido; (3) a refatoração tornou públicos `preparar_mlflow` e `config_intervalos` em `treino.py`.
+- Hipótese não verificada: o reajuste de SARIMA e Prophet em dados reais pode levar minutos; só foi medido com séries sintéticas.
+- Pendente: #15 (batch e XLSX de predição) e #31 (dashboard).
+
 ## Registro do #13
 
 - Fatos: ver `docs/relatorio/fase4/13-avaliacao-final.md` (8 séries, MAE, RMSE, WAPE, MASE e cobertura 80/95%).
