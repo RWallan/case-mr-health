@@ -17,6 +17,7 @@ Layout congelado do pacote `api/`; valor unitário em configuração, pois a tab
 
 - #14 e #17 correram em paralelo, embora a issue #17 declare bloqueio pelo #14: o layout congelado evita o conflito, e a inclusão do router é feita na integração.
 - O #18 não entrou: é conversa com o usuário e continua pendente, bloqueando o #19.
+  - Fechado em 2026-10-30: especificação aprovada pelo usuário em `issues/18.md`; o #19 está desbloqueado.
 - Os agentes rodam só os próprios testes. O critério "`poe test` verde" de cada issue fica para a integração, com a tarefa `test-rapido`.
 
 ## Decisões do usuário em 2026-10-30
@@ -30,4 +31,4 @@ Layout congelado do pacote `api/`; valor unitário em configuração, pois a tab
 - **Validação do #27 e critério `poe test` dos #14 e #17:** `uv run poe lint` limpo e `uv run poe test-rapido` com 441 passados e 48 desselecionados (`lento`), em 45,5 s, na árvore com as mudanças da onda 3 ainda não commitadas. A suíte lenta não foi rodada, conforme a decisão de não repetir o treino real.
 - **Inclusão do router do changelog:** já feita; `ROTEADORES` em `api/app.py` contém `predicao`, `changelog` e `consultas`.
 - **Hash com artefatos reais (#14):** **não conferido**. `carregar_modelos` com o MLflow local (`data/mlflow/mlflow.db`) encontrou os 8 registros sem alias `champion` e carregou 0 modelos. A conferência depende do #13, que promove o champion.
-- **#18** (especificação da regra de recomendação) segue pendente: exige conversa com o usuário e bloqueia o #19.
+- **#18** (regra de recomendação): especificação e 5 casos aprovados pelo usuário em 2026-10-30 (`issues/18.md`); desbloqueia o #19.
