@@ -1,7 +1,8 @@
 <script>
+  import EntradaPrevisoes from './EntradaPrevisoes.svelte';
   import ComparacaoSkus from './ComparacaoSkus.svelte';
   import LinksApi from './LinksApi.svelte';
-  import EntradaPrevisoes from './EntradaPrevisoes.svelte';
+  import Recomendacoes from './Recomendacoes.svelte';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const mlflow = import.meta.env.VITE_MLFLOW_URL ?? 'http://localhost:5000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
@@ -299,8 +300,9 @@
       {/if}
     </section>
 
-    <ComparacaoSkus {api} {sku} {granularidade} {skus} />
     <EntradaPrevisoes />
+    <ComparacaoSkus {api} {sku} {granularidade} {skus} />
+    <Recomendacoes {api} {skus} />
 
     <footer><span>MR. HEALTH · Planejamento de demanda</span><span>Previsões da rede · Só o envio de pedidos novos reajusta os modelos</span></footer>
   </main>
