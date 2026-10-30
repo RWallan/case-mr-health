@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 import duckdb
 import mlflow
+import numpy as np
 import pandas as pd
 import pytest
 from mlflow import MlflowClient
@@ -15,6 +16,7 @@ from case_mr_health.cli import app
 from case_mr_health.config import Settings
 from case_mr_health.particoes import carregar_particoes, separar_series
 from case_mr_health.treino import (
+    ModeloDemanda,
     carregar_serie,
     hash_artefato,
     nome_modelo,
@@ -31,6 +33,8 @@ SEED_DE_20210901 = 20210901
 N_DIAS = 91  # 13 semanas completas: 5 folds na diária e 5 na semanal
 SEED = 5
 BASELINES = {'naive', 'media_historica', 'naive_sazonal'}
+INTERMITENTES = {'croston', 'sba', 'tsb'}
+SEMANAS_SERVIDAS = 2
 
 
 def _constante(i):
@@ -140,17 +144,17 @@ def _particao(cfg, sku, granularidade):
 def test_treina_baselines_da_diaria_e_registra_o_modelo_por_sku(cfg):
     resumo = treinar_serie(cfg, 'item C', 'diaria', seed=7)
 
-    assert set(_por_algoritmo(resumo)) == BASELINES
+    assert BASELINES <= set(_por_algoritmo(resumo))
     cliente = MlflowClient()
     [modelo] = cliente.search_registered_models(
         filter_string="name = 'demanda-item-c-diaria'"
     )
     assert modelo.name == nome_modelo('item C', 'diaria')
     versoes = cliente.search_model_versions("name = 'demanda-item-c-diaria'")
-    assert len(versoes) == len(BASELINES)
+    assert len(versoes) == len(resumo.runs)
     for v in versoes:
         assert len(v.tags['hash_artefato']) == TAMANHO_SHA256
-        assert v.tags['algoritmo'] in BASELINES
+        assert v.tags['algoritmo'] in _por_algoritmo(resumo)
 
 
 def test_baselines_da_semanal_nao_incluem_naive_sazonal(cfg):
@@ -307,8 +311,40 @@ def test_candidatos_sem_implementacao_sao_reportados(cfg):
     resumo = treinar_serie(cfg, 'item C', 'diaria', seed=7)
 
     assert 'ets_ses' in resumo.sem_implementacao
-    assert 'croston' in resumo.sem_implementacao
     assert set(resumo.sem_implementacao).isdisjoint(algoritmos.ALGORITMOS)
+
+
+def test_intermitentes_treinam_na_diaria_com_as_tres_combinacoes(cfg):
+    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
+    runs = [r for r in resumo.runs if r.algoritmo in INTERMITENTES]
+    serie = carregar_serie(cfg, 'item B', 'diaria').to_numpy()
+
+    treinados = {(r.algoritmo, *r.hiperparametros.values()) for r in runs}
+
+    assert len(runs) == len(INTERMITENTES) * 3
+    assert treinados == {
+        (nome, alfa) for nome in INTERMITENTES for alfa in (0.1, 0.2, 0.3)
+    }
+    for r in runs:
+        run = mlflow.get_run(r.run_id)
+        chave = next(iter(r.hiperparametros))
+        assert run.data.tags['algoritmo'] == r.algoritmo
+        assert run.data.tags['papel'] == 'candidato'
+        assert run.data.params[f'hp.{chave}'] == str(r.hiperparametros[chave])
+        assert 'mae' in run.data.metrics
+        modelo = mlflow.pyfunc.load_model(f'runs:/{r.run_id}/modelo')
+        previsao = modelo.predict(pd.DataFrame({'horizonte': [HORIZONTE]}))
+        esperado = algoritmos.criar(r.algoritmo, r.hiperparametros, 7)
+        assert list(previsao) == list(
+            esperado.ajustar(serie).prever(HORIZONTE)
+        )
+
+
+def test_intermitentes_ficam_fora_da_semanal(cfg):
+    resumo = treinar_serie(cfg, 'item B', 'semanal', seed=7)
+
+    assert set(_por_algoritmo(resumo)).isdisjoint(INTERMITENTES)
+    assert set(resumo.sem_implementacao).isdisjoint(INTERMITENTES)
 
 
 def test_candidato_plugado_entra_no_fluxo_sem_mudancas(cfg, monkeypatch):
@@ -330,6 +366,205 @@ def test_candidato_plugado_entra_no_fluxo_sem_mudancas(cfg, monkeypatch):
 
     assert 'ets_ses' in _por_algoritmo(resumo)
     assert 'ets_ses' not in resumo.sem_implementacao
+
+
+def test_cobertura_do_backtest_vai_ao_mlflow(cfg):
+    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
+    particao = _particao(cfg, 'item B', 'diaria')
+
+    for r in resumo.runs:
+        run = mlflow.get_run(r.run_id)
+        metricas = run.data.metrics
+        for nivel in ('80', '95'):
+            assert 0 <= metricas[f'cobertura_{nivel}'] <= 1
+            assert (
+                metricas[f'cobertura_{nivel}_ic_inf']
+                <= metricas[f'cobertura_{nivel}']
+                <= metricas[f'cobertura_{nivel}_ic_sup']
+            )
+            assert metricas[f'amplitude_{nivel}'] >= 0
+            historico = MlflowClient().get_metric_history(
+                r.run_id, f'cobertura_{nivel}_fold'
+            )
+            assert len(historico) == len(particao.folds)
+        n_pontos = 7 * len(particao.folds)
+        assert metricas['cobertura_n_pontos'] == n_pontos
+        assert metricas['cobertura_80'] == r.cobertura[0.80]
+
+
+def test_metodo_do_intervalo_fica_no_run_e_na_versao(cfg):
+    resumo = treinar_serie(cfg, 'item C', 'semanal', seed=7)
+    run = _por_algoritmo(resumo)['naive']
+
+    registrado = mlflow.get_run(run.run_id)
+    [versao] = MlflowClient().search_model_versions(
+        f"name = 'demanda-item-c-semanal' and run_id = '{run.run_id}'"
+    )
+
+    assert registrado.data.tags['intervalo_metodo'] == 'empirico_t'
+    assert registrado.data.tags['intervalo_motivo'] == 'sem_nativo'
+    assert registrado.data.params['intervalo.horizonte'] == '2'
+    assert registrado.data.params['fold_1.intervalo_metodo'] == 'empirico_t'
+    assert versao.tags['intervalo_metodo'] == 'empirico_t'
+    assert versao.tags['intervalo_horizonte'] == '2'
+    assert json.loads(versao.tags['intervalo_niveis']) == [0.8, 0.95]
+
+
+def test_modelo_registrado_expoe_os_limites(cfg):
+    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
+
+    for run in resumo.runs:
+        modelo = mlflow.pyfunc.load_model(f'runs:/{run.run_id}/modelo')
+        saida = modelo.predict(
+            pd.DataFrame({'horizonte': [HORIZONTE], 'intervalos': [True]})
+        )
+
+        assert list(saida.columns) == [
+            'previsao',
+            'inferior_80',
+            'superior_80',
+            'inferior_95',
+            'superior_95',
+        ]
+        assert len(saida) == HORIZONTE
+        assert (saida >= 0).all(axis=None)
+        assert (saida['inferior_95'] <= saida['inferior_80']).all()
+        assert (saida['inferior_80'] <= saida['previsao']).all()
+        assert (saida['previsao'] <= saida['superior_80']).all()
+        assert (saida['superior_80'] <= saida['superior_95']).all()
+        ponto = modelo.predict(pd.DataFrame({'horizonte': [HORIZONTE]}))
+        assert saida['previsao'].tolist() == pytest.approx(list(ponto))
+
+
+def test_modelo_final_aplica_o_piso_zero_com_os_zeros_do_desenvolvimento(
+    cfg,
+):
+    # Item B intermitente: maioria de zeros em todo o desenvolvimento.
+    resumo = treinar_serie(cfg, 'item B', 'diaria', seed=7)
+
+    for run in resumo.runs:
+        registrado = mlflow.get_run(run.run_id)
+        assert float(registrado.data.params['intervalo.fracao_zeros']) > 0.5  # noqa: PLR2004
+        modelo = mlflow.pyfunc.load_model(f'runs:/{run.run_id}/modelo')
+        saida = modelo.predict(
+            pd.DataFrame({'horizonte': [HORIZONTE], 'intervalos': [True]})
+        )
+        assert (saida['inferior_80'] == 0).all()
+        assert (saida['inferior_95'] == 0).all()
+
+
+def test_modelo_nao_extrapola_o_horizonte_calibrado(cfg):
+    resumo = treinar_serie(cfg, 'item D', 'semanal', seed=7)
+    run = _por_algoritmo(resumo)['naive']
+    modelo = mlflow.pyfunc.load_model(f'runs:/{run.run_id}/modelo')
+
+    entrada = {'horizonte': [SEMANAS_SERVIDAS + 1], 'intervalos': [True]}
+    with pytest.raises(ValueError, match='acima do calibrado'):
+        modelo.predict(pd.DataFrame(entrada))
+
+
+def test_modelo_sem_calibracao_nao_serve_intervalos():
+    modelo = ModeloDemanda(algoritmos.Naive().ajustar([1, 2]))
+
+    with pytest.raises(ValueError, match='sem calibração'):
+        modelo.prever_com_intervalos(2)
+
+
+def test_niveis_vem_da_configuracao(cfg):
+    outro = cfg.model_copy(update={'niveis_intervalo': (0.5, 0.9)})
+
+    resumo = treinar_serie(outro, 'item C', 'diaria', seed=7)
+
+    run = _por_algoritmo(resumo)['naive']
+    assert 'cobertura_50' in mlflow.get_run(run.run_id).data.metrics
+    modelo = mlflow.pyfunc.load_model(f'runs:/{run.run_id}/modelo')
+    saida = modelo.predict(
+        pd.DataFrame({'horizonte': [3], 'intervalos': [True]})
+    )
+    assert 'superior_90' in saida.columns
+
+
+def test_alterar_o_oot_nao_muda_a_cobertura_nem_a_calibracao(cfg):
+    antes = treinar_serie(cfg, 'item C', 'diaria', seed=7)
+    con = duckdb.connect(str(cfg.oot_db_path))
+    try:
+        con.execute('UPDATE serie_diaria SET quantidade = quantidade + 999')
+    finally:
+        con.close()
+
+    depois = treinar_serie(cfg, 'item C', 'diaria', seed=7)
+
+    for a, b in zip(antes.runs, depois.runs, strict=True):
+        assert a.cobertura == b.cobertura
+        modelos = [
+            mlflow.pyfunc.load_model(f'runs:/{r.run_id}/modelo')
+            for r in (a, b)
+        ]
+        limites = [
+            m.predict(pd.DataFrame({'horizonte': [7], 'intervalos': [True]}))
+            for m in modelos
+        ]
+        assert limites[0].equals(limites[1])
+
+
+def test_mesma_seed_reproduz_a_cobertura(cfg):
+    primeira = treinar_serie(cfg, 'item B', 'semanal', seed=123)
+    segunda = treinar_serie(cfg, 'item B', 'semanal', seed=123)
+
+    for a, b in zip(primeira.runs, segunda.runs, strict=True):
+        assert a.cobertura == b.cobertura
+
+
+def test_sensibilidade_da_cobertura_do_item_c_vai_ao_mlflow(cfg):
+    resumo = treinar_serie(cfg, 'item C', 'semanal', seed=7)
+
+    run = mlflow.get_run(_por_algoritmo(resumo)['naive'].run_id)
+
+    assert 'sens_sem_periodo_atipico_cobertura_95' in run.data.metrics
+
+
+def test_previsor_com_nativo_calibrado_e_servido_pelo_nativo(cfg, monkeypatch):
+    monkeypatch.setattr(algoritmos, 'ALGORITMOS', dict(algoritmos.ALGORITMOS))
+    gerador = np.random.default_rng(3)
+    ruido = gerador.normal(20, 3, N_DIAS).round().clip(0)
+    _gravar_origem(cfg, {'item A': lambda i: int(ruido[i])})
+
+    @algoritmos.registrar('ets_ses')
+    class ComNativo:
+        def __init__(self, alfa):
+            self.alfa = alfa
+
+        def ajustar(self, y):
+            self.media = float(np.mean(y))
+            return self
+
+        def prever(self, horizonte):
+            return np.full(horizonte, self.media)
+
+        def intervalos_nativos(self, horizonte, niveis):
+            meia = {0.80: 3.85, 0.95: 5.9}
+            return {
+                n: (
+                    np.full(horizonte, self.media - meia[n]),
+                    np.full(horizonte, self.media + meia[n]),
+                )
+                for n in niveis
+            }
+
+    resumo = treinar_serie(cfg, 'item A', 'diaria', seed=7)
+
+    run = _por_algoritmo(resumo)['ets_ses']
+    registrado = mlflow.get_run(run.run_id)
+    assert run.intervalo_metodo == 'nativo'
+    assert registrado.data.tags['intervalo_motivo'] == 'calibrado'
+    assert 'cobertura_nativo_95' in registrado.data.metrics
+    assert 'cobertura_empirico_95' in registrado.data.metrics
+    modelo = mlflow.pyfunc.load_model(f'runs:/{run.run_id}/modelo')
+    saida = modelo.predict(
+        pd.DataFrame({'horizonte': [3], 'intervalos': [True]})
+    )
+    largura = saida['superior_95'] - saida['inferior_95']
+    assert largura.tolist() == pytest.approx([11.8] * 3)
 
 
 def test_seed_padrao_e_a_data_local_de_sao_paulo():

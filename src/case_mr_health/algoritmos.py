@@ -95,4 +95,8 @@ class NaiveSazonal:
         return np.resize(self._ciclo, horizonte)
 
 
-from case_mr_health import algoritmos_prophet, algoritmos_statsmodels  # noqa: E402, F401
+from case_mr_health import (  # noqa: E402, F401
+    algoritmos_intermitentes,  # noqa: E402, F401
+    algoritmos_prophet,
+    algoritmos_statsmodels,
+)

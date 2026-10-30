@@ -91,12 +91,13 @@ def treinar(
         return 1
     for run in resumo.runs:
         logger.info(
-            '{} {} {}: MAE {:.3f} MASE {:.3f} (versão {})',
+            '{} {} {}: MAE {:.3f} MASE {:.3f} intervalo {} (versão {})',
             resumo.sku,
             run.algoritmo,
             run.hiperparametros,
             run.medias['mae'],
             run.medias['mase'],
+            run.intervalo_metodo,
             run.versao_modelo,
         )
     return 0

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,3 +36,22 @@ class Settings(BaseSettings):
     fuso_horario: str = 'America/Sao_Paulo'
     mlflow_tracking_uri: str = 'sqlite:///data/mlflow/mlflow.db'
     mlflow_artifact_dir: Path = Path('data/mlflow/artefatos')
+    # Confiança (ADR 0008): limites superiores inclusivos de MASE para Ótima,
+    # Boa e Média; acima do último, Ruim. MASE instável: o IC atravessa mais
+    # fronteiras do que `confianca_max_fronteiras_ic`.
+    confianca_limites: tuple[float, float, float] = (0.50, 0.75, 1.00)
+    confianca_nivel_ic: float = Field(default=0.80, gt=0, lt=1)
+    confianca_max_fronteiras_ic: int = Field(default=1, ge=0)
+
+    @field_validator('confianca_limites')
+    @classmethod
+    def _limites_crescentes(cls, limites: tuple[float, ...]):
+        if limites[0] <= 0 or sorted(set(limites)) != list(limites):
+            raise ValueError(
+                'confianca_limites deve ser positivo e estritamente crescente'
+            )
+        return limites
+
+    # Intervalos de previsão (#8, docs/analysis/plano-intervalos.md).
+    niveis_intervalo: tuple[float, ...] = (0.80, 0.95)
+    intervalo_max_origens: int = 70
