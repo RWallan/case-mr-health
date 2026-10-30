@@ -72,6 +72,18 @@ _Evitar_: modelo do SKU (sem granularidade)
 Quantidade de períodos futuros previstos por um modelo. Limitado ao tamanho do período OOT da granularidade, que é o máximo validado empiricamente.
 _Evitar_: granularidade, prazo
 
+**Fim do treino**:
+Último período de série usado no ajuste de um modelo. O modelo só prevê períodos posteriores a ele.
+_Evitar_: data de corte
+
+**Último período histórico**:
+Último período com venda observada de uma série na base. Coincide com o fim do treino quando o modelo servido foi reajustado com a base atual.
+_Evitar_: data de referência (nome do parâmetro, não do conceito)
+
+**Previsão integralmente zero**:
+Previsão em que todos os valores previstos do horizonte são exatamente zero. É um resultado válido do modelo, distinto de ausência de dados e de falha na geração; um valor ausente não conta como zero.
+_Evitar_: previsão vazia, erro de previsão
+
 **Período OOT**:
 Trecho final de uma série reservado para avaliar o modelo depois de escolhido, sem participar do treino nem da seleção.
 _Evitar_: validação, holdout
