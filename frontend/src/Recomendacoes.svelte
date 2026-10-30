@@ -110,7 +110,7 @@
     <label class="rotulo" for="llm-chave">Chave de API</label>
     <div class="chave">
       <input id="llm-chave" class="campo" type={mostrarChave ? 'text' : 'password'} bind:value={chaveLlm} autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…" />
-      <button class="btn btn-secundario" type="button" aria-pressed={mostrarChave} onclick={() => (mostrarChave = !mostrarChave)}>{mostrarChave ? 'Ocultar' : 'Mostrar'}</button>
+      <button class="btn btn-secundario" type="button" aria-pressed={mostrarChave} onclick={() => (mostrarChave = !mostrarChave)}>Mostrar chave</button>
     </div>
     <button class="btn btn-secundario" type="submit" disabled={carregando} aria-busy={carregando}>{carregando ? 'Carregando…' : 'Aplicar e recarregar'}</button>
   </form>
@@ -155,16 +155,19 @@
   </form>
 
   {#if erroAlerta}<div class="alerta alerta-erro" role="alert">{erroAlerta}</div>{/if}
+  <div aria-live="polite">
   {#if alerta}
-    <article class="email" aria-live="polite">
+    <article class="email">
       <p class="simulado" role="status">ENVIO SIMULADO · {alerta.aviso_envio}</p>
       <p><strong>Para:</strong> {alerta.destinatario}</p>
       <p><strong>Assunto:</strong> {alerta.assunto}</p>
       <p class="selo" data-resultado={alerta.recomendacao.resultado}><span aria-hidden="true">{rotulos[alerta.recomendacao.resultado].sinal}</span> {rotulos[alerta.recomendacao.resultado].texto}</p>
       <p>{alerta.recomendacao.texto}</p>
       <p>Variação {fmtPct(alerta.recomendacao.variacao)} · Q3 {fmtLimite(alerta.recomendacao.limite_aplicado)}</p>
-      <table class="tabela">
-        <thead><tr><th>Semana</th><th>Demanda</th><th>Intervalo 80%</th><th>Intervalo 95%</th><th>Valor (R$)</th></tr></thead>
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+      <div class="tabela-rolagem" role="region" aria-label="Previsão por semana" tabindex="0">
+      <table class="tabela tabela-larga">
+        <thead><tr><th scope="col">Semana</th><th scope="col">Demanda</th><th scope="col">Intervalo 80%</th><th scope="col">Intervalo 95%</th><th scope="col">Valor (R$)</th></tr></thead>
         <tbody>
           {#each alerta.periodos as periodo}
             <tr>
@@ -177,16 +180,18 @@
           {/each}
         </tbody>
       </table>
+      </div>
       <p>Valor total previsto: R$ {fmt.format(alerta.valor_total_previsto)}</p>
       <p class="aviso">Aviso: {alerta.recomendacao.aviso}</p>
     </article>
   {/if}
+  </div>
 </section>
 
 <style>
   .recomendacoes { margin-top: 24px; padding: 24px 25px; }
-  .nota { color: var(--cor-texto-suave); font-size: var(--texto-xs); }
-  .lista { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .nota { color: var(--cor-texto-suave); font-size: var(--texto-xs); overflow-wrap: anywhere; }
+  .lista { list-style: none; padding: 0; margin: 18px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 14px; }
   .item { border: 1px solid var(--cor-borda); border-left-width: 5px; border-radius: 10px; padding: 14px; font-size: var(--texto-xs); }
   .item[data-resultado='aumento_significativo'] { border-left-color: var(--cor-aumento); background: var(--cor-aumento-fundo); }
   .item[data-resultado='reducao_significativa'] { border-left-color: var(--cor-info); background: var(--cor-info-fundo); }
@@ -208,12 +213,14 @@
   .llm-form { margin-top: 16px; display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .llm-form h3 { font-size: 14px; margin-bottom: 0; }
   .chave { display: flex; gap: var(--espaco-2); }
-  .chave .campo { flex: 1; }
+  .chave .campo { flex: 1; min-width: 0; }
+  .chave .btn { flex: 0 0 auto; }
   .erro-campo { color: var(--cor-erro); font-weight: 600; }
   .alerta-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--cor-borda); display: grid; gap: 6px; max-width: 32rem; font-size: var(--texto-xs); }
   .alerta-form h3 { font-size: 14px; margin-bottom: 4px; }
   .llm-form .btn, .alerta-form .btn { justify-self: start; margin-top: 6px; }
   .email { margin-top: 16px; border: 1px solid var(--cor-borda-campo); border-radius: 10px; padding: 16px; font-size: var(--texto-xs); max-width: 46rem; }
-  .email p { margin: 6px 0; }
+  .email p { margin: 6px 0; overflow-wrap: anywhere; }
+  @media (max-width: 560px) { .recomendacoes { padding: 20px 16px; } .numeros { gap: 16px; } }
   .simulado { background: var(--cor-alerta-fundo); color: var(--cor-alerta); font-weight: 700; padding: 8px 10px; border-radius: var(--raio-sm); border: 1px solid var(--cor-alerta-borda); }
 </style>

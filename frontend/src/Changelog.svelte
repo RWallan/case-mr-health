@@ -27,15 +27,15 @@
   });
 </script>
 
-<main>
-  <section class="card changelog" aria-label="Changelog" aria-live="polite">
+<main id="conteudo" tabindex="-1">
+  <section class="card changelog" aria-label="Changelog">
     <div class="section-heading">
-      <div><h2>Changelog</h2><p>Mudanças por versão do projeto.</p></div>
+      <div><h1 class="titulo-pagina">Changelog</h1><p>Mudanças por versão do projeto.</p></div>
     </div>
     <p><a class="link" href="#/">← Voltar à previsão</a></p>
 
     {#if carregando}
-      <p class="carregando">Carregando…</p>
+      <p class="carregando" role="status">Carregando…</p>
     {:else if erro}
       <div class="alerta alerta-erro" role="alert">
         {erro}
@@ -63,6 +63,9 @@
 
 <style>
   .changelog { padding: var(--espaco-5); }
+  .titulo-pagina { font-size: 22px; margin: 2px 0 5px; }
+  @media (max-width: 560px) { .changelog { padding: var(--espaco-4); } }
+  .changelog-versao { overflow-wrap: anywhere; }
   .changelog-versao { border-top: 1px solid var(--cor-borda); margin-top: var(--espaco-4); padding-top: var(--espaco-3); }
   .changelog-versao h3 small { color: var(--cor-texto-suave); font-size: var(--texto-xs); font-weight: 400; }
   .changelog-versao h4 { color: var(--cor-texto-secundario); font-size: var(--texto-sm); margin: var(--espaco-3) 0 var(--espaco-2); }

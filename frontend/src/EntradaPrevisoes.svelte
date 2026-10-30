@@ -83,23 +83,29 @@
     <div class="alerta alerta-erro" role="alert">
       {mensagem}
       {#if erros.length}
-        <table class="tabela">
-          <thead><tr><th>Campo / linha</th><th>Problema</th></tr></thead>
-          <tbody>{#each erros as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
-        </table>
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+        <div class="tabela-rolagem" role="region" aria-label="Erros da solicitação" tabindex="0">
+          <table class="tabela">
+            <thead><tr><th scope="col">Campo / linha</th><th scope="col">Problema</th></tr></thead>
+            <tbody>{#each erros as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
+          </table>
+        </div>
       {/if}
     </div>
   {/if}
 
+  <div aria-live="polite">
   {#if resultados.length}
-    <div class="update-status" aria-live="polite">
+    <div class="update-status">
       <strong>{resultados.length} previsão(ões) gerada(s)</strong>
-      <table class="tabela">
-        <thead><tr><th>Linha</th><th>Série</th><th>Períodos</th><th>Total previsto</th></tr></thead>
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+      <div class="tabela-rolagem" role="region" aria-label="Previsões geradas" tabindex="0">
+      <table class="tabela tabela-larga">
+        <thead><tr><th scope="col">Linha</th><th scope="col">Série</th><th scope="col">Períodos</th><th scope="col">Total previsto</th></tr></thead>
         <tbody>
           {#each resultados as item}
             <tr>
-              <td>{item.linha ?? item.indice + 1}</td>
+              <th scope="row">{item.linha ?? item.indice + 1}</th>
               <td>{item.previsao.sku} · {rotulo(item.previsao.granularidade)}</td>
               <td>{item.previsao.periodos.length}</td>
               <td>
@@ -110,6 +116,8 @@
           {/each}
         </tbody>
       </table>
+      </div>
     </div>
   {/if}
+  </div>
 </section>
