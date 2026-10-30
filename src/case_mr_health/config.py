@@ -35,3 +35,6 @@ class Settings(BaseSettings):
     fuso_horario: str = 'America/Sao_Paulo'
     mlflow_tracking_uri: str = 'sqlite:///data/mlflow/mlflow.db'
     mlflow_artifact_dir: Path = Path('data/mlflow/artefatos')
+    # Intervalos de previsão (#8, docs/analysis/plano-intervalos.md).
+    niveis_intervalo: tuple[float, ...] = (0.80, 0.95)
+    intervalo_max_origens: int = 70
