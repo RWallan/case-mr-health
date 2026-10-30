@@ -99,7 +99,10 @@
   {#if carregando}
     <p class="carregando" role="status">Carregando…</p>
   {:else if datas.length}
-    <svg viewBox="0 0 900 290" role="img" aria-label="Gráfico de linhas com a demanda de cada SKU">
+    <!-- Em telas estreitas o gráfico mantém largura mínima e rola dentro do contêiner, com teclado. -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+    <div class="rolagem" role="region" aria-label="Gráfico de linhas com a demanda de cada SKU" tabindex="0">
+    <svg viewBox="0 0 900 290" role="img" aria-label={`Demanda ${rotuloGranularidade} de ${linhas.map((l) => l.sku).join(', ')}, de ${fmtData(datas[0])} a ${fmtData(datas.at(-1))}`}>
       <line x1="40" y1="245" x2="860" y2="245" class="axis" />
       <line x1="40" y1="40" x2="40" y2="245" class="axis" />
       <text x="30" y="48" class="tick" text-anchor="end">{fmt.format(teto / 1.1)}</text>
@@ -108,13 +111,14 @@
       <text x="40" y="274" class="tick">{fmtData(datas[0])}</text>
       <text x="860" y="274" class="tick" text-anchor="end">{fmtData(datas.at(-1))}</text>
     </svg>
+    </div>
   {/if}
 
   <div class="sumario">
     <strong>Sumário XLSX das previsões</strong>
-    <label><input type="checkbox" bind:checked={limitarSku} /> Só o SKU selecionado ({sku})</label>
-    <label><input type="checkbox" bind:checked={limitarGranularidade} /> Só a granularidade selecionada ({rotuloGranularidade})</label>
-    <p class="escopo" data-completo={completo}>Escopo: {escopo}</p>
+    <label class="opcao"><input type="checkbox" bind:checked={limitarSku} /> Só o SKU selecionado ({sku})</label>
+    <label class="opcao"><input type="checkbox" bind:checked={limitarGranularidade} /> Só a granularidade selecionada ({rotuloGranularidade})</label>
+    <p class="escopo" data-completo={completo} aria-live="polite">Escopo: {escopo}</p>
     <button class="btn btn-secundario" type="button" onclick={baixar} disabled={baixando} aria-busy={baixando}>{baixando ? 'Gerando…' : 'Baixar sumário (.xlsx)'}</button>
   </div>
 </section>
@@ -124,6 +128,12 @@
   .cabecalho { display: flex; justify-content: space-between; gap: 18px; align-items: start; flex-wrap: wrap; }
   .cabecalho p { color: var(--cor-texto-suave); font-size: var(--texto-xs); margin: 0; }
   .legenda { display: flex; gap: 14px; flex-wrap: wrap; font-size: var(--texto-xs); color: var(--cor-texto-secundario); padding-top: 7px; }
+  .rolagem { max-width: 100%; overflow-x: auto; }
+  .rolagem:focus-visible { outline: 3px solid var(--cor-foco); outline-offset: 2px; }
+  .rolagem svg { display: block; width: 100%; min-width: 560px; height: auto; }
+  .opcao { display: flex; align-items: center; gap: var(--espaco-2); min-height: 32px; }
+  input[type='checkbox'] { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; }
+  @media (max-width: 560px) { .comparacao { padding: 20px 16px; } }
   .legenda i { display: inline-block; width: 14px; height: 3px; margin-right: 5px; vertical-align: middle; }
   .sumario { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--cor-borda); display: grid; gap: 8px; font-size: var(--texto-xs); }
   .escopo { margin: 4px 0; font-weight: 600; color: var(--cor-verde); }

@@ -89,7 +89,7 @@
           <line x1={escala.x(ativo.ms)} y1={margem.topo} x2={escala.x(ativo.ms)} y2={altura - margem.base} class="guia" />
           <circle cx={escala.x(ativo.ms)} cy={escala.y(ativo.valor)} r="6" class="ponto-ativo" />
         {/if}
-        <rect x={margem.esquerda} y={margem.topo} width={Math.max(0, largura - margem.esquerda - margem.direita)} height={altura - margem.topo - margem.base} fill="none" pointer-events="all" role="presentation" onpointermove={aoMover} onpointerleave={() => (ativo = null)} />
+        <rect x={margem.esquerda} y={margem.topo} width={Math.max(0, largura - margem.esquerda - margem.direita)} height={altura - margem.topo - margem.base} fill="none" pointer-events="all" role="presentation" style="touch-action: pan-y" onpointerdown={aoMover} onpointermove={aoMover} onpointerleave={() => (ativo = null)} />
       </svg>
 
       {#if ativo}

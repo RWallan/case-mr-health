@@ -128,6 +128,12 @@
     await buscar(montarItem({ sku, granularidade, horizonte: ultimoHorizonte ?? horizontePadrao(granularidade) }));
   }
 
+  // O link de salto muda o foco para o conteúdo, e não só a rolagem (o hash troca a rota).
+  function irParaConteudo(evento) {
+    evento.preventDefault();
+    document.getElementById('conteudo')?.focus();
+  }
+
   $effect(() => {
     sku;
     granularidade;
@@ -142,6 +148,7 @@
 </svelte:head>
 
 <div class="shell">
+  <a class="pular" href="#conteudo" onclick={irParaConteudo}>Pular para o conteúdo</a>
   <header class="topbar">
     <a class="brand" href="/" aria-label="MR. HEALTH, início">
       <span class="brand-mark">+</span>
@@ -157,7 +164,7 @@
   {#if rota === 'changelog'}
     <Changelog {api} />
   {:else}
-  <main>
+  <main id="conteudo" tabindex="-1">
     <section class="intro">
       <div>
         <p class="eyebrow">PLANEJAMENTO DE DEMANDA</p>
@@ -176,7 +183,7 @@
         <FormularioPrevisao id="painel" {skus} bind:sku bind:granularidade {carregando} erro={erroPrevisao} onenviar={buscar} />
       </aside>
 
-      <section class="results card" aria-live="polite">
+      <section class="results card" aria-label="Resultado da previsão">
         <div class="results-heading">
           <div class="section-heading">
             <span class="step">02</span>
@@ -186,6 +193,7 @@
 
         <GraficoPrevisao {historico} {previsao} {granularidade} {carregando} {erro} />
 
+        <div aria-live="polite">
         {#if previsao}
           <div class="forecast-summary">
             <div><span class="summary-label">PREVISÃO PARA {previsao.periodos.length} PERÍODOS</span><strong>{fmt.format(previsao.periodos.reduce((soma, item) => soma + item.quantidade_prevista, 0))}<small> unidades</small></strong></div>
@@ -194,6 +202,7 @@
           </div>
           <p class="interval-note">Os intervalos são apresentados por período e não devem ser somados entre períodos.</p>
         {/if}
+        </div>
       </section>
     </section>
 
@@ -217,20 +226,26 @@
         <div class="alerta alerta-erro" role="alert">
           {mensagemEnvio}
           {#if errosEnvio.length}
-            <table class="tabela">
-              <thead><tr><th>Onde</th><th>Problema</th></tr></thead>
-              <tbody>{#each errosEnvio as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
-            </table>
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+            <div class="tabela-rolagem" role="region" aria-label="Erros do envio" tabindex="0">
+              <table class="tabela">
+                <thead><tr><th scope="col">Onde</th><th scope="col">Problema</th></tr></thead>
+                <tbody>{#each errosEnvio as item}<tr><td>{item.campo}</td><td>{item.mensagem}</td></tr>{/each}</tbody>
+              </table>
+            </div>
           {/if}
         </div>
       {/if}
+      <div aria-live="polite">
       {#if atualizacao}
-        <div class="update-status" aria-live="polite">
+        <div class="update-status">
           <strong>{rotuloEstado[atualizacao.estado]}</strong>
           <p>{atualizacao.pedidos_novos} pedidos novos · {atualizacao.itens_novos} itens · dados até {fmtData(atualizacao.ultimo_dia)}</p>
           {#if atualizacao.series.length}
-            <table class="tabela">
-              <thead><tr><th>Série</th><th>Situação</th><th>Versão</th></tr></thead>
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex (região rolável precisa de foco no teclado) -->
+            <div class="tabela-rolagem" role="region" aria-label="Situação das séries reajustadas" tabindex="0">
+            <table class="tabela tabela-larga">
+              <thead><tr><th scope="col">Série</th><th scope="col">Situação</th><th scope="col">Versão</th></tr></thead>
               <tbody>
                 {#each atualizacao.series as serie}
                   <tr>
@@ -241,10 +256,12 @@
                 {/each}
               </tbody>
             </table>
+            </div>
           {/if}
           <p class="interval-note">{atualizacao.aviso}</p>
         </div>
       {/if}
+      </div>
     </section>
 
     <footer><span>MR. HEALTH · Planejamento de demanda</span><span>Previsões da rede · Só o envio de pedidos novos reajusta os modelos</span></footer>

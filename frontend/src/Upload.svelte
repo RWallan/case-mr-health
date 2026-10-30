@@ -76,7 +76,7 @@
     <input {id} class="oculto" type="file" accept={EXTENSAO} tabindex="-1" aria-hidden="true" bind:this={entrada} onchange={aoSelecionar} />
   </div>
   <p class="ajuda" id={`${id}-ajuda`}>Somente {EXTENSAO}, até 5 MB.</p>
-  <div class="status" id={`${id}-status`} aria-live="polite">
+  <div class="status" id={`${id}-status`} aria-live="polite" aria-atomic="true">
     {#if erro}
       <span class="msg-erro">{erro}</span>
     {:else if estado === 'processando'}
@@ -111,6 +111,6 @@
   .msg-erro { color: var(--cor-erro); font-weight: 600; }
   .msg-sucesso { color: var(--cor-sucesso); font-weight: 600; }
   .acoes { display: flex; gap: var(--espaco-2); margin-top: var(--espaco-2); }
-  .acoes .btn { height: 34px; }
+  .acoes .btn { height: 40px; }
   @media (prefers-reduced-motion: no-preference) { .zona { transition: border-color .15s, background .15s; } }
 </style>
