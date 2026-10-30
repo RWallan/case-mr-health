@@ -374,3 +374,69 @@ def test_explicacao_documentada_no_swagger(servir):
     assert 'explicacao' in schemas['RespostaRecomendacao']['properties']
     origem = schemas['ExplicacaoResposta']['properties']['origem']
     assert origem['enum'] == ['llm', 'template']
+
+
+def test_chave_do_usuario_nos_cabecalhos_aciona_o_llm(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    chamadas = []
+    texto = 'A média prevista é 25,0 contra 17,0 vendidos.'
+
+    def falso(**kwargs):
+        chamadas.append(kwargs)
+        return litellm.ModelResponse(
+            choices=[
+                {
+                    'message': {
+                        'role': 'assistant',
+                        'content': json.dumps({'texto': texto}),
+                    }
+                }
+            ]
+        )
+
+    monkeypatch.setattr(litellm, 'completion', falso)
+    cliente = servir(AUMENTO, [24, 26])
+
+    corpo = cliente.get(
+        '/recomendacoes/item A',
+        headers={
+            'X-LLM-Modelo': 'openai/gpt-4o',
+            'X-LLM-Chave': 'chave-do-usuario',
+        },
+    ).json()
+
+    assert corpo['explicacao'] == {'texto': texto, 'origem': 'llm'}
+    assert chamadas[0]['model'] == 'openai/gpt-4o'
+    assert chamadas[0]['api_key'] == 'chave-do-usuario'
+    assert 'chave-do-usuario' not in json.dumps(corpo)
+
+
+def test_sem_cabecalhos_nao_chama_o_llm(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    def proibido(**_kwargs):
+        raise AssertionError('não deveria chamar o LLM')
+
+    monkeypatch.setattr(litellm, 'completion', proibido)
+
+    corpo = servir(AUMENTO, [24, 26]).get('/recomendacoes/item A').json()
+
+    assert corpo['explicacao']['origem'] == 'template'
+
+
+def test_chave_do_usuario_invalida_cai_no_template(servir, monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    def falha(**_kwargs):
+        raise litellm.AuthenticationError('chave ruim', 'openai', 'gpt-4o')
+
+    monkeypatch.setattr(litellm, 'completion', falha)
+
+    resposta = servir(AUMENTO, [24, 26]).get(
+        '/recomendacoes/item A',
+        headers={'X-LLM-Modelo': 'openai/gpt-4o', 'X-LLM-Chave': 'ruim'},
+    )
+
+    assert resposta.status_code == HTTP_OK
+    assert resposta.json()['explicacao']['origem'] == 'template'

@@ -13,8 +13,9 @@ from pydantic import ValidationError
 from case_mr_health.config import Settings
 from case_mr_health.explicacao import (
     EntradaExplicacao,
-    criar_gerador_anthropic,
+    criar_gerador_padrao,
     explicar,
+    gerador_do_usuario,
     montar_template,
     numeros_fora_da_entrada,
 )
@@ -195,13 +196,13 @@ def test_saida_em_bloco_de_codigo_e_aceita():
 def test_chave_ausente_nao_cria_gerador():
     cfg = Settings(_env_file=None, llm_api_key=None)
 
-    assert criar_gerador_anthropic(cfg) is None
+    assert criar_gerador_padrao(cfg) is None
 
 
 def test_chave_configurada_cria_gerador_sem_chamar_a_rede():
     cfg = Settings(_env_file=None, llm_api_key='chave-falsa')
 
-    assert callable(criar_gerador_anthropic(cfg))
+    assert callable(criar_gerador_padrao(cfg))
 
 
 def test_modelo_e_chave_vem_da_configuracao(monkeypatch):
@@ -218,3 +219,53 @@ def test_modelo_e_chave_vem_da_configuracao(monkeypatch):
 def test_contrato_rejeita_resultado_desconhecido():
     with pytest.raises(ValidationError):
         entrada(resultado='ruptura_certa')
+
+
+def test_chave_do_usuario_ausente_nao_cria_gerador():
+    cfg = Settings(_env_file=None)
+
+    assert gerador_do_usuario(cfg, 'openai/gpt-4o', None) is None
+    assert gerador_do_usuario(cfg, 'openai/gpt-4o', '') is None
+
+
+def test_gerador_do_usuario_chama_o_litellm_com_modelo_e_chave(monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    chamadas = []
+
+    def falso(**kwargs):
+        chamadas.append(kwargs)
+        return litellm.ModelResponse(
+            choices=[{'message': {'role': 'assistant', 'content': '{}'}}]
+        )
+
+    monkeypatch.setattr(litellm, 'completion', falso)
+    cfg = Settings(_env_file=None)
+
+    gerador = gerador_do_usuario(cfg, 'gemini/gemini-2.0-flash', 'k-123')
+    bruto = gerador(entrada())
+
+    assert bruto == '{}'
+    assert chamadas[0]['model'] == 'gemini/gemini-2.0-flash'
+    assert chamadas[0]['api_key'] == 'k-123'
+
+
+def test_modelo_do_usuario_cai_no_da_configuracao(monkeypatch):
+    import litellm  # noqa: PLC0415
+
+    chamadas = []
+    monkeypatch.setattr(
+        litellm,
+        'completion',
+        lambda **kw: (
+            chamadas.append(kw)
+            or litellm.ModelResponse(
+                choices=[{'message': {'role': 'assistant', 'content': 'x'}}]
+            )
+        ),
+    )
+    cfg = Settings(_env_file=None, llm_modelo='openai/gpt-4o')
+
+    gerador_do_usuario(cfg, None, 'k')(entrada())
+
+    assert chamadas[0]['model'] == 'openai/gpt-4o'

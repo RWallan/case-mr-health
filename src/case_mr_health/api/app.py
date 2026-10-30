@@ -24,7 +24,7 @@ from case_mr_health.api.rotas import (
 )
 from case_mr_health.api.servicos.atualizacao import GerenteAtualizacoes
 from case_mr_health.config import Settings
-from case_mr_health.explicacao import GeradorLLM, criar_gerador_anthropic
+from case_mr_health.explicacao import GeradorLLM, criar_gerador_padrao
 
 ROTEADORES = (
     predicao.router,
@@ -44,7 +44,7 @@ def criar_app(
     @asynccontextmanager
     async def ciclo_de_vida(app: FastAPI) -> AsyncIterator[None]:
         app.state.cfg = cfg
-        app.state.gerador_llm = gerador_llm or criar_gerador_anthropic(cfg)
+        app.state.gerador_llm = gerador_llm or criar_gerador_padrao(cfg)
         app.state.modelos = carregar_modelos(cfg)
         app.state.historico = Historico(cfg.historico_db_path)
         app.state.atualizacoes = GerenteAtualizacoes(cfg, app.state.modelos)
@@ -71,7 +71,7 @@ def criar_app(
             'http://127.0.0.1:5173',
         ],
         allow_methods=['GET', 'POST'],
-        allow_headers=['content-type'],
+        allow_headers=['content-type', 'x-llm-modelo', 'x-llm-chave'],
     )
     for roteador in ROTEADORES:
         app.include_router(roteador)
