@@ -1,3 +1,10 @@
+# case-mr-health 0.6.1 (2026-10-30)
+
+## Alterado
+
+- Página inicial do guia MkDocs com apresentação do projeto e mapa das seções, no lugar do texto-esqueleto. ([#52](issues/52.md))
+
+
 # case-mr-health 0.6.0 (2026-10-30)
 
 ## Adicionado
