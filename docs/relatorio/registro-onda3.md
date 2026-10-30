@@ -24,7 +24,7 @@ Escopo: issues #13, #15, #16, #19 e #22, conforme
 
 | Ticket | Status nesta entrega | Registro |
 | --- | --- | --- |
-| #13 | Avaliação executada; publicação pendente (D-022) | D-019, D-020 e D-021 aprovadas pelo usuário às 12:13 UTC de 2026-10-30; fase `final_evaluation`; `avaliar-final` rodou uma vez (12:18 UTC). Resultados em `docs/relatorio/fase4/13-avaliacao-final.md` e `issues/13.md`. Publicação por série proposta como D-022. |
+| #13 | Concluído (avaliação, D-022 e promoção das 8 séries) | D-019, D-020 e D-021 aprovadas pelo usuário às 12:13 UTC de 2026-10-30; fase `final_evaluation`; `avaliar-final` rodou uma vez (12:18 UTC). Resultados em `docs/relatorio/fase4/13-avaliacao-final.md` e `issues/13.md`. Publicação aprovada (D-022, opção 1) e as 8 versões promovidas a `champion`. |
 | #15 | Implementado (2026-10-30) | Decisão do usuário (2026-10-30): sem campo `quantidade`; contrato do #14 inalterado; critério de zero × ausente descartado. `POST /predicoes/lote`, `POST /predicoes/lote/xlsx` e template; 21 testes; suíte rápida 562 passaram (evidência `.ds-workflow/test-evidence/test-run-20261030T095901-1222695.json`). Detalhes em `issues/15.md`. |
 | #16 | Implementado | `GET /previsoes`, `GET /previsoes/exportacao.xlsx`, `GET /modelos`; histórico paginado, XLSX sem truncamento e metadados do Registry. |
 | #19 | Implementado | #18 foi aprovada (commit e66357d). `GET /recomendacoes/{sku}`, regra pura em `recomendacao.py`, 5 casos do #18 e bordas testados. Detalhes em `docs/relatorio/fase5/19.md`. |
