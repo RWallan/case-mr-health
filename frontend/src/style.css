@@ -26,6 +26,9 @@ input[type='file'].campo { height: auto; padding: 7px var(--espaco-3); }
 .link:hover { text-decoration: underline; }
 .alerta { padding: var(--espaco-3) 14px; border-radius: var(--raio-sm); border: 1px solid; font-size: var(--texto-xs); margin-top: 22px; }
 .alerta-erro { color: var(--cor-erro); background: var(--cor-erro-fundo); border-color: var(--cor-erro-borda); }
+.erro-campo { color: var(--cor-erro); font-size: var(--texto-xs); margin: var(--espaco-2) 0 0; }
+.avancado { margin-top: var(--espaco-4); }
+.avancado summary { cursor: pointer; color: var(--cor-verde-link); font-size: var(--texto-xs); font-weight: 600; }
 .alerta-aviso { color: var(--cor-alerta); background: var(--cor-alerta-fundo); border-color: var(--cor-alerta-borda); }
 .tabela { width: 100%; border-collapse: collapse; margin-top: .75rem; font-size: .875rem; }
 .tabela th, .tabela td { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid var(--cor-borda); }

@@ -7,16 +7,16 @@
   import LinksApi from './LinksApi.svelte';
   import Recomendacoes from './Recomendacoes.svelte';
   import Upload from './Upload.svelte';
+  import FormularioPrevisao from './FormularioPrevisao.svelte';
+  import { campoDoErro, horizontePadrao, montarItem } from './formulario.js';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const mlflow = import.meta.env.VITE_MLFLOW_URL ?? 'http://localhost:5000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
-  const granularidades = ['diaria', 'semanal'];
 
   let rota = $state(rotaDoHash(location.hash));
   let sku = $state('item A');
   let granularidade = $state('diaria');
-  let horizonte = $state(7);
-  let dataReferencia = $state('');
+  let erroPrevisao = $state(null);
   let historico = $state([]);
   let previsao = $state(null);
   let erro = $state('');
@@ -34,6 +34,7 @@
 
   async function carregarSerie() {
     erro = '';
+    erroPrevisao = null;
     previsao = null;
     carregando = true;
     try {
@@ -43,8 +44,6 @@
       const corpo = await resposta.json();
       if (!resposta.ok) throw new Error(corpo.mensagem ?? 'Não foi possível carregar o histórico.');
       historico = corpo.pontos;
-      dataReferencia = historico.at(-1)?.data ?? '';
-      horizonte = granularidade === 'diaria' ? 7 : 2;
     } catch (falha) {
       erro = falha.message;
       historico = [];
@@ -53,19 +52,26 @@
     }
   }
 
-  async function buscar(event) {
-    event?.preventDefault();
+  let ultimoHorizonte = null;
+
+  async function buscar(item) {
+    ultimoHorizonte = item.horizonte;
     erro = '';
+    erroPrevisao = null;
     previsao = null;
     carregando = true;
     try {
       const resposta = await fetch(`${api}/predicoes`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sku, granularidade, data_referencia: dataReferencia, horizonte }),
+        body: JSON.stringify(item),
       });
       const corpo = await resposta.json();
-      if (!resposta.ok) throw new Error(corpo.mensagem ?? 'Não foi possível gerar a previsão.');
+      if (!resposta.ok) {
+        if (campoDoErro(corpo)) erroPrevisao = corpo;
+        else erro = corpo.mensagem ?? 'Não foi possível gerar a previsão.';
+        return;
+      }
       previsao = corpo;
     } catch (falha) {
       erro = falha.message;
@@ -118,7 +124,8 @@
     }
     // O histórico e a previsão passam a partir dos pedidos novos.
     await carregarSerie();
-    await buscar();
+    // Repete o pedido sobre a série atual, sem data manual (ADR 0013).
+    await buscar(montarItem({ sku, granularidade, horizonte: ultimoHorizonte ?? horizontePadrao(granularidade) }));
   }
 
   $effect(() => {
@@ -166,26 +173,7 @@
           <span class="step">01</span>
           <div><h2>Escolha a série</h2><p>Defina o produto e o período.</p></div>
         </div>
-        <label class="rotulo" for="sku">SKU</label>
-        <select id="sku" class="campo" bind:value={sku}>
-          {#each skus as opcao}<option value={opcao}>{opcao}</option>{/each}
-        </select>
-        <span class="rotulo" id="rotulo-granularidade">Granularidade</span>
-        <div class="segmented" role="group" aria-labelledby="rotulo-granularidade">
-          {#each granularidades as opcao}
-            <button type="button" class:active={granularidade === opcao} aria-pressed={granularidade === opcao} onclick={() => (granularidade = opcao)}>{opcao === 'diaria' ? 'Diária' : 'Semanal'}</button>
-          {/each}
-        </div>
-        <form onsubmit={buscar}>
-          <label class="rotulo" for="referencia">Último período conhecido</label>
-          <input id="referencia" class="campo" type="date" bind:value={dataReferencia} required />
-          <label class="rotulo" for="horizonte">Períodos a prever</label>
-          <input id="horizonte" class="campo" type="number" min="1" max={granularidade === 'diaria' ? 14 : 2} bind:value={horizonte} required />
-          <button class="btn btn-bloco" type="submit" disabled={carregando || !dataReferencia} aria-busy={carregando}>
-            {carregando ? 'Carregando…' : 'Gerar previsão'} <span aria-hidden="true">→</span>
-          </button>
-        </form>
-        <p class="limits-note">Limite validado: {granularidade === 'diaria' ? '14 dias' : '2 semanas'} após o fim do treino.</p>
+        <FormularioPrevisao id="painel" {skus} bind:sku bind:granularidade {carregando} erro={erroPrevisao} onenviar={buscar} />
       </aside>
 
       <section class="results card" aria-live="polite">

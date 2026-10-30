@@ -1,15 +1,15 @@
 <script>
   import AvisoZero from './AvisoZero.svelte';
+  import FormularioPrevisao from './FormularioPrevisao.svelte';
   import Upload from './Upload.svelte';
+  import { campoDoErro, erroDoLote } from './formulario.js';
   import { previsaoTodaZero } from './grafico.js';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
-  const maxHorizonte = { diaria: 14, semanal: 2 };
 
   let sku = $state('item A');
   let granularidade = $state('diaria');
-  let dataReferencia = $state('');
-  let horizonte = $state(7);
+  let erroForm = $state(null);
   let arquivo = $state(null);
   let enviando = $state(false);
   let mensagem = $state('');
@@ -20,8 +20,9 @@
   const rotulo = (g) => (g === 'diaria' ? 'diária' : 'semanal');
 
   // Envia ao backend e normaliza erros {campo, mensagem} (campo traz a linha em XLSX).
-  async function enviar(requisicao) {
+  async function enviar(requisicao, manual = false) {
     mensagem = '';
+    erroForm = null;
     erros = [];
     resultados = [];
     enviando = true;
@@ -31,6 +32,7 @@
       if (!resposta.ok) {
         mensagem = corpo.mensagem ?? 'Não foi possível gerar as previsões.';
         erros = corpo.detalhes ?? [];
+        if (manual) erroForm = erroDoLote(corpo);
         return;
       }
       resultados = corpo.resultados;
@@ -41,16 +43,15 @@
     }
   }
 
-  function enviarManual(event) {
-    event.preventDefault();
-    return enviar(() =>
-      fetch(`${api}/predicoes/lote`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          itens: [{ sku, granularidade, data_referencia: dataReferencia, horizonte }],
+  function enviarManual(item) {
+    return enviar(
+      () =>
+        fetch(`${api}/predicoes/lote`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ itens: [item] }),
         }),
-      }),
+      true,
     );
   }
 
@@ -68,24 +69,7 @@
     <div><h2>Pedir previsões</h2><p>Preencha uma solicitação ou envie uma planilha com várias.</p></div>
   </div>
 
-  <form onsubmit={enviarManual}>
-    <label class="rotulo" for="entrada-sku">SKU</label>
-    <select id="entrada-sku" class="campo" bind:value={sku} required>
-      {#each skus as opcao}<option value={opcao}>{opcao}</option>{/each}
-    </select>
-    <label class="rotulo" for="entrada-granularidade">Granularidade</label>
-    <select id="entrada-granularidade" class="campo" bind:value={granularidade} required>
-      <option value="diaria">Diária</option>
-      <option value="semanal">Semanal</option>
-    </select>
-    <label class="rotulo" for="entrada-data">Último período conhecido</label>
-    <input id="entrada-data" class="campo" type="date" bind:value={dataReferencia} pattern={'\\d{4}-\\d{2}-\\d{2}'} required />
-    <label class="rotulo" for="entrada-horizonte">Períodos a prever (1 a {maxHorizonte[granularidade]})</label>
-    <input id="entrada-horizonte" class="campo" type="number" min="1" max={maxHorizonte[granularidade]} step="1" bind:value={horizonte} required />
-    <button class="btn btn-bloco" type="submit" disabled={enviando} aria-busy={enviando}>
-      {enviando ? 'Enviando…' : 'Gerar previsão'} <span aria-hidden="true">→</span>
-    </button>
-  </form>
+  <FormularioPrevisao id="entrada" {skus} bind:sku bind:granularidade carregando={enviando} erro={erroForm} onenviar={enviarManual} />
 
   <form onsubmit={enviarPlanilha}>
     <Upload id="entrada-arquivo" rotulo="Planilha de solicitações (.xlsx)" bind:arquivo estado={enviando ? 'processando' : resultados.length ? 'sucesso' : 'ocioso'} mensagemSucesso="Planilha processada." />
@@ -95,7 +79,7 @@
     </button>
   </form>
 
-  {#if mensagem}
+  {#if mensagem && !campoDoErro(erroForm)}
     <div class="alerta alerta-erro" role="alert">
       {mensagem}
       {#if erros.length}
