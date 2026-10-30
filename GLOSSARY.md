@@ -17,7 +17,7 @@ Produto do cadastro (`item A` a `item D`), com um valor unitário. É a unidade 
 _Evitar_: item, produto
 
 **Valor unitário**:
-Preço de um SKU no cadastro.
+Preço de um SKU no cadastro. Interpretação inferida: a planilha de cadastro não tem cabeçalho e o case não a define; não confirmada.
 _Evitar_: preço médio, valor do item
 
 **Valor do item**:

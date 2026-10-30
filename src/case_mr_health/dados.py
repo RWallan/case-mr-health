@@ -6,6 +6,7 @@ import duckdb
 from loguru import logger
 
 from case_mr_health.config import Settings
+from case_mr_health.series import construir_series
 
 CABECALHO_PEDIDO = ('ID_PEDIDO', 'DATA', 'VALOR_TOTAL')
 CABECALHO_ITEM_PEDIDO = ('ID_PEDIDO', 'ID_ITEM', 'QUANTIDADE')
@@ -92,6 +93,7 @@ def preparar_dados(cfg: Settings | None = None) -> RelatorioQualidade:
         _carregar_brutos(con, origens)
         _validar(con)
         _consolidar(con)
+        construir_series(con)
         relatorio = _relatorio(con, hashes)
         _persistir(con, relatorio, cfg)
     finally:
@@ -460,6 +462,8 @@ def _persistir(con, relatorio: RelatorioQualidade, cfg: Settings) -> None:
         'pedido',
         'item_pedido',
         'base_consolidada',
+        'serie_diaria',
+        'serie_semanal',
         'qualidade_verificacoes',
         'qualidade_itens_repetidos',
     ):
