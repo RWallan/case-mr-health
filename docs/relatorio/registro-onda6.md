@@ -17,10 +17,10 @@ Escopo: planejamento (sem implementação) de melhorias do frontend, do gráfico
 | #45 | Responsividade e acessibilidade | #42, #43 | `ready-for-agent` |
 | #46 | Changelog dentro do app | #42 | `ready-for-agent` |
 | #47 | MkDocs Material, tokens, poe e link no frontend | #42 | `ready-for-agent` |
-| #48 | Docs: arquitetura e regras de negócio | #47, #41 | `ready-for-agent` |
+| #48 | Docs: arquitetura e regras de negócio | #47, #41 | resolvida |
 | #49 | Docs: Ciência de Dados e ML | #47 | `ready-for-agent` |
 | #50 | Docs: operação e Swagger | #47 | `ready-for-agent` |
-| #51 | Revisão final | #38 a #50 | `ready-for-agent` |
+| #51 | Revisão final | #38 a #50 | resolvida |
 
 Ordem adotada: a de referência do pedido, com um ajuste justificado. A correção do gráfico (#38) e a referência automática (#39, #40) vêm antes porque o formulário simplificado só funciona depois do reajuste (D1). Os tokens (#42) antecedem uploads, LLM, acessibilidade, changelog e MkDocs, que os reutilizam.
 
@@ -96,3 +96,11 @@ with TestClient(criar_app()) as c:
         print(g, ref, h, r.status_code)
 PY
 ```
+
+## Fechamento (#48 e #51)
+
+A issue #48 preencheu as páginas de negócio, arquitetura e funcional; o diagrama Mermaid e os links para ADRs fazem parte do guia. A revisão #51 consolidou rastreabilidade em `docs/guia/rastreabilidade.md`, incluindo remoção de confiança, exclusão de ARIMA/Prophet sem ADR atualizado, opção `--demonstracao` ausente, identificador `hash_dados = base`, divergências do Swagger e lacunas de e-mail real/deploy. Detalhes em `docs/relatorio/onda6/48.md` e `51.md`.
+
+Checklist visual para navegador está em `issues/51.md`; requer conferência humana, não foi declarado como executado. Build visual não substitui o teste funcional no navegador.
+
+Lint passou; build estrito passou após corrigir links. Resultado de `test-rapido` e revisão de critérios será registrado em `docs/relatorio/onda6/51.md`. Nenhum treino, reajuste ou escrita em artefatos de modelos foi realizado. Fragmentos pendentes incluem itens `adicionado`; sugestão de release: 0.6.0 (MINOR) sobre 0.5.0, sem compilar changelog ou mudar versão.
