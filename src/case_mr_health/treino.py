@@ -25,7 +25,7 @@ import pandas as pd
 from loguru import logger
 from mlflow import MlflowClient
 
-from case_mr_health import algoritmos, metricas
+from case_mr_health import algoritmos, confianca, metricas
 from case_mr_health.backtest import ResultadoBacktest, rodar_backtest
 from case_mr_health.candidatos import SKUS, candidatos
 from case_mr_health.config import Settings
@@ -286,6 +286,9 @@ def _treinar_candidato(
             MlflowClient().set_model_version_tag(
                 nome, info.registered_model_version, chave, valor
             )
+        confianca.registrar(
+            nome, info.registered_model_version, resultado, ctx.cfg
+        )
     return ResumoRun(
         run.info.run_id,
         algoritmo,
