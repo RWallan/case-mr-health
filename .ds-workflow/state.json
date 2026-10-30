@@ -1,10 +1,18 @@
 {
-  "phase": "setup",
+  "phase": "eda",
   "history": [
     {
       "at": "2026-10-30T05:26:45+00:00",
       "phase": "setup",
       "note": "init"
+    },
+    {
+      "at": "2026-10-30T05:37:33+00:00",
+      "from": "setup",
+      "phase": "eda",
+      "decision": null,
+      "note": null,
+      "decision_events": 4
     }
   ],
   "frozen": {}
