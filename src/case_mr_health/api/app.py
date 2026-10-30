@@ -9,10 +9,10 @@ from fastapi import FastAPI
 from case_mr_health.api.erros import registrar_tratadores
 from case_mr_health.api.historico import Historico
 from case_mr_health.api.modelos import carregar_modelos
-from case_mr_health.api.rotas import predicao
+from case_mr_health.api.rotas import changelog, predicao
 from case_mr_health.config import Settings
 
-ROTEADORES = (predicao.router,)
+ROTEADORES = (predicao.router, changelog.router)
 
 
 def criar_app(cfg: Settings | None = None) -> FastAPI:

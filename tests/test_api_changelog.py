@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from loguru import logger
 
+from case_mr_health.api.app import criar_app
 from case_mr_health.api.rotas.changelog import obter_settings, router
 from case_mr_health.api.schemas.changelog import TipoMudanca
 from case_mr_health.config import Settings
@@ -242,3 +243,7 @@ def test_swagger_documenta_a_rota(cliente):
     assert '`versoes` vazia' in operacao['description']
     assert resposta['description']
     assert esquema['components']['schemas']['Changelog']['examples']
+
+
+def test_rota_faz_parte_da_aplicacao():
+    assert '/changelog' in criar_app().openapi()['paths']
