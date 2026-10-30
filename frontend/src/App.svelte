@@ -6,6 +6,7 @@
   import { rotaDoHash } from './changelog.js';
   import LinksApi from './LinksApi.svelte';
   import Recomendacoes from './Recomendacoes.svelte';
+  import Upload from './Upload.svelte';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const mlflow = import.meta.env.VITE_MLFLOW_URL ?? 'http://localhost:5000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
@@ -26,6 +27,7 @@
   let atualizacao = $state(null);
   let errosEnvio = $state([]);
   let mensagemEnvio = $state('');
+  const estadoUpload = $derived(enviando ? 'processando' : atualizacao && !mensagemEnvio ? 'sucesso' : 'ocioso');
 
   const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
   const fmtData = (valor) => new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T12:00:00`));
@@ -89,8 +91,8 @@
     enviando = true;
     try {
       const corpo = new FormData();
-      corpo.append('pedidos', arquivoPedidos[0]);
-      corpo.append('itens', arquivoItens[0]);
+      corpo.append('pedidos', arquivoPedidos);
+      corpo.append('itens', arquivoItens);
       const resposta = await fetch(`${api}/dados/pedidos`, { method: 'POST', body: corpo });
       const dados = await resposta.json();
       if (!resposta.ok) {
@@ -217,11 +219,9 @@
         <div><h2>Enviar pedidos novos</h2><p>Os modelos são reajustados com o histórico atualizado.</p></div>
       </div>
       <form onsubmit={enviarPedidos}>
-        <label class="rotulo" for="pedidos">Planilha de pedidos (.xlsx)</label>
-        <input id="pedidos" class="campo" type="file" accept=".xlsx" bind:files={arquivoPedidos} required />
-        <label class="rotulo" for="itens">Planilha de itens de pedido (.xlsx)</label>
-        <input id="itens" class="campo" type="file" accept=".xlsx" bind:files={arquivoItens} required />
-        <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivoPedidos?.length || !arquivoItens?.length} aria-busy={enviando}>
+        <Upload id="pedidos" rotulo="Planilha de pedidos (.xlsx)" bind:arquivo={arquivoPedidos} estado={estadoUpload} mensagemSucesso="Pedidos enviados." />
+        <Upload id="itens" rotulo="Planilha de itens de pedido (.xlsx)" bind:arquivo={arquivoItens} estado={estadoUpload} mensagemSucesso="Itens enviados." />
+        <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivoPedidos || !arquivoItens} aria-busy={enviando}>
           {enviando ? 'Enviando…' : 'Enviar e reajustar'} <span aria-hidden="true">→</span>
         </button>
       </form>

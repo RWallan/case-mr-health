@@ -1,5 +1,6 @@
 <script>
   import AvisoZero from './AvisoZero.svelte';
+  import Upload from './Upload.svelte';
   import { previsaoTodaZero } from './grafico.js';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
@@ -56,7 +57,7 @@
   function enviarPlanilha(event) {
     event.preventDefault();
     const corpo = new FormData();
-    corpo.append('arquivo', arquivo[0]);
+    corpo.append('arquivo', arquivo);
     return enviar(() => fetch(`${api}/predicoes/lote/xlsx`, { method: 'POST', body: corpo }));
   }
 </script>
@@ -87,10 +88,9 @@
   </form>
 
   <form onsubmit={enviarPlanilha}>
-    <label class="rotulo" for="entrada-arquivo">Planilha de solicitações (.xlsx)</label>
-    <input id="entrada-arquivo" class="campo" type="file" accept=".xlsx" bind:files={arquivo} required />
+    <Upload id="entrada-arquivo" rotulo="Planilha de solicitações (.xlsx)" bind:arquivo estado={enviando ? 'processando' : resultados.length ? 'sucesso' : 'ocioso'} mensagemSucesso="Planilha processada." />
     <a class="link" href={`${api}/predicoes/lote/template.xlsx`} download>Baixar o template (.xlsx)</a>
-    <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivo?.length} aria-busy={enviando}>
+    <button class="btn btn-bloco" type="submit" disabled={enviando || !arquivo} aria-busy={enviando}>
       {enviando ? 'Enviando…' : 'Enviar planilha'} <span aria-hidden="true">→</span>
     </button>
   </form>
