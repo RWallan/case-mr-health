@@ -34,6 +34,7 @@ N_DIAS = 91  # 13 semanas completas: 5 folds na diária e 5 na semanal
 SEED = 5
 BASELINES = {'naive', 'media_historica', 'naive_sazonal'}
 SEMANAS_SERVIDAS = 2
+pytestmark = pytest.mark.lento
 
 
 def _constante(i):

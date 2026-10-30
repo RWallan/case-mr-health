@@ -13,9 +13,11 @@ import hashlib
 import json
 import random
 import subprocess
+import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from importlib import metadata
+from itertools import product
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -52,6 +54,7 @@ from case_mr_health.particoes import (
 PREFIXO_EXPERIMENTO = 'demanda'
 CAMINHO_MODELO = 'modelo'
 ARTEFATO_DIAGNOSTICOS = 'diagnosticos.json'
+ARTEFATO_BACKTEST = 'backtest.json'
 LIMITE_TAG = 5000
 _COLUNA_DATA = {
     'diaria': ('serie_diaria', 'data'),
@@ -72,6 +75,7 @@ class Contexto:
     particao: Particao
     seed: int
     codigo: dict[str, str]
+    rodada: str = ''
 
 
 @dataclass(frozen=True)
@@ -107,6 +111,7 @@ class ResumoTreino:
     runs: tuple[ResumoRun, ...]
     sem_implementacao: tuple[str, ...]
     falhas: tuple[ResumoFalha, ...] = ()
+    rodada: str = ''
 
 
 def nome_modelo(sku: str, granularidade: str) -> str:
@@ -254,8 +259,13 @@ def treinar_serie(
     sku: str,
     granularidade: str,
     seed: int | None = None,
+    rodada: str = '',
 ) -> ResumoTreino:
-    """Treina todos os candidatos implementados de uma série."""
+    """Treina todos os candidatos implementados de uma série.
+
+    `rodada` identifica a execução nas tags dos runs: a seleção do #12 lê
+    só uma rodada, sem misturar versões de execuções anteriores.
+    """
     if granularidade not in GRANULARIDADES:
         raise ValueError(f'granularidade desconhecida: {granularidade}')
     sku = normalizar_sku(sku)
@@ -268,6 +278,7 @@ def treinar_serie(
         _particao(cfg, sku, granularidade),
         seed,
         versao_codigo(),
+        rodada,
     )
 
     runs, falhas, pendentes = [], [], []
@@ -297,7 +308,23 @@ def treinar_serie(
         tuple(runs),
         tuple(pendentes),
         tuple(falhas),
+        rodada,
     )
+
+
+def treinar_todas(
+    cfg: Settings,
+    seed: int | None = None,
+    series: tuple[tuple[str, str], ...] | None = None,
+) -> tuple[str, list[ResumoTreino]]:
+    """Treina cada série de forma independente, numa mesma rodada."""
+    rodada = uuid.uuid4().hex
+    seed = seed if seed is not None else seed_padrao(cfg)
+    todas = series or tuple(product(SKUS, GRANULARIDADES))
+    return rodada, [
+        treinar_serie(cfg, sku, granularidade, seed, rodada)
+        for sku, granularidade in todas
+    ]
 
 
 def _particao(cfg: Settings, sku: str, granularidade: str) -> Particao:
@@ -423,6 +450,7 @@ def _registrar_falha(
             'falha_convergencia': 'true',
             'falha_ajuste': ajuste,
             'falha_motivo': falha.motivo[:LIMITE_TAG],
+            **_tag_rodada(ctx),
         })
         _registrar_parametros(ctx, hiperparametros)
         mlflow.log_dict(
@@ -514,10 +542,12 @@ def _treinar_candidato(
             'granularidade': particao.granularidade,
             'algoritmo': algoritmo,
             'papel': papel,
+            **_tag_rodada(ctx),
         })
         _registrar_parametros(ctx, hiperparametros)
         _registrar_metricas(resultado)
         _registrar_intervalos(resultado, calibracao)
+        mlflow.log_dict(_payload_backtest(resultado), ARTEFATO_BACKTEST)
         info = mlflow.pyfunc.log_model(
             name=CAMINHO_MODELO,
             python_model=ModeloDemanda(modelo_final, calibracao),
@@ -555,6 +585,36 @@ def _treinar_candidato(
         calibracao.metodo,
         {n: c.valor for n, c in resultado.intervalos.usada.items()},
     )
+
+
+def _tag_rodada(ctx: Contexto) -> dict[str, str]:
+    return {'rodada': ctx.rodada} if ctx.rodada else {}
+
+
+def _sem_nan(valores) -> list[float | None]:
+    return [None if np.isnan(v) else float(v) for v in valores]
+
+
+def _payload_backtest(resultado: ResultadoBacktest) -> dict:
+    """Previsão por fold, com os limites do método usado, para os gráficos."""
+    usar_nativo = resultado.intervalos.usar_nativo
+    folds = []
+    for r in resultado.folds:
+        fold = {
+            'fold': r.fold,
+            'teste_inicio': r.teste_inicio.isoformat(),
+            'teste_fim': r.teste_fim.isoformat(),
+            'observado': list(r.observado),
+            'previsto': list(r.previsto),
+        }
+        limites = r.intervalos.empirico
+        if usar_nativo and r.intervalos.nativo is not None:
+            limites = r.intervalos.nativo
+        for nivel, (inferior, superior) in limites.items():
+            fold[f'inferior_{rotulo(nivel)}'] = _sem_nan(inferior)
+            fold[f'superior_{rotulo(nivel)}'] = _sem_nan(superior)
+        folds.append(fold)
+    return {'folds': folds}
 
 
 def _registrar_parametros(ctx: Contexto, hiperparametros: dict) -> None:
@@ -596,6 +656,12 @@ def _registrar_metricas(resultado: ResultadoBacktest) -> None:
     for variante, medias in resultado.sensibilidade.items():
         for m, valor in medias.items():
             _metrica(f'sens_{variante}_{m}', valor, None, indefinidas)
+    observado = np.concatenate([r.observado for r in resultado.folds])
+    previsto = np.concatenate([r.previsto for r in resultado.folds])
+    vies = float(np.mean(previsto - observado))
+    _metrica('vies', vies, None, indefinidas)
+    if observado.mean() > 0:
+        _metrica('vies_relativo', vies / observado.mean(), None, indefinidas)
     if indefinidas:
         mlflow.set_tag(
             'metricas_indefinidas', ','.join(sorted(set(indefinidas)))

@@ -31,6 +31,7 @@ from tests.test_treino import (
 )
 
 HORIZONTE = 7
+pytestmark = pytest.mark.lento
 RUNS_SEMANAIS = 3  # naive, média e SES
 INTERMITENTES = ('croston', 'sba', 'tsb')
 PROPHET = {'ordem_fourier': 2, 'escala_sazonalidade': 1.0}

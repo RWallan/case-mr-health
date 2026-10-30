@@ -246,6 +246,7 @@ def _por_algoritmo(resumo):
     return {r.algoritmo: r for r in resumo.runs}
 
 
+@pytest.mark.lento
 def test_confianca_vai_para_a_versao_do_modelo_e_para_o_run(cfg):
     resumo = treinar_serie(cfg, 'item C', 'diaria', seed=SEED)
 
@@ -260,6 +261,7 @@ def test_confianca_vai_para_a_versao_do_modelo_e_para_o_run(cfg):
     assert registrado['confianca'] == tags['confianca']
 
 
+@pytest.mark.lento
 def test_todas_as_versoes_recebem_confianca(cfg):
     resumo = treinar_serie(cfg, 'item B', 'semanal', seed=SEED)
 
@@ -268,6 +270,7 @@ def test_todas_as_versoes_recebem_confianca(cfg):
         assert tags['confianca'] in {*confianca.FAIXAS, INSUFICIENTE}
 
 
+@pytest.mark.lento
 def test_escala_zero_vira_insuficiente_coerente_com_a_tag_do_run(cfg):
     resumo = treinar_serie(cfg, 'item A', 'diaria', seed=SEED)
 
@@ -287,6 +290,7 @@ def _zera_o_teste_do_fold_2(i):
     return 0 if i in TESTE_FOLD_2 else _intermitente(i)
 
 
+@pytest.mark.lento
 def test_wape_indefinido_nao_torna_a_confianca_insuficiente(cfg):
     _gravar_origem(cfg, dict(PADROES, **{'item B': _zera_o_teste_do_fold_2}))
 
@@ -300,6 +304,7 @@ def test_wape_indefinido_nao_torna_a_confianca_insuficiente(cfg):
     assert tags['confianca_motivo'] != MOTIVO_INDEFINIDO
 
 
+@pytest.mark.lento
 def test_confianca_nao_depende_do_oot(cfg):
     antes = treinar_serie(cfg, 'item C', 'diaria', seed=SEED)
     con = duckdb.connect(str(cfg.oot_db_path))
@@ -317,6 +322,7 @@ def test_confianca_nao_depende_do_oot(cfg):
             assert tags_antes.get(chave) == tags_depois.get(chave)
 
 
+@pytest.mark.lento
 def test_confianca_nao_promove_nenhuma_versao(cfg):
     treinar_serie(cfg, 'item C', 'diaria', seed=SEED)
 

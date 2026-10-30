@@ -7,7 +7,8 @@ from loguru import logger
 from case_mr_health.config import Settings
 from case_mr_health.dados import DadosInvalidosError, preparar_dados
 from case_mr_health.logs import configurar_logs
-from case_mr_health.treino import treinar_serie
+from case_mr_health.selecao import publicar_selecao
+from case_mr_health.treino import ResumoTreino, treinar_serie, treinar_todas
 
 app = App(name='case-mr-health', help='Previsão de demanda da MR. HEALTH.')
 
@@ -67,11 +68,14 @@ def preparar(
 
 @app.command(name='treinar')
 def treinar(
-    sku: Annotated[str, Parameter(name='--sku')],
-    granularidade: Annotated[str, Parameter(name='--granularidade')],
+    sku: Annotated[str | None, Parameter(name='--sku')] = None,
+    granularidade: Annotated[
+        str | None, Parameter(name='--granularidade')
+    ] = None,
+    todas: Annotated[bool, Parameter(name='--todas')] = False,
     seed: Annotated[int | None, Parameter(name='--seed')] = None,
 ) -> int:
-    """Treina uma série (backtest, baselines e registro no MLflow).
+    """Treina uma série ou todas (backtest, candidatos e registro no MLflow).
 
     Parameters
     ----------
@@ -79,20 +83,36 @@ def treinar(
         SKU da série (`item A` ou só `A`).
     granularidade
         `diaria` ou `semanal`.
+    todas
+        Treina as 8 séries numa mesma rodada, em vez de `--sku`.
     seed
         Seed (padrão: configuração ou a data local, YYYYMMDD).
     """
     cfg = Settings()
     configurar_logs(cfg.log_level)
+    if todas == bool(sku and granularidade):
+        logger.error('Use --todas ou --sku com --granularidade')
+        return 1
     try:
-        resumo = treinar_serie(cfg, sku, granularidade, seed)
+        if todas:
+            rodada, resumos = treinar_todas(cfg, seed)
+            logger.info('Rodada {}', rodada)
+        else:
+            resumos = [treinar_serie(cfg, sku, granularidade, seed)]
     except ValueError as erro:
         logger.error('{}', erro)
         return 1
+    for resumo in resumos:
+        _relatar_runs(resumo)
+    return 0
+
+
+def _relatar_runs(resumo: ResumoTreino) -> None:
     for run in resumo.runs:
         logger.info(
-            '{} {} {}: MAE {:.3f} MASE {:.3f} intervalo {} (versão {})',
+            '{} {} {} {}: MAE {:.3f} MASE {:.3f} intervalo {} (versão {})',
             resumo.sku,
+            resumo.granularidade,
             run.algoritmo,
             run.hiperparametros,
             run.medias['mae'],
@@ -100,4 +120,29 @@ def treinar(
             run.intervalo_metodo,
             run.versao_modelo,
         )
+
+
+@app.command(name='selecionar')
+def selecionar(
+    rodada: Annotated[str, Parameter(name='--rodada')],
+    resumo_path: Annotated[Path, Parameter(name='--resumo-path')] = Path(
+        'docs/relatorio/fase2/12-resumo.md'
+    ),
+) -> int:
+    """Aplica o critério do #12 a uma rodada e publica a seleção.
+
+    Parameters
+    ----------
+    rodada
+        Identificador impresso pelo `treinar --todas`.
+    resumo_path
+        Resumo em markdown, por série.
+    """
+    cfg = Settings()
+    configurar_logs(cfg.log_level)
+    try:
+        publicar_selecao(cfg, rodada, resumo_path)
+    except ValueError as erro:
+        logger.error('{}', erro)
+        return 1
     return 0
