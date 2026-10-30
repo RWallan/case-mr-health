@@ -1,10 +1,13 @@
 """Rota da recomendação determinística (#19)."""
 
-from fastapi import APIRouter, Request
+from typing import Annotated
+
+from fastapi import APIRouter, Header, Request
 
 from case_mr_health.api.schemas.erros import ErroResposta
 from case_mr_health.api.schemas.recomendacao import RespostaRecomendacao
 from case_mr_health.api.servicos import recomendacao
+from case_mr_health.explicacao import gerador_do_usuario
 
 router = APIRouter(tags=['Recomendação'])
 
@@ -43,7 +46,29 @@ def _erro(descricao: str, codigo: str, mensagem: str) -> dict:
         ),
     },
 )
-def consultar_recomendacao(sku: str, request: Request) -> RespostaRecomendacao:
+def consultar_recomendacao(
+    sku: str,
+    request: Request,
+    x_llm_modelo: Annotated[
+        str | None,
+        Header(
+            description=(
+                'Modelo do LLM na notação do litellm, por exemplo '
+                '`openai/gpt-4o`, `anthropic/claude-sonnet-5-5` ou '
+                '`gemini/gemini-2.0-flash`. Vale só com `X-LLM-Chave`.'
+            ),
+        ),
+    ] = None,
+    x_llm_chave: Annotated[
+        str | None,
+        Header(
+            description=(
+                'Chave de API do usuário para o provedor do modelo. Usada '
+                'só nesta chamada; não é armazenada nem registrada em log.'
+            ),
+        ),
+    ] = None,
+) -> RespostaRecomendacao:
     """Compara a demanda prevista (2 semanas) com a venda recente (4).
 
     Usa o modelo semanal (`champion` ou versão fixada) da **rede**. A
@@ -55,17 +80,23 @@ def consultar_recomendacao(sku: str, request: Request) -> RespostaRecomendacao:
     baixa confiabilidade estatística, e a chamada é gravada no histórico de
     previsões.
 
-    A explicação é gerada pelo LLM da Anthropic (modelo e chave vêm da
-    configuração), sem ferramentas nem acesso externo, a partir dos números
+    A explicação é gerada por um LLM de qualquer provedor (litellm), com o
+    modelo e a chave que o usuário informa nos cabeçalhos `X-LLM-Modelo` e
+    `X-LLM-Chave`; sem eles, vale a configuração do servidor. Sem
+    ferramentas nem acesso externo, a partir dos números
     da regra. A saída é validada por schema e só pode citar números da
     entrada; sem chave, com falha ou com saída inválida, vem o template
     determinístico. A explicação nunca altera o resultado.
     """
     estado = request.app.state
+    gerador = (
+        gerador_do_usuario(estado.cfg, x_llm_modelo, x_llm_chave)
+        or estado.gerador_llm
+    )
     return recomendacao.recomendar_sku(
         sku,
         estado.modelos,
         estado.historico,
         estado.cfg,
-        estado.gerador_llm,
+        gerador,
     )

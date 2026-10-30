@@ -21,6 +21,19 @@
   const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
   const fmtData = (valor) => new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T12:00:00`));
 
+  const modelosSugeridos = [
+    'anthropic/claude-sonnet-5-5',
+    'openai/gpt-4o',
+    'gemini/gemini-2.0-flash',
+    'mistral/mistral-large-latest',
+  ];
+  // A chave fica só na memória desta página: não vai para o armazenamento do navegador.
+  let modeloLlm = $state('');
+  let chaveLlm = $state('');
+
+  const cabecalhosLlm = () =>
+    chaveLlm ? { 'X-LLM-Modelo': modeloLlm.trim(), 'X-LLM-Chave': chaveLlm.trim() } : {};
+
   let itens = $state([]);
   let erro = $state('');
   let carregando = $state(false);
@@ -37,7 +50,7 @@
     try {
       itens = await Promise.all(
         skus.map(async (item) => {
-          const resposta = await fetch(`${api}/recomendacoes/${encodeURIComponent(item)}`);
+          const resposta = await fetch(`${api}/recomendacoes/${encodeURIComponent(item)}`, { headers: cabecalhosLlm() });
           const corpo = await resposta.json();
           if (!resposta.ok) return { sku: item, erro: corpo.mensagem ?? 'Recomendação indisponível.' };
           return { sku: item, ...corpo };
@@ -82,6 +95,19 @@
     <span class="step">04</span>
     <div><h2>Recomendações por SKU</h2><p>Variação da demanda prevista (2 semanas) contra a venda recente (4 semanas), comparada ao Q3 histórico.</p></div>
   </div>
+
+  <form class="llm-form" onsubmit={(evento) => { evento.preventDefault(); carregar(); }}>
+    <h3>LLM da explicação (opcional)</h3>
+    <p class="nota">Informe o modelo (formato <code>provedor/modelo</code>) e a sua chave de API. Funciona com OpenAI, Anthropic, Gemini e outros. A chave é enviada só nas consultas desta página, não é armazenada e não aparece em log. Sem chave, a explicação vem do template.</p>
+    <label>Modelo
+      <input list="modelos-llm" bind:value={modeloLlm} placeholder="openai/gpt-4o" required={!!chaveLlm} pattern="[^/\s]+/\S+" title="Use o formato provedor/modelo, por exemplo openai/gpt-4o" autocomplete="off" />
+    </label>
+    <datalist id="modelos-llm">{#each modelosSugeridos as modelo}<option value={modelo}></option>{/each}</datalist>
+    <label>Chave de API
+      <input type="password" bind:value={chaveLlm} autocomplete="off" placeholder="sk-…" />
+    </label>
+    <button type="submit" disabled={carregando}>Aplicar e recarregar</button>
+  </form>
 
   {#if erro}<div class="error" role="alert">{erro}</div>{/if}
   {#if carregando}<p class="nota">Carregando…</p>{/if}
@@ -171,9 +197,11 @@
   .motivo, .aviso { color: #9a5f1f; margin: 4px 0; }
   .explicacao { margin: 8px 0 4px; line-height: 1.5; }
   .origem { margin: 0; font-size: 10px; color: #74837d; font-weight: 600; }
+  .llm-form { margin-top: 16px; display: grid; gap: 6px; max-width: 32rem; font-size: 12px; }
+  .llm-form h3 { font-size: 14px; margin-bottom: 0; }
   .alerta-form { margin-top: 22px; padding-top: 16px; border-top: 1px solid #e6ebe6; display: grid; gap: 6px; max-width: 32rem; font-size: 12px; }
   .alerta-form h3 { font-size: 14px; margin-bottom: 4px; }
-  .alerta-form input, .alerta-form select { height: 38px; border: 1px solid #dfe6df; border-radius: 8px; padding: 0 12px; }
+  .llm-form input, .alerta-form input, .alerta-form select { height: 38px; border: 1px solid #dfe6df; border-radius: 8px; padding: 0 12px; }
   button { justify-self: start; height: 38px; margin-top: 6px; padding: 0 16px; border: 0; border-radius: 8px; background: #234d3e; color: #fff; font-weight: 600; font-size: 12px; cursor: pointer; }
   button:disabled { opacity: .55; cursor: wait; }
   .email { margin-top: 16px; border: 1px solid #dfe6df; border-radius: 10px; padding: 16px; font-size: 12px; max-width: 46rem; }

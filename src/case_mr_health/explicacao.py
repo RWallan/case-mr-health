@@ -1,7 +1,8 @@
 """Explicação da recomendação em linguagem simples (#20).
 
 A decisão é só da regra (#18); aqui só se explica o que ela decidiu. A
-explicação vem de um LLM (Anthropic), sem ferramentas nem acesso externo, a
+explicação vem de um LLM de qualquer provedor (litellm), sem ferramentas nem
+acesso externo, a
 partir de um contrato estruturado. A saída é validada por schema e toda
 quantidade citada precisa estar na entrada. Sem chave, com falha do LLM ou
 com saída inválida, vale o template determinístico com os mesmos números.
@@ -258,35 +259,65 @@ def _frase_variacao(entrada: EntradaExplicacao) -> str:
 # --- LLM -------------------------------------------------------------------
 
 
-def criar_gerador_anthropic(cfg: Settings) -> GeradorLLM | None:
-    """Gerador sobre a API da Anthropic, ou `None` sem chave configurada."""
-    if cfg.llm_api_key is None:
-        return None
-    from anthropic import Anthropic  # noqa: PLC0415
+def criar_gerador(
+    modelo: str,
+    api_key: str,
+    timeout_s: float,
+    max_tokens: int,
+) -> GeradorLLM:
+    """Gerador agnóstico ao provedor (litellm).
 
-    cliente = Anthropic(
-        api_key=cfg.llm_api_key.get_secret_value(),
-        timeout=cfg.llm_timeout_s,
-        max_retries=1,
-    )
+    `modelo` segue a notação do litellm (`anthropic/claude-sonnet-5-5`,
+    `openai/gpt-4o`, `gemini/gemini-2.0-flash`...). A chave é usada só na
+    chamada e nunca é registrada em log.
+    """
 
     def gerar(entrada: EntradaExplicacao) -> str:
-        resposta = cliente.messages.create(
-            model=cfg.llm_modelo,
-            max_tokens=cfg.llm_max_tokens,
-            system=_INSTRUCAO,
+        import litellm  # noqa: PLC0415
+
+        resposta = litellm.completion(
+            model=modelo,
+            api_key=api_key,
+            max_tokens=max_tokens,
+            timeout=timeout_s,
+            num_retries=1,
             messages=[
-                {
-                    'role': 'user',
-                    'content': entrada.model_dump_json(),
-                }
+                {'role': 'system', 'content': _INSTRUCAO},
+                {'role': 'user', 'content': entrada.model_dump_json()},
             ],
         )
-        return ''.join(
-            bloco.text for bloco in resposta.content if bloco.type == 'text'
-        )
+        return resposta.choices[0].message.content or ''
 
     return gerar
+
+
+def criar_gerador_padrao(cfg: Settings) -> GeradorLLM | None:
+    """Gerador da configuração do servidor, ou `None` sem chave."""
+    if cfg.llm_api_key is None:
+        return None
+    return criar_gerador(
+        cfg.llm_modelo,
+        cfg.llm_api_key.get_secret_value(),
+        cfg.llm_timeout_s,
+        cfg.llm_max_tokens,
+    )
+
+
+def gerador_do_usuario(
+    cfg: Settings, modelo: str | None, api_key: str | None
+) -> GeradorLLM | None:
+    """Gerador com a chave informada pelo usuário na requisição.
+
+    `None` quando a chave não veio; o modelo cai no da configuração.
+    """
+    if not api_key:
+        return None
+    return criar_gerador(
+        modelo or cfg.llm_modelo,
+        api_key,
+        cfg.llm_timeout_s,
+        cfg.llm_max_tokens,
+    )
 
 
 def _validar(bruto: str, entrada: EntradaExplicacao) -> str:
