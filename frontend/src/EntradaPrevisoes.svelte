@@ -1,4 +1,6 @@
 <script>
+  import AvisoZero from './AvisoZero.svelte';
+  import { previsaoTodaZero } from './grafico.js';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const skus = ['item A', 'item B', 'item C', 'item D'];
   const maxHorizonte = { diaria: 14, semanal: 2 };
@@ -116,7 +118,10 @@
               <td>{item.linha ?? item.indice + 1}</td>
               <td>{item.previsao.sku} · {rotulo(item.previsao.granularidade)}</td>
               <td>{item.previsao.periodos.length}</td>
-              <td>{fmt.format(item.previsao.periodos.reduce((soma, p) => soma + p.quantidade_prevista, 0))} unidades</td>
+              <td>
+                {fmt.format(item.previsao.periodos.reduce((soma, p) => soma + p.quantidade_prevista, 0))} unidades
+                {#if previsaoTodaZero(item.previsao.periodos)}<AvisoZero rotulo="Previsão toda zero" id={`dica-zero-lote-${item.indice}`} />{/if}
+              </td>
             </tr>
           {/each}
         </tbody>

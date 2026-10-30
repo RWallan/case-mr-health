@@ -67,12 +67,7 @@ h2 { font-family: var(--fonte-titulo); font-size: 16px; margin: 2px 0 5px; lette
 .limits-note { color: var(--cor-texto-suave); font-size: var(--texto-xs); line-height: 1.5; margin: 13px 0 0; }
 .results { min-height: 500px; padding: 24px 25px 19px; }
 .results-heading { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
-.legend { display: flex; align-items: center; gap: 7px; color: var(--cor-texto-suave); font-size: var(--texto-xs); white-space: nowrap; padding-top: 7px; }
-.legend-history, .legend-forecast, .legend-interval { width: 16px; height: 3px; border-radius: 4px; background: var(--cor-historico); margin-left: 6px; }
-.legend-forecast { background: var(--cor-previsao); }
-.legend-interval { height: 8px; background: var(--cor-intervalo-95); }
-.chart-wrap { margin-top: 36px; width: 100%; }
-.chart-wrap svg { width: 100%; height: auto; overflow: visible; }
+.legend { display: flex; align-items: center; gap: 7px; color: var(--cor-texto-suave); font-size: var(--texto-xs); }
 .axis { stroke: var(--cor-eixo); stroke-width: 1.2; }
 .gridline { stroke: var(--cor-grade); stroke-dasharray: 3 5; }
 .tick { fill: var(--cor-texto-suave); font-size: var(--texto-xs); }
@@ -83,7 +78,6 @@ h2 { font-family: var(--fonte-titulo); font-size: 16px; margin: 2px 0 5px; lette
 .interval-80 { stroke: var(--cor-intervalo-80); stroke-width: 3; }
 .split-line { stroke: var(--cor-divisao); stroke-dasharray: 4 5; }
 .chart-footnote { color: var(--cor-texto-suave); font-size: var(--texto-xs); margin: 3px 0 0 40px; }
-.chart-footnote span { color: var(--cor-previsao-texto); font-weight: 700; }
 .empty-state { min-height: 320px; display: grid; align-content: center; justify-items: center; text-align: center; color: var(--cor-texto-suave); }
 .empty-icon { color: var(--cor-lima-texto); font-size: 32px; margin-bottom: 10px; }
 .empty-state h3 { color: var(--cor-texto-forte); font-size: 15px; margin-bottom: 7px; }
