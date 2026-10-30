@@ -2,6 +2,8 @@
   import EntradaPrevisoes from './EntradaPrevisoes.svelte';
   import ComparacaoSkus from './ComparacaoSkus.svelte';
   import GraficoPrevisao from './GraficoPrevisao.svelte';
+  import Changelog from './Changelog.svelte';
+  import { rotaDoHash } from './changelog.js';
   import LinksApi from './LinksApi.svelte';
   import Recomendacoes from './Recomendacoes.svelte';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -9,6 +11,7 @@
   const skus = ['item A', 'item B', 'item C', 'item D'];
   const granularidades = ['diaria', 'semanal'];
 
+  let rota = $state(rotaDoHash(location.hash));
   let sku = $state('item A');
   let granularidade = $state('diaria');
   let horizonte = $state(7);
@@ -123,6 +126,8 @@
   });
 </script>
 
+<svelte:window onhashchange={() => (rota = rotaDoHash(location.hash))} />
+
 <svelte:head>
   <meta name="description" content="Histórico e previsão da demanda da rede MR. HEALTH." />
 </svelte:head>
@@ -140,6 +145,9 @@
     </div>
   </header>
 
+  {#if rota === 'changelog'}
+    <Changelog {api} />
+  {:else}
   <main>
     <section class="intro">
       <div>
@@ -253,4 +261,5 @@
 
     <footer><span>MR. HEALTH · Planejamento de demanda</span><span>Previsões da rede · Só o envio de pedidos novos reajusta os modelos</span></footer>
   </main>
+  {/if}
 </div>
