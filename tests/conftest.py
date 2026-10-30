@@ -111,4 +111,5 @@ def settings(tmp_path, planilhas) -> Settings:
         relatorio_path=tmp_path / 'saida' / 'relatorio.md',
         desenvolvimento_db_path=tmp_path / 'saida' / 'desenvolvimento.duckdb',
         oot_db_path=tmp_path / 'saida' / 'oot.duckdb',
+        atualizacoes_dir=tmp_path / 'atualizacoes',
     )

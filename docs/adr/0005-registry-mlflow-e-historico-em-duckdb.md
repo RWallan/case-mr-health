@@ -1,3 +1,5 @@
+> **Alterado em parte pelo ADR 0011** (2026-10-30): a API continua sem treinar em requisições de predição, mas passa a reajustar os modelos quando recebe pedidos novos. O texto abaixo é o original.
+
 # Modelos servidos pelo MLflow Model Registry e histórico de previsões em DuckDB próprio
 
 Treino e inferência são separados pelo MLflow Model Registry. Cada série tem um modelo registrado `demanda-<sku>-<granularidade>`, e há um experimento por granularidade, com tags `sku`, `granularidade` e `algoritmo`. Na inicialização, a API carrega a versão com alias `champion` de cada modelo, ou uma versão fixada por configuração, e nunca treina. As URIs de tracking (SQLite local) e de artefatos (diretório local) vêm de configuração, para permitir migrar para servidor e armazenamento remotos sem mudar código.

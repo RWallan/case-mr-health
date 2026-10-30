@@ -54,6 +54,11 @@ class VersaoDisponivel(BaseModel):
     hash_artefato: str | None
     run_id: str | None
     criada_em: datetime
+    origem: str | None = Field(
+        default=None,
+        description='`atualizacao` se foi reajustada com pedidos novos.',
+    )
+    versao_anterior: str | None = None
 
 
 class RespostaModelos(BaseModel):

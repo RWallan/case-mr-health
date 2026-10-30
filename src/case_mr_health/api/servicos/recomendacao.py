@@ -126,4 +126,5 @@ def recomendar_sku(
         aviso=AVISO,
         versao_modelo=modelo.versao,
         hash_artefato=modelo.hash_artefato,
+        origem_modelo=modelo.origem,
     )

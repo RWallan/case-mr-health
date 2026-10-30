@@ -123,6 +123,7 @@ class RespostaPredicao(BaseModel):
                     'valor_unitario': 10.0,
                     'versao_modelo': '3',
                     'hash_artefato': 'a3f5…',
+                    'origem_modelo': 'treino',
                     'experimento_id': '1',
                     'run_id': '0a2bbfbec17244318eae019bd4c0b91e',
                     'periodos': [
@@ -162,6 +163,13 @@ class RespostaPredicao(BaseModel):
     versao_modelo: str = Field(description='Versão registrada no MLflow.')
     hash_artefato: str = Field(
         description='Hash do artefato, conferido no carregamento.'
+    )
+    origem_modelo: Literal['treino', 'atualizacao'] = Field(
+        default='treino',
+        description=(
+            '`atualizacao` indica versão reajustada com pedidos novos (ADR '
+            '0011): não tem métrica fora da amostra.'
+        ),
     )
     experimento_id: str = Field(description='Experimento MLflow de origem.')
     run_id: str = Field(description='Execução MLflow de origem.')

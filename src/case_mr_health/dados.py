@@ -120,29 +120,33 @@ def _ler_xlsx(con, caminho: Path, intervalo: str) -> str:
     )
 
 
+def _carregar_bruto(con, nome: str, caminho: Path) -> None:
+    leitura = _ler_xlsx(con, caminho, 'A1:D')
+    con.execute(
+        f'CREATE TABLE bruto_{nome} AS '
+        f'SELECT row_number() OVER () AS linha, A, B, C, D '
+        f'FROM {leitura}'
+    )
+    cabecalho = con.execute(
+        f'SELECT B, C, D FROM bruto_{nome} WHERE linha = 1'
+    ).fetchone()
+    esperado = (
+        CABECALHO_PEDIDO if nome == 'pedido' else (CABECALHO_ITEM_PEDIDO)
+    )
+    if cabecalho != esperado:
+        raise DadosInvalidosError(
+            f'Cabeçalho inesperado em {caminho.name}: '
+            f'{cabecalho}, esperado {esperado}.'
+        )
+    con.execute(
+        f'DELETE FROM bruto_{nome} WHERE linha = 1 '
+        f'OR (B IS NULL AND C IS NULL AND D IS NULL)'
+    )
+
+
 def _carregar_brutos(con, origens: dict[str, Path]) -> None:
-    for nome, ultima in (('pedido', 'D'), ('item_pedido', 'D')):
-        leitura = _ler_xlsx(con, origens[nome], f'A1:{ultima}')
-        con.execute(
-            f'CREATE TABLE bruto_{nome} AS '
-            f'SELECT row_number() OVER () AS linha, A, B, C, D '
-            f'FROM {leitura}'
-        )
-        cabecalho = con.execute(
-            f'SELECT B, C, D FROM bruto_{nome} WHERE linha = 1'
-        ).fetchone()
-        esperado = (
-            CABECALHO_PEDIDO if nome == 'pedido' else (CABECALHO_ITEM_PEDIDO)
-        )
-        if cabecalho != esperado:
-            raise DadosInvalidosError(
-                f'Cabeçalho inesperado em {origens[nome].name}: '
-                f'{cabecalho}, esperado {esperado}.'
-            )
-        con.execute(
-            f'DELETE FROM bruto_{nome} WHERE linha = 1 '
-            f'OR (B IS NULL AND C IS NULL AND D IS NULL)'
-        )
+    for nome in ('pedido', 'item_pedido'):
+        _carregar_bruto(con, nome, origens[nome])
     # A primeira linha de ITENS é um resquício (índice 0), não um dado.
     leitura = _ler_xlsx(con, origens['sku'], 'A1:B')
     con.execute(

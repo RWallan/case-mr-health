@@ -242,7 +242,7 @@ class ModeloDemanda(mlflow.pyfunc.PythonModel):
         return pd.DataFrame(colunas)
 
 
-def _preparar_mlflow(cfg: Settings, granularidade: str) -> str:
+def preparar_mlflow(cfg: Settings, granularidade: str) -> str:
     mlflow.set_tracking_uri(cfg.mlflow_tracking_uri)
     cfg.mlflow_artifact_dir.mkdir(parents=True, exist_ok=True)
     nome = nome_experimento(granularidade)
@@ -273,7 +273,7 @@ def treinar_serie(
     aplicar_seed(seed)
     contexto = Contexto(
         cfg,
-        _preparar_mlflow(cfg, granularidade),
+        preparar_mlflow(cfg, granularidade),
         carregar_serie(cfg, sku, granularidade),
         _particao(cfg, sku, granularidade),
         seed,
@@ -492,7 +492,7 @@ def horizonte_maximo(cfg: Settings, granularidade: str) -> int:
     return cfg.oot_semanal_semanas
 
 
-def _config_intervalos(cfg: Settings) -> ConfigIntervalos:
+def config_intervalos(cfg: Settings) -> ConfigIntervalos:
     return ConfigIntervalos(cfg.niveis_intervalo, cfg.intervalo_max_origens)
 
 
@@ -500,7 +500,7 @@ def _calibrar_final(
     ctx: Contexto, algoritmo: str, hiperparametros: dict, usar_nativo: bool
 ) -> Calibracao:
     """Calibração do modelo final: todo o desenvolvimento, sem o OOT."""
-    config = _config_intervalos(ctx.cfg)
+    config = config_intervalos(ctx.cfg)
     horizonte = horizonte_maximo(ctx.cfg, ctx.particao.granularidade)
     y = ctx.serie.to_numpy(dtype=float)
     if usar_nativo:
@@ -524,7 +524,7 @@ def _treinar_candidato(
         algoritmo,
         hiperparametros,
         seed,
-        _config_intervalos(ctx.cfg),
+        config_intervalos(ctx.cfg),
     )
     modelo_final = algoritmos.criar(algoritmo, hiperparametros, seed).ajustar(
         ctx.serie.to_numpy(dtype=float)

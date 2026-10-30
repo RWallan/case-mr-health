@@ -70,3 +70,9 @@ h2 { font-family: Manrope, sans-serif; font-size: 16px; margin: 2px 0 5px; lette
 footer { display: flex; justify-content: space-between; gap: 12px; color: #9aa69f; font-size: 10px; padding: 26px 3px 0; }
 @media (max-width: 820px) { .workspace { grid-template-columns: 1fr; } .controls { order: 0; } .results { min-height: 400px; } .intro { align-items: start; } }
 @media (max-width: 560px) { .topbar { height: 62px; padding: 0 18px; } .network-label { display: none; } main { padding: 36px 16px 20px; } .intro { gap: 14px; flex-direction: column; } .source-badge { border-left: 0; padding-left: 0; } .results { padding: 20px 14px; } .results-heading { flex-direction: column; } .forecast-summary { grid-template-columns: 1fr 1fr; } footer { flex-direction: column; } }
+
+.update { margin-top: 1.5rem; }
+.update form { display: grid; gap: 0.5rem; max-width: 32rem; }
+.update-status { margin-top: 1rem; }
+table.erros { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.875rem; }
+table.erros th, table.erros td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid #e4e3dd; }

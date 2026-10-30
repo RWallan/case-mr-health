@@ -37,6 +37,7 @@ class RespostaRecomendacao(BaseModel):
                     'aviso': AVISO,
                     'versao_modelo': '3',
                     'hash_artefato': 'a3f5…',
+                    'origem_modelo': 'treino',
                 }
             ]
         },
@@ -101,3 +102,9 @@ class RespostaRecomendacao(BaseModel):
     )
     versao_modelo: str = Field(description='Versão semanal servida.')
     hash_artefato: str = Field(description='Hash do artefato da versão.')
+    origem_modelo: Literal['treino', 'atualizacao'] = Field(
+        default='treino',
+        description=(
+            '`atualizacao`: versão reajustada, sem métrica fora da amostra.'
+        ),
+    )
