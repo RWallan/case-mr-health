@@ -22,3 +22,6 @@ test-evidence/
 mlruns/
 data/atualizacoes/
 site/
+
+# Dependências do dashboard (instaladas com npm ci)
+node_modules/

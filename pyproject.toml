@@ -46,6 +46,9 @@ docs = [
     "mkdocs-material>=9.8.0",
 ]
 
+[tool.uv]
+default-groups = ["dev", "docs"]
+
 [tool.ruff]
 line-length = 79
 # O registro MLflow versionado tem pyproject.toml dentro dos artefatos: sem
