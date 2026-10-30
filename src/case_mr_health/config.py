@@ -30,3 +30,8 @@ class Settings(BaseSettings):
     fold_semanal_semanas: int = 1
     treino_minimo_diaria_dias: int = 42
     treino_minimo_semanal_semanas: int = 6
+    # Treino e MLflow (ADR 0005); a seed padrão é a data local (YYYYMMDD).
+    seed: int | None = None
+    fuso_horario: str = 'America/Sao_Paulo'
+    mlflow_tracking_uri: str = 'sqlite:///data/mlflow/mlflow.db'
+    mlflow_artifact_dir: Path = Path('data/mlflow/artefatos')

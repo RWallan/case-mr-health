@@ -7,6 +7,7 @@ from loguru import logger
 from case_mr_health.config import Settings
 from case_mr_health.dados import DadosInvalidosError, preparar_dados
 from case_mr_health.logs import configurar_logs
+from case_mr_health.treino import treinar_serie
 
 app = App(name='case-mr-health', help='Previsão de demanda da MR. HEALTH.')
 
@@ -61,4 +62,41 @@ def preparar(
     except DadosInvalidosError as erro:
         logger.error('{}', erro)
         return 1
+    return 0
+
+
+@app.command(name='treinar')
+def treinar(
+    sku: Annotated[str, Parameter(name='--sku')],
+    granularidade: Annotated[str, Parameter(name='--granularidade')],
+    seed: Annotated[int | None, Parameter(name='--seed')] = None,
+) -> int:
+    """Treina uma série (backtest, baselines e registro no MLflow).
+
+    Parameters
+    ----------
+    sku
+        SKU da série (`item A` ou só `A`).
+    granularidade
+        `diaria` ou `semanal`.
+    seed
+        Seed (padrão: configuração ou a data local, YYYYMMDD).
+    """
+    cfg = Settings()
+    configurar_logs(cfg.log_level)
+    try:
+        resumo = treinar_serie(cfg, sku, granularidade, seed)
+    except ValueError as erro:
+        logger.error('{}', erro)
+        return 1
+    for run in resumo.runs:
+        logger.info(
+            '{} {} {}: MAE {:.3f} MASE {:.3f} (versão {})',
+            resumo.sku,
+            run.algoritmo,
+            run.hiperparametros,
+            run.medias['mae'],
+            run.medias['mase'],
+            run.versao_modelo,
+        )
     return 0
