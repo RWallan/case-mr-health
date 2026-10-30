@@ -1,0 +1,304 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "sarima",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 4.2263614204023686e-05,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.42719921660301924
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.3419698497701054
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.39697433115285113
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 6,
+            "kruskal_p": 0.008687629885622696
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "sarima",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 9.097246274789895e-07,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.3162769532504851
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.314528613638096
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.4226316972433126
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 7,
+            "kruskal_p": 0.003652168383049326
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "sarima",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 3.721113068588211e-07,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.5174953677310774
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.3374354906768224
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.6306519205378317
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 8,
+            "kruskal_p": 0.0036559284339868843
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "sarima",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 8.309224451309892e-11,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.38329205263158594
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.2870472994787578
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.5830925072956654
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 9,
+            "kruskal_p": 0.0019054540336690194
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "sarima",
+      "n_treino": 76,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "d": 0,
+            "adf_p": 3.5720656192382187e-09,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 76,
+            "lag": 14,
+            "ljung_box_p": 0.3908319387869381
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.2918728251154612
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "lag": 14,
+            "ljung_box_p": 0.551461589021139
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 10,
+            "kruskal_p": 0.006135620946894812
+          }
+        }
+      ]
+    }
+  ]
+}

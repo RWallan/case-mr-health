@@ -19,6 +19,5 @@ data/processed/
 data/servico/
 *.duckdb
 test-evidence/
-data/mlflow/
 mlruns/
 data/atualizacoes/

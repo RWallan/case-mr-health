@@ -1,0 +1,262 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "ets_ses",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.5
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.015684033483162812
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 0.2413730925430061,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "ets_ses",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.46938775510204084
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.031051391264875824
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 0.044604329782993675,
+            "kpss_p": 0.04254516583868117
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "ets_ses",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.42857142857142855
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 10,
+            "ljung_box_p": 0.01262002702089081
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 0.4542156760456496,
+            "kpss_p": 0.01
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "ets_ses",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.4444444444444444
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 10,
+            "ljung_box_p": 0.09326155920733363
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 2.771965559661522e-09,
+            "kpss_p": 0.017497550997984276
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_5",
+      "algoritmo": "ets_ses",
+      "n_treino": 70,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 70,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.44285714285714284
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 70,
+            "lag": 10,
+            "ljung_box_p": 0.08270886358591455
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 70,
+            "d": 0,
+            "adf_p": 4.712987949248413e-10,
+            "kpss_p": 0.02376065022775854
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "ets_ses",
+      "n_treino": 79,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.45569620253164556
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "lag": 10,
+            "ljung_box_p": 0.09329964916791365
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "d": 0,
+            "adf_p": 2.2720394467299358e-11,
+            "kpss_p": 0.0781161000400818
+          }
+        }
+      ]
+    }
+  ]
+}

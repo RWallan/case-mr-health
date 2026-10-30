@@ -14,6 +14,55 @@ uv sync
 (cd frontend && npm install)
 ```
 
+## Clonar o repositório (demonstração)
+
+Este é um repositório de **demonstração**. Para que o clone funcione sem
+retreinar, o `data/mlflow/` (cerca de 80 MB: `mlflow.db` com o Model Registry
+e os artefatos dos modelos) **está versionado**, junto com as planilhas em
+`data/raw/`. Ele traz as 8 séries com o alias `champion` e todos os runs de
+backtest e de avaliação final. Num projeto real, o registro de modelos ficaria
+num servidor MLflow, fora do Git (veja "MLflow remoto" em Configuração).
+
+Três ressalvas:
+
+- **Caminhos absolutos.** O `mlflow.db` guarda os caminhos dos artefatos como
+  `file:///home/rwallan/git/case-mr-health/...`. Se você clonar em outro
+  diretório, reescreva-os uma vez, na raiz do clone (o `git status` passa a
+  mostrar o `mlflow.db` modificado; não o commite). Sem isso, a API recusa os
+  modelos (`modelo_indisponivel`). A correção automática é a issue #33.
+
+  ```bash
+  uv run python - <<'PY'
+  import sqlite3
+  from pathlib import Path
+
+  antigo = 'file:///home/rwallan/git/case-mr-health'
+  novo = Path.cwd().as_uri()
+  con = sqlite3.connect('data/mlflow/mlflow.db')
+  for tabela, coluna in [
+      ('runs', 'artifact_uri'),
+      ('logged_models', 'artifact_location'),
+      ('experiments', 'artifact_location'),
+      ('model_versions', 'storage_location'),
+  ]:
+      con.execute(
+          f'update {tabela} set {coluna} = replace({coluna}, ?, ?)',
+          (antigo, novo),
+      )
+  con.commit()
+  PY
+  ```
+
+- **Bases do DuckDB não versionadas.** `data/processed/*.duckdb` e
+  `data/servico/` são gerados: rode `uv run case-mr-health preparar-dados`
+  antes de abrir o dashboard (a rota `/series` lê `base.duckdb`).
+- **O retreino total não é repetível pelo CLI como está.** O `avaliar-final`
+  abre o OOT uma única vez (marcador `.ds-workflow/final-evaluation-attempt.json`,
+  versionado e já concluído) e, junto com o `promover`, depende de decisões
+  aprovadas em `.ds-workflow/decisions.jsonl`. Os passos 2 e 3 abaixo
+  descrevem o fluxo que gerou os modelos; a simplificação para quem quiser
+  retreinar tudo está nas issues #34 a #36.
+
 ## Do zero ao dashboard
 
 As planilhas brutas ficam em `data/raw/` (`PEDIDO-_1_.xlsx`,
@@ -44,8 +93,8 @@ As planilhas brutas ficam em `data/raw/` (`PEDIDO-_1_.xlsx`,
        --versao <n> --decisao <D-xxx>
    ```
 
-   Neste repositório, o `champion` das 8 séries já está promovido: **não
-   repita os passos 2 e 3** só para subir o sistema.
+   O `champion` das 8 séries já está promovido e versionado: **não repita
+   os passos 2 e 3** só para subir o sistema (veja "Clonar o repositório").
 
 4. **Subir a API** (porta 8000, um único worker). Swagger em
    `http://127.0.0.1:8000/docs`.

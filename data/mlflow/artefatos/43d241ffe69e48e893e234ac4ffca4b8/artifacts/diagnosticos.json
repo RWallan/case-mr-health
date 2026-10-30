@@ -1,0 +1,204 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "ets_ses",
+      "n_treino": 6,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 6,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "fracao_zeros": 0.0
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 6,
+            "lag": 1
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 6,
+            "d": 0
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "ets_ses",
+      "n_treino": 7,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 7,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "fracao_zeros": 0.0
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 7,
+            "lag": 1
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 7,
+            "d": 0
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "ets_ses",
+      "n_treino": 8,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 8,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "fracao_zeros": 0.0
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 8,
+            "lag": 1
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 8,
+            "d": 0
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "ets_ses",
+      "n_treino": 9,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 9,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "fracao_zeros": 0.0
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 9,
+            "lag": 1
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 9,
+            "d": 0
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "ets_ses",
+      "n_treino": 10,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 10,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "fracao_zeros": 0.0
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 10,
+            "lag": 2
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_testavel",
+          "detalhe": {
+            "n": 10,
+            "d": 0
+          }
+        }
+      ]
+    }
+  ]
+}

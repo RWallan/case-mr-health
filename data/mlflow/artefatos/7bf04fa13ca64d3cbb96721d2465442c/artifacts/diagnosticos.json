@@ -1,0 +1,364 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "sarima",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 0.2413730925430061,
+            "kpss_p": 0.1
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.0474810320835793
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.1426318201223586
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.39409466600200954
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 6,
+            "kruskal_p": 0.14096021370280853
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "sarima",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 0.044604329782993675,
+            "kpss_p": 0.04254516583868117
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.12758829558080226
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.1760705385982282
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.7150435573798136
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 7,
+            "kruskal_p": 0.13306781504239606
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "sarima",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 0.4542156760456496,
+            "kpss_p": 0.01
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.04946066832061297
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.1549165935110708
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 11,
+            "ljung_box_p": 0.4778344960703149
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "ciclos": 8,
+            "kruskal_p": 0.06215723620774829
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "sarima",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 2.771965559661522e-09,
+            "kpss_p": 0.017497550997984276
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.4660787966829202
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.2083056697120447
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 12,
+            "ljung_box_p": 0.6184463510773115
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 9,
+            "kruskal_p": 0.03383697893408891
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_5",
+      "algoritmo": "sarima",
+      "n_treino": 70,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 70,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 70,
+            "d": 0,
+            "adf_p": 4.712987949248413e-10,
+            "kpss_p": 0.02376065022775854
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 70,
+            "lag": 14,
+            "ljung_box_p": 0.17587595011335963
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.171342829155561
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 70,
+            "lag": 14,
+            "ljung_box_p": 0.3011242644060753
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 10,
+            "kruskal_p": 0.01268761764369883
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "sarima",
+      "n_treino": 79,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "d": 0,
+            "adf_p": 2.2720394467299358e-11,
+            "kpss_p": 0.0781161000400818
+          }
+        },
+        {
+          "premissa": "dependencia_temporal",
+          "situacao": "inconclusiva",
+          "detalhe": {
+            "n": 79,
+            "lag": 14,
+            "ljung_box_p": 0.14376236970385828
+          }
+        },
+        {
+          "premissa": "raizes_fora_do_circulo",
+          "situacao": "atendida",
+          "detalhe": {
+            "menor_modulo": 1.182997200431109
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 79,
+            "lag": 14,
+            "ljung_box_p": 0.29128349129710845
+          }
+        },
+        {
+          "premissa": "sazonalidade",
+          "situacao": "atendida",
+          "detalhe": {
+            "ciclos": 11,
+            "kruskal_p": 0.017061820086612677
+          }
+        }
+      ]
+    }
+  ]
+}

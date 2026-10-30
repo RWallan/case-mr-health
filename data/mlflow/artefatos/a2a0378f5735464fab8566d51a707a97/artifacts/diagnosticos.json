@@ -1,0 +1,219 @@
+{
+  "ajustes": [
+    {
+      "ajuste": "fold_1",
+      "algoritmo": "ets_ses",
+      "n_treino": 42,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.3333333333333333
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "lag": 8,
+            "ljung_box_p": 0.4516314509924374
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 42,
+            "d": 0,
+            "adf_p": 5.8274876903591446e-08,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_2",
+      "algoritmo": "ets_ses",
+      "n_treino": 49,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.30612244897959184
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "lag": 9,
+            "ljung_box_p": 0.28176406384623254
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 49,
+            "d": 0,
+            "adf_p": 5.054019078398568e-10,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_3",
+      "algoritmo": "ets_ses",
+      "n_treino": 56,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.2857142857142857
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "lag": 10,
+            "ljung_box_p": 0.4436349209767222
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 56,
+            "d": 0,
+            "adf_p": 8.647787357297248e-11,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "fold_4",
+      "algoritmo": "ets_ses",
+      "n_treino": 63,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.30158730158730157
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "lag": 10,
+            "ljung_box_p": 0.484349293786259
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 63,
+            "d": 0,
+            "adf_p": 1.1954439580919359e-11,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "ajuste": "modelo_final",
+      "algoritmo": "ets_ses",
+      "n_treino": 76,
+      "convergiu": true,
+      "avisos": [],
+      "premissas": [
+        {
+          "premissa": "parametros_por_observacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "parametros": 3
+          }
+        },
+        {
+          "premissa": "valores_continuos",
+          "situacao": "nao_atendida",
+          "detalhe": {
+            "fracao_zeros": 0.32894736842105265
+          }
+        },
+        {
+          "premissa": "residuos_sem_autocorrelacao",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "lag": 10,
+            "ljung_box_p": 0.13251361155048877
+          }
+        },
+        {
+          "premissa": "estacionariedade",
+          "situacao": "atendida",
+          "detalhe": {
+            "n": 76,
+            "d": 0,
+            "adf_p": 5.446115652860325e-09,
+            "kpss_p": 0.1
+          }
+        }
+      ]
+    }
+  ]
+}

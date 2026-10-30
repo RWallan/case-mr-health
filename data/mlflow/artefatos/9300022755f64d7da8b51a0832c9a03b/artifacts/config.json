@@ -1,0 +1,33 @@
+{
+  "raw_dir": "data/raw",
+  "db_path": "data/processed/base.duckdb",
+  "relatorio_path": "data/processed/relatorio_qualidade.md",
+  "desenvolvimento_db_path": "/home/rwallan/git/case-mr-health/data/processed/desenvolvimento.duckdb",
+  "oot_db_path": "data/processed/oot.duckdb",
+  "arquivo_pedido": "PEDIDO-_1_.xlsx",
+  "arquivo_item_pedido": "ITEM_PEDIDO-_2_.xlsx",
+  "arquivo_sku": "ITENS-_3_.xlsx",
+  "log_level": "INFO",
+  "oot_diaria_dias": 14,
+  "oot_semanal_semanas": 2,
+  "fold_diaria_dias": 7,
+  "fold_semanal_semanas": 1,
+  "treino_minimo_diaria_dias": 42,
+  "treino_minimo_semanal_semanas": 6,
+  "seed": null,
+  "fuso_horario": "America/Sao_Paulo",
+  "mlflow_tracking_uri": "sqlite:////home/rwallan/git/case-mr-health/data/mlflow/mlflow.db",
+  "mlflow_artifact_dir": "/home/rwallan/git/case-mr-health/data/mlflow/artefatos",
+  "confianca_limites": [
+    0.5,
+    0.75,
+    1.0
+  ],
+  "confianca_nivel_ic": 0.8,
+  "confianca_max_fronteiras_ic": 1,
+  "niveis_intervalo": [
+    0.8,
+    0.95
+  ],
+  "intervalo_max_origens": 70
+}
