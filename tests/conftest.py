@@ -113,3 +113,9 @@ def settings(tmp_path, planilhas) -> Settings:
         oot_db_path=tmp_path / 'saida' / 'oot.duckdb',
         atualizacoes_dir=tmp_path / 'atualizacoes',
     )
+
+
+@pytest.fixture(autouse=True)
+def sem_chave_de_llm(monkeypatch):
+    """Nenhum teste chama a rede por uma chave do ambiente (#20)."""
+    monkeypatch.delenv('CASE_MR_HEALTH_LLM_API_KEY', raising=False)

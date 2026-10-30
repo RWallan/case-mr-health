@@ -4,9 +4,26 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from case_mr_health.explicacao import Origem
 from case_mr_health.recomendacao import Motivo, Resultado
 
 AVISO = 'baixa confiabilidade estatística: poucas janelas históricas'
+
+
+class ExplicacaoResposta(BaseModel):
+    texto: str = Field(
+        description=(
+            'Explicação em linguagem simples, com os números da regra e as '
+            'incertezas. Só cita números presentes na entrada.'
+        )
+    )
+    origem: Origem = Field(
+        description=(
+            '`llm`: texto do modelo de linguagem, validado por schema e '
+            'conferido contra os números da entrada. `template`: texto '
+            'determinístico (sem chave, falha do LLM ou saída inválida).'
+        )
+    )
 
 
 class RespostaRecomendacao(BaseModel):
@@ -34,6 +51,16 @@ class RespostaRecomendacao(BaseModel):
                         '(17,0), acima do limite histórico de 30,7%. '
                         'Indica pressão de alta sobre o estoque.'
                     ),
+                    'explicacao': {
+                        'texto': (
+                            'item A (rede, semanal): resultado da regra, '
+                            'aumento significativo. A previsão supera a '
+                            'venda recente em 47,1%, acima do limite '
+                            'histórico (Q3) de 30,7%. Incerteza: poucas '
+                            'janelas históricas.'
+                        ),
+                        'origem': 'template',
+                    },
                     'aviso': AVISO,
                     'versao_modelo': '3',
                     'hash_artefato': 'a3f5…',
@@ -95,6 +122,12 @@ class RespostaRecomendacao(BaseModel):
         description=(
             'Explicação em português. Fala em "pressão sobre o estoque" e '
             'nunca afirma ruptura.'
+        )
+    )
+    explicacao: ExplicacaoResposta = Field(
+        description=(
+            'Explicação do resultado, por LLM ou por template. Nunca altera '
+            'o resultado: a decisão é só da regra.'
         )
     )
     aviso: str = Field(

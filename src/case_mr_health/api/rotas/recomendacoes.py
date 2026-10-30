@@ -51,10 +51,21 @@ def consultar_recomendacao(sku: str, request: Request) -> RespostaRecomendacao:
     mesmo sentido; com menos de 3 delas, ou sem venda recente, o resultado
     é `insuficiente`. A decisão é só da regra: nenhum LLM participa, e o
     texto fala em pressão sobre o estoque, nunca em ruptura. Toda resposta
-    leva o aviso de baixa confiabilidade estatística, e a chamada é gravada
-    no histórico de previsões.
+    leva a `explicacao` (campo `origem`: `llm` ou `template`) e o aviso de
+    baixa confiabilidade estatística, e a chamada é gravada no histórico de
+    previsões.
+
+    A explicação é gerada pelo LLM da Anthropic (modelo e chave vêm da
+    configuração), sem ferramentas nem acesso externo, a partir dos números
+    da regra. A saída é validada por schema e só pode citar números da
+    entrada; sem chave, com falha ou com saída inválida, vem o template
+    determinístico. A explicação nunca altera o resultado.
     """
     estado = request.app.state
     return recomendacao.recomendar_sku(
-        sku, estado.modelos, estado.historico, estado.cfg
+        sku,
+        estado.modelos,
+        estado.historico,
+        estado.cfg,
+        estado.gerador_llm,
     )
