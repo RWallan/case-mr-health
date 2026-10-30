@@ -31,6 +31,7 @@ Respeite sempre as convenções já estabelecidas no projeto; ao adicionar códi
 - Testes com pytest (`pythonpath = "."`); use estilo pytest (regras `PT`) e fixtures, e `faker` para gerar dados sintéticos.
 - Configuração via `pydantic-settings`, logs via `loguru` (não use `print`/`logging`), CLI via `cyclopts`.
 - Projeto e textos de changelog em português.
+- Commits sem coautoria do Claude
 
 ## Issues locais
 
