@@ -32,6 +32,7 @@ Respeite sempre as convenções já estabelecidas no projeto; ao adicionar códi
 - Configuração via `pydantic-settings`, logs via `loguru` (não use `print`/`logging`), CLI via `cyclopts`.
 - Projeto e textos de changelog em português.
 - Commits sem coautoria do Claude
+- Mantenha `docs/relatorio/registro-fase1.md` atualizado a cada ticket (decisões, evidências, questionamentos do usuário, limitações e pendências): um agente sem o contexto da conversa deve conseguir escrever o relatório final a partir dele
 
 ## Issues locais
 
