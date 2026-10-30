@@ -47,8 +47,20 @@ _SERIE = {
 }
 
 
-def gerar_xlsx(linhas: list[LinhaHistorico]) -> bytes:
-    """Gera uma planilha com o histórico, sem colunas removidas do produto."""
+def rotulo_escopo(sku: str | None, granularidade: str | None) -> str:
+    """`Completo` sem filtros; `Filtrado` com SKU e/ou granularidade."""
+    return 'Completo' if sku is None and granularidade is None else 'Filtrado'
+
+
+def gerar_xlsx(
+    linhas: list[LinhaHistorico],
+    sku: str | None = None,
+    granularidade: str | None = None,
+) -> bytes:
+    """Gera a planilha do histórico e a aba `Escopo` (completo ou filtrado).
+
+    Colunas removidas do produto (confiança) não são exportadas.
+    """
     livro = Workbook()
     aba = livro.active
     aba.title = 'Previsões'
@@ -57,6 +69,15 @@ def gerar_xlsx(linhas: list[LinhaHistorico]) -> bytes:
         aba.append([getattr(linha, chave) for chave, _ in _COLUNAS_XLSX])
     aba.freeze_panes = 'A2'
     aba.auto_filter.ref = aba.dimensions
+    escopo = livro.create_sheet('Escopo')
+    for par in (
+        ('Escopo', rotulo_escopo(sku, granularidade)),
+        ('SKU', sku or 'Todos'),
+        ('Granularidade', granularidade or 'Todas'),
+        ('Linhas', len(linhas)),
+        ('Gerado em', datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')),
+    ):
+        escopo.append(par)
     saida = BytesIO()
     livro.save(saida)
     return saida.getvalue()

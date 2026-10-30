@@ -1,4 +1,6 @@
 <script>
+  import ComparacaoSkus from './ComparacaoSkus.svelte';
+  import LinksApi from './LinksApi.svelte';
   import EntradaPrevisoes from './EntradaPrevisoes.svelte';
   const api = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
   const mlflow = import.meta.env.VITE_MLFLOW_URL ?? 'http://localhost:5000';
@@ -156,6 +158,7 @@
     </a>
     <div class="topbar-right">
       <span class="network-label"><span class="status-dot"></span> Visão da rede</span>
+      <LinksApi {api} />
       <a class="mlflow-link" href={mlflow} target="_blank" rel="noreferrer">Abrir MLflow <span aria-hidden="true">↗</span></a>
     </div>
   </header>
@@ -296,6 +299,7 @@
       {/if}
     </section>
 
+    <ComparacaoSkus {api} {sku} {granularidade} {skus} />
     <EntradaPrevisoes />
 
     <footer><span>MR. HEALTH · Planejamento de demanda</span><span>Previsões da rede · Só o envio de pedidos novos reajusta os modelos</span></footer>
