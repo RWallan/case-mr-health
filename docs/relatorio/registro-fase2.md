@@ -14,7 +14,11 @@ Herdadas da Fase 1 (`registro-fase1.md`, seção 2): OOT selado até o #13 (o tr
 
 | Ticket | Branch | Commit(s) | Status | Testes ao final |
 | --- | --- | --- | --- | --- |
-| #7 Treino de uma série com baselines | `7-treino_baselines` (criada a partir da `main`, que já contém o merge do #6) | nenhum (aguarda pedido do usuário) | `resolved` | 126 (cobertura 98%) |
+| #7 Treino de uma série com baselines | `7-treino_baselines` (criada a partir da `main`, que já contém o merge do #6) | `ff4a0fe`, PR #7 | `resolved` | 126 (cobertura 98%) |
+| #8 Intervalos de previsão | `8-intervalos_previsao` | PR #8, merge `b8a7f8a` | `resolved` | ver 3.2 |
+| #9 Confiança pelo MASE | `9-confianca_mase` | PR #9, merge `03d011f` | `resolved` | ver 3.2 |
+| #10 Croston, SBA e TSB | `10-metodos_intermitentes` | PR #10, merge `aa370ab` | `resolved` | ver 3.2 |
+| #11 ETS, SARIMA, ARIMA e Prophet | `11-candidatos_statsmodels` | PR #11, merge `5aa43df` | `resolved` | ver 3.2 |
 
 ### 3.1 Ticket #7
 
@@ -62,16 +66,41 @@ Item C semanal (sensibilidade, MAE): naive 14,250 (todas) / 11,667 (sem a semana
 
 **Sinalizações contra ADRs ou spec:** nenhuma contradição. Lacunas do ADR 0005 preenchidas pelo ADR 0006 (nome com SKU, versão por execução).
 
+### 3.2 Onda 1 (#8 a #11)
+
+Executada em paralelo por agentes, em worktrees a partir da `main` com o #7 integrado. Os blocos completos, com fatos, decisões, referências e reprodução, estão em `docs/relatorio/fase2/8.md`, `9.md`, `9-pre-registro.md`, `10.md` e `11.md`.
+
+**Desvios do plano de paralelização:** (1) o #10 e o #11 dependiam do #8, e isso foi resolvido com um contrato congelado de intervalos; (2) os agentes não rodaram `ds_policy.py propose`, porque quatro worktrees gerariam IDs repetidos: o coordenador registrou tudo; (3) em dados reais, #10 e #11 só fizeram smoke test, sem abrir métricas de candidatos, para o critério do #12 ser fixado antes dos resultados; (4) a integração foi por PR, sem aprovação formal, porque o GitHub recusa aprovar o próprio PR; o usuário autorizou o merge assim.
+
+**Achados da integração, que os testes de cada ticket isolado não mostravam:** (a) ajustes de calibração do #8, com treino de até 2 pontos, entravam nos diagnósticos do #11 e contaminariam as tags de premissas: as tags agora usam só folds e modelo final; (b) falha numa origem de calibração é pulada e contada, não invalida o candidato, ao contrário do que o relatório do #11 dizia (regra explicitada em D-016); (c) a soma de #8 com #11 tornou o treino e a suíte muito lentos.
+
+**Tempo:** A diária levava 23 s sem intervalos e 191 s com `K = 70` e a tabela completa (24 runs). Depois do corte da D-007, leva 35,5 s (15 runs); A semanal leva 10,4 s (3 runs). Medido sem abrir métricas. Nos testes, `K = 5`, fixado na tarefa `poe test`.
+
+**Incidente:** a suíte lenta rodou uma segunda vez sem autorização durante a integração, por erro do coordenador: um script falhou e o corte e o `K = 5` não entraram na branch do #11. O usuário questionou, a suíte foi encerrada aos 14 minutos, e o PR do #11 foi validado só com 188 testes afetados, em 87 s. **Depois do #8, a suíte completa não rodou no estado final da `main`.** Última execução completa: 386 passando e 1 falha depois corrigida, no ensaio de integração anterior à D-009.
+
 ## 4. Decisões consolidadas
 
 | # | Decisão | Quem | Quando | Justificativa | Onde |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Itens 1 a 7 da lista de decisões de implementação (seção 3.1) | Agente (proposta), aprovada pelo usuário | 2026-10-30 | Ver seção 3.1 | D-006 (approved), ADR 0006 |
-| 2 | Paralelizar as issues seguintes por ondas | Usuário pediu a análise | 2026-10-30 | 20 issues pela frente | `docs/relatorio/plano-paralelizacao.md` (proposta) |
+| 2 | Paralelizar as issues seguintes por ondas | Usuário pediu a análise e mandou iniciar a onda 1 | 2026-10-30 | 20 issues pela frente | `docs/relatorio/plano-paralelizacao.md` |
+| 3 | Corte de candidatos: saem ARIMA, Prophet e Holt amortecido; SARIMA com 1 combinação | Usuário pediu a redução; agente escolheu sem ver métricas | 2026-10-30 | Tempo de treino; premissas mais fracas | D-007, emenda a D-004 |
+| 4 | Intervalos empíricos, regra do nativo e piso zero (desvio pós-hoc) | Agente, aprovado pelo usuário | 2026-10-30 | Ver bloco do #8 | D-008, D-009, D-010, ADR 0007 |
+| 5 | Regra de confiança, faixas não discriminam nos baselines, escala de um passo mantida | Agente, aprovado pelo usuário | 2026-10-30 | Ver bloco do #9 | D-011, D-012, D-013, ADR 0008 |
+| 6 | Inicialização e conclusão dos intermitentes | Agente, aprovado pelo usuário | 2026-10-30 | Ver bloco do #10 | D-014, D-015 |
+| 7 | Falhas de convergência e premissas; premissa violada não exclui no treino | Agente, aprovado pelo usuário | 2026-10-30 | Ver bloco do #11 | D-016, D-017, ADR 0010 |
+| 8 | Frontend simplificado, sem testes de componentes nem Playwright, com link para a UI do MLflow | Usuário (a retirada dos testes de componentes foi escolha do agente) | 2026-10-30 | Prazo | `issues/1.md`, "Alterações de escopo", e `issues/22.md` a `issues/26.md` |
+| 9 | Treino real uma única vez, no #12; depois, só testes rápidos | Usuário | 2026-10-30 | Prazo | `plano-paralelizacao.md`, seção 5 |
+| 10 | Integrar sempre por PR | Usuário | 2026-10-30 | Padrão do projeto | Histórico da `main` |
+| 11 | Remover a confiança se ela se mostrar inútil | Usuário (condicional) | 2026-10-30 | 15 de 20 runs Insuficiente | `issues/12.md` |
 
 ## 5. Questionamentos do usuário e respostas
 
-1. **"Veja se você pode paralelizar as issues para o projeto caminhar mais rápido."** Resposta: sim, em ondas, depois que o #7 estiver integrado; plano e riscos em `docs/relatorio/plano-paralelizacao.md`. Status: proposta, aguarda decisão do usuário.
+1. **"Veja se você pode paralelizar as issues para o projeto caminhar mais rápido."** Resposta: sim, em ondas, depois que o #7 estiver integrado; plano e riscos em `docs/relatorio/plano-paralelizacao.md`. Status: decidida; onda 1 executada.
+2. **"É possível terminar até as 11:00?"** Resposta: improvável; estimativa de 6 a 11 horas, com o #13 e as aprovações como gargalo. Status: respondida; levou às simplificações registradas acima.
+3. **"A maioria vai ficar com confiança insuficiente?"** Resposta: nos baselines, sim, 15 de 20, incluindo os 8 semanais; os candidatos ainda não foram avaliados. Insuficiente significa falta de evidência, não modelo ruim. Status: respondida.
+4. **"E se a confiança fosse em cima do MAE?"** Resposta: não recomendado, porque mantém o ruído e não tem régua; a comparação pareada com o baseline nos mesmos folds é a alternativa a testar (hipótese). Status: decidida em `issues/12.md`.
+5. **"Por que rodou o teste demorado que não era pra rodar?"** Resposta: erro do coordenador, descrito em 3.2. Status: respondida.
 
 ## 6. Resultados e conclusões
 
@@ -94,5 +123,5 @@ Conclusões **APROVADAS** (D-006, `human_cli`, 2026-10-30): (a) o comando `trein
 
 ## 9. Pendências e passos de reprodução
 
-- Commit do #7 e demais operações de git só quando o usuário pedir. Onda 1 (#8 a #11) aguarda a troca de modelo e o aviso do usuário.
+- Onda 2 (#12, #14, #17) e o #18 aguardam início. No #12, antes de qualquer resultado de candidato: fixar o critério de seleção, o critério de confiança "inútil" e testar a comparação pareada nos baselines; ajustar a chave do notebook 04 para incluir hiperparâmetros.
 - Reprodução: `uv sync`; `uv run case-mr-health preparar-dados`; `uv run case-mr-health treinar --sku A --granularidade diaria --seed 20261030`; `uv run poe test`.
