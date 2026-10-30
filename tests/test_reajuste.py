@@ -242,3 +242,20 @@ def test_falha_nao_troca_a_versao_servida(cfg):
         f"name = '{nome_modelo('item C', 'diaria')}'"
     )
     assert len(versoes) == 1
+
+
+def test_so_o_algoritmo_servido_e_ajustado(cfg, monkeypatch):
+    _original(cfg, 'item A', 'diaria')
+    criados = []
+    criar = algoritmos.criar
+
+    def registrar_criacao(nome, hp, seed):
+        criados.append(nome)
+        return criar(nome, hp, seed)
+
+    monkeypatch.setattr(algoritmos, 'criar', registrar_criacao)
+
+    reajustar_serie(cfg, 'item A', 'diaria', HASH)
+
+    assert criados
+    assert set(criados) == {'naive'}
